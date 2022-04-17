@@ -1,7 +1,7 @@
 makeLexerWithMain:lexerWithMain.l
 	flex lexerWithMain.l
 	gcc -o mainLexer lex.yy.c
-	./mainLexer ctestfile.txt
+	./mainLexer ctestfile.gcupl
 
 clean:
 	clear

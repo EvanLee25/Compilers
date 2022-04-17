@@ -743,7 +743,7 @@ YY_DECL
 		}
 
 	{
-#line 27 "lexerWithMain.l"
+#line 28 "lexerWithMain.l"
 
 
 #line 750 "lex.yy.c"
@@ -815,7 +815,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 29 "lexerWithMain.l"
+#line 30 "lexerWithMain.l"
 {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE\n", yytext);
@@ -823,7 +823,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 34 "lexerWithMain.l"
+#line 35 "lexerWithMain.l"
 {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE\n", yytext);
@@ -832,7 +832,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 40 "lexerWithMain.l"
+#line 41 "lexerWithMain.l"
 {
 	words++; chars += strlen(yytext);
 	printf("%s : IF STATEMENT\n", yytext);
@@ -841,7 +841,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 46 "lexerWithMain.l"
+#line 47 "lexerWithMain.l"
 {
 	words++; chars += strlen(yytext);
 	printf("%s : ELSE STATEMENT\n", yytext);
@@ -850,7 +850,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 52 "lexerWithMain.l"
+#line 53 "lexerWithMain.l"
 {
 	words++; chars += strlen(yytext);
 	printf("%s : WHILE STATEMENT\n", yytext);
@@ -859,7 +859,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 58 "lexerWithMain.l"
+#line 59 "lexerWithMain.l"
 {
 	words++; chars += strlen(yytext);
 	printf("%s : PRINT STATEMENT\n", yytext);
@@ -868,7 +868,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 64 "lexerWithMain.l"
+#line 65 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -877,7 +877,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 70 "lexerWithMain.l"
+#line 71 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -886,7 +886,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 76 "lexerWithMain.l"
+#line 77 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -895,7 +895,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 82 "lexerWithMain.l"
+#line 83 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -904,7 +904,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 88 "lexerWithMain.l"
+#line 89 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -913,7 +913,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 94 "lexerWithMain.l"
+#line 95 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -922,7 +922,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 100 "lexerWithMain.l"
+#line 101 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -931,7 +931,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 106 "lexerWithMain.l"
+#line 107 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -940,7 +940,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 112 "lexerWithMain.l"
+#line 113 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -949,7 +949,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 118 "lexerWithMain.l"
+#line 119 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -958,7 +958,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 124 "lexerWithMain.l"
+#line 125 "lexerWithMain.l"
 {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -967,7 +967,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 130 "lexerWithMain.l"
+#line 131 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -976,7 +976,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 136 "lexerWithMain.l"
+#line 137 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -985,7 +985,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 142 "lexerWithMain.l"
+#line 143 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -994,7 +994,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 148 "lexerWithMain.l"
+#line 149 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1003,7 +1003,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 154 "lexerWithMain.l"
+#line 155 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1012,7 +1012,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 160 "lexerWithMain.l"
+#line 161 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1021,7 +1021,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 166 "lexerWithMain.l"
+#line 167 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1030,7 +1030,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 172 "lexerWithMain.l"
+#line 173 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1039,7 +1039,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 178 "lexerWithMain.l"
+#line 179 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1048,7 +1048,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 184 "lexerWithMain.l"
+#line 185 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -1057,7 +1057,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 190 "lexerWithMain.l"
+#line 191 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : SEMICOLON\n", yytext);
@@ -1067,7 +1067,7 @@ YY_RULE_SETUP
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 196 "lexerWithMain.l"
+#line 197 "lexerWithMain.l"
 {
 	chars++;
 	printf("%s : STRING LITERAL\n", yytext);
@@ -1076,7 +1076,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 202 "lexerWithMain.l"
+#line 203 "lexerWithMain.l"
 { 
 	chars++;
 	printf("%s : CHAR LITERAL\n", yytext);
@@ -1085,7 +1085,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 208 "lexerWithMain.l"
+#line 209 "lexerWithMain.l"
 { 
 	printf("%s : ERROR on line %i. Variable cannot start with number\n", yytext, lines);
      
@@ -1093,7 +1093,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 213 "lexerWithMain.l"
+#line 214 "lexerWithMain.l"
 {
 
 } 
@@ -1101,14 +1101,14 @@ YY_RULE_SETUP
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 217 "lexerWithMain.l"
+#line 218 "lexerWithMain.l"
 {
 	lines++;
 }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 221 "lexerWithMain.l"
+#line 222 "lexerWithMain.l"
 {
 	chars += strlen(yytext);
 	printf("%s : ID\n", yytext); 
@@ -1117,7 +1117,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 227 "lexerWithMain.l"
+#line 228 "lexerWithMain.l"
 {
 	chars += strlen(yytext);
 	printf("%s : NUMBER\n", yytext);
@@ -1126,12 +1126,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 237 "lexerWithMain.l"
+#line 234 "lexerWithMain.l"
 {printf("%s: UNRECOGNIZED\n", yytext);}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 239 "lexerWithMain.l"
+#line 236 "lexerWithMain.l"
 ECHO;
 	YY_BREAK
 #line 1138 "lex.yy.c"
@@ -2151,7 +2151,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 239 "lexerWithMain.l"
+#line 236 "lexerWithMain.l"
 
 
 int main(int argc, char**argv)

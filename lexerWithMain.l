@@ -24,6 +24,7 @@ NUMBER  {DIGIT}+
 DIGITLETTER {DIGIT}+{LETTER}+({LETTER}|{DIGIT})*
 STRINGLITERAL \"([^\\\"]|\\.)*\"
 CHARLITERAL '([^'\n]|\\n|\\\\)'
+
 %% 
 
 "char"  {
@@ -229,10 +230,6 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 	printf("%s : NUMBER\n", yytext);
      
 }
-
-
-
-
 
 .  {printf("%s: UNRECOGNIZED\n", yytext);}
 
