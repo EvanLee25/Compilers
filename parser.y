@@ -44,33 +44,55 @@ char currentScope[50]; /* global or the name of the function */
 %token <character> DIVIDE
 %token <character> MODULUS
 
+%token <number> NUMBER
 %token <string> ID
-%token <string> STRING
+%token <character> SEMICOLON
 
-%type <ast> 
+%type <ast> Program DeclList Decl VarDecl StmtList Stmt Expr
 
 %start Program
 
 %%
 
+Program: DeclList  
+;
 
+DeclList:	Decl DeclList
+	| Decl
+;
 
+Decl:	VarDecl
+	| StmtList
+;
 
+VarDecl:	TYPE ID SEMICOLON	{ printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+								}
+;
 
+StmtList:	
+	| Stmt StmtList
+;
 
+Stmt:	SEMICOLON
+	| Expr SEMICOLON
+;
 
-
+Expr:	ID { printf("\n RECOGNIZED RULE: Simplest expression\n"); }
+	| ID EQ ID 	{ printf("\n RECOGNIZED RULE: Assignment statement\n"); }
+	| ID EQ NUMBER 	{ printf("\n RECOGNIZED RULE: Assignment statement\n"); }
+	| WRITE ID 	{ printf("\n RECOGNIZED RULE: WRITE statement\n"); }
 
 %%
 
-int main(int argc, char**argv)	
+int main(int argc, char**argv)
 {
 /*
 	#ifdef YYDEBUG
 		yydebug = 1;
 	#endif
 */
-	printf("\n\n##### COMPILER STARTED #####\n\n");
+	printf("Compiler started. \n\n");
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
