@@ -16,200 +16,238 @@ int lines = 1;
 
 %option yylineno
 
-NEWLINE [\n]
+NEWLINE [\n\r]
 DELIM   [ \t]
 WS      {DELIM}+
 LETTER  [_a-zA-Z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
 NUMBER  {DIGIT}+
-DIGITLETTER {DIGIT}+{LETTER}+({LETTER}|{DIGIT})*
 STRINGLITERAL \"([^\\\"]|\\.)*\"
 CHARLITERAL '([^'\n]|\\n|\\\\)'
 
 %%  
 
+"/*"    {
+				int c;
+				while((c = input()) != 0) {
+					if(c == '*') {
+						if((c = input()) == '/')
+							break;
+						else
+							unput(c);
+					}
+				}
+		}
+
+
 "char"  {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE\n", yytext);
+    return TYPE;
 }
 
 "int"  {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE\n", yytext);
+    return TYPE;
      
 }
 
 "if"  {
 	words++; chars += strlen(yytext);
 	printf("%s : IF STATEMENT\n", yytext);
+    return IF;
      
 }
 
 "else"  {
 	words++; chars += strlen(yytext);
 	printf("%s : ELSE STATEMENT\n", yytext);
+    return ELSE;
      
 }
 
 "while"  {
 	words++; chars += strlen(yytext);
 	printf("%s : WHILE STATEMENT\n", yytext);
+    return WHILE;
      
 }
 
 "print"  {
 	words++; chars += strlen(yytext);
 	printf("%s : PRINT STATEMENT\n", yytext);
+    return PRINT;
      
 }
 
 "=="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
+    return DOUBLE_EQ;
      
 }
 
 "!="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
+    return NOT_EQ;
      
 }
 
 "<="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-     
-}
-
-"<"  {
-	chars++;
-	printf("%s : OPERATOR\n", yytext);
-     
-}
-
-">"  {
-	chars++;
-	printf("%s : OPERATOR\n", yytext);
+    return LT_EQ;
      
 }
 
 ">="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-     
-}
-
-"="  {
-	chars++;
-	printf("%s : OPERATOR\n", yytext);
+    return GT_EQ;
      
 }
 
 "+="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
+    return PLUS_EQ;
      
 }
 
 "-="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
+    return MINUS_EQ;
      
 }
 
 "*="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
+    return MULTIPLY_EQ;
      
 }
 
 "/="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
+    return DIVIDE_EQ;
      
 }
+
+"<"  {
+	chars++;
+	printf("%s : OPERATOR\n", yytext);
+    return LT; 
+}
+
+">"  {
+	chars++;
+	printf("%s : OPERATOR\n", yytext);
+    return GT;
+     
+}
+
+
+"="  {
+	chars++;
+	printf("%s : OPERATOR\n", yytext);
+    return EQ;
+     
+}
+
 
 "+"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return PLUS_OP;
      
 }
 
 "*"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return MULTIPLY;
      
 }
 
 "-"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return MINUS;
      
 }
 
 "/"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return DIVIDE;
      
 }
 
 "%"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return MODULUS;
      
 }
 
 "("  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return LPAREN;
      
 }
 
 ")"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return RPAREN;
      
 }
 
 "{"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return LBRACE;
      
 }
 
 "}"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return RBRACE;
      
 }
 
 ","  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
+    return COMMA;
      
 }
 
 ";"  {
 	chars++;
 	printf("%s : SEMICOLON\n", yytext);
+    return SEMICOLON;
      
 }
 
 {STRINGLITERAL}  {
 	chars++;
 	printf("%s : STRING LITERAL\n", yytext);
+    return STRINGLITERAL;
      
 }
 
 {CHARLITERAL}  { 
 	chars++;
 	printf("%s : CHAR LITERAL\n", yytext);
-     
-}
-
-{DIGITLETTER}  { 
-	printf("%s : ERROR on line %i. Variable cannot start with number\n", yytext, lines);
+    return CHARLITERAL;
      
 }
 
@@ -224,33 +262,17 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 {ID}  {
 	chars += strlen(yytext);
 	printf("%s : ID\n", yytext); 
+    return ID;
 
 } 
 
 {NUMBER}  {
 	chars += strlen(yytext);
 	printf("%s : NUMBER\n", yytext);
+    return NUMBER;
      
 }
 
 .  {printf("%s: UNRECOGNIZED\n", yytext);}
 
 %%
-
-int main(int argc, char**argv)
-{
-	#ifdef YYDEBUG
-		yydebug = 1;
-	#endif
-
-	printf("Compiler started. \n\n");
-
-	if (argc > 1){
-	  if(!(yyin = fopen(argv[1], "r")))
-          {
-		perror(argv[1]);
-		return(1);
-	  }
-	}
-	yylex();
-}

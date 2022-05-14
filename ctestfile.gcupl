@@ -1,4 +1,12 @@
-phoenix_number = 142857;
-print(phoenix_number, "\n");
-1phoenix_number = 142857;
-"hello world"
+int x;
+int y;
+x = 142857;
+y = x;
+z = k;
+
+/*
+print(x, "\n");
+1x = 142857;
+*/
+
+

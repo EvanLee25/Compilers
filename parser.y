@@ -25,30 +25,44 @@ char currentScope[50]; /* global or the name of the function */
 	struct AST* ast;
 }
 
-%token <number> TYPE
-
+%token <string> TYPE
+%token <string> IF
+%token <string> ELSE
+%token <string> WHILE
+%token <string> PRINT
 %token <string> DOUBLE_EQ
 %token <string> NOT_EQ
 %token <string> LT_EQ
 %token <string> GT_EQ
-%token <character> LT
-%token <character> GT
-%token <character> EQ
 %token <string> PLUS_EQ
 %token <string> MINUS_EQ
 %token <string> MULTIPLY_EQ
 %token <string> DIVIDE_EQ
+%token <character> LT
+%token <character> GT
+%token <character> EQ
 %token <character> PLUS_OP
 %token <character> MULTIPLY
 %token <character> MINUS
 %token <character> DIVIDE
 %token <character> MODULUS
+%token <character> LPAREN
+%token <character> RPAREN
+%token <character> LBRACE
+%token <character> RBRACE
+%token <character> COMMA
+%token <character> SEMICOLON
 
+%token <string> STRINGLITERAL
+%token <character> CHARLITERAL
 %token <string> WRITE
 
-%token <number> NUMBER
 %token <string> ID
-%token <character> SEMICOLON
+%token <number> NUMBER
+
+
+%printer { fprintf(yyoutput, "%s", $$); } ID;
+%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 %type <ast> Program DeclList Decl VarDecl StmtList Stmt Expr
 
@@ -70,6 +84,21 @@ Decl:	VarDecl
 VarDecl:	TYPE ID SEMICOLON	{ printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
+
+			|TYPE ID EQ NUMBER SEMICOLON	{
+								  printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+								}
+
+			|ID EQ NUMBER SEMICOLON	{
+								  printf("\n RECOGNIZED RULE: Variable declaration %s\n", $1);
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+								}
+			
+			|TYPE ID EQ CHARLITERAL SEMICOLON	{
+									  printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
+									  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+									} 
 ;
 
 StmtList:	
