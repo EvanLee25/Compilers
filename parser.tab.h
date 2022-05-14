@@ -49,38 +49,39 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    TYPE = 258,
-    IF = 259,
-    ELSE = 260,
-    WHILE = 261,
-    PRINT = 262,
-    DOUBLE_EQ = 263,
-    NOT_EQ = 264,
-    LT_EQ = 265,
-    GT_EQ = 266,
-    PLUS_EQ = 267,
-    MINUS_EQ = 268,
-    MULTIPLY_EQ = 269,
-    DIVIDE_EQ = 270,
-    LT = 271,
-    GT = 272,
-    EQ = 273,
-    PLUS_OP = 274,
-    MULTIPLY = 275,
-    MINUS = 276,
-    DIVIDE = 277,
-    MODULUS = 278,
-    LPAREN = 279,
-    RPAREN = 280,
-    LBRACE = 281,
-    RBRACE = 282,
-    COMMA = 283,
-    SEMICOLON = 284,
-    STRINGLITERAL = 285,
-    CHARLITERAL = 286,
-    WRITE = 287,
-    ID = 288,
-    NUMBER = 289
+    CHAR = 258,
+    INT = 259,
+    IF = 260,
+    ELSE = 261,
+    WHILE = 262,
+    PRINT = 263,
+    DOUBLE_EQ = 264,
+    NOT_EQ = 265,
+    LT_EQ = 266,
+    GT_EQ = 267,
+    PLUS_EQ = 268,
+    MINUS_EQ = 269,
+    MULTIPLY_EQ = 270,
+    DIVIDE_EQ = 271,
+    LT = 272,
+    GT = 273,
+    EQ = 274,
+    PLUS_OP = 275,
+    MULTIPLY = 276,
+    MINUS = 277,
+    DIVIDE = 278,
+    MODULUS = 279,
+    LPAREN = 280,
+    RPAREN = 281,
+    LBRACE = 282,
+    RBRACE = 283,
+    COMMA = 284,
+    SEMICOLON = 285,
+    STRINGLITERAL = 286,
+    CHARLITERAL = 287,
+    WRITE = 288,
+    ID = 289,
+    NUMBER = 290
   };
 #endif
 
@@ -95,7 +96,7 @@ union YYSTYPE
 	char* string;
 	struct AST* ast;
 
-#line 99 "parser.tab.h"
+#line 100 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

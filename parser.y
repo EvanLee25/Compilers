@@ -25,7 +25,8 @@ char currentScope[50]; /* global or the name of the function */
 	struct AST* ast;
 }
 
-%token <string> TYPE
+%token <string> CHAR
+%token <string> INT
 %token <string> IF
 %token <string> ELSE
 %token <string> WHILE
@@ -64,7 +65,7 @@ char currentScope[50]; /* global or the name of the function */
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Stmt Expr
+%type <ast> Program DeclList Decl VarDecl StmtList Expr
 
 %start Program
 
@@ -81,38 +82,42 @@ Decl:	VarDecl
 	| StmtList
 ;
 
-VarDecl:	TYPE ID SEMICOLON	{ printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
+VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable declaration %s\n\n", $2);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 
-			|TYPE ID EQ NUMBER SEMICOLON	{
-								  printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
+			|INT ID EQ NUMBER SEMICOLON	{
+								  printf("RECOGNIZED RULE: Integer Variable declaration %s = %i\n\n", $2, $4);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 
 			|ID EQ NUMBER SEMICOLON	{
-								  printf("\n RECOGNIZED RULE: Variable declaration %s\n", $1);
+								  printf("RECOGNIZED RULE: Integer Variable declaration %s\n\n", $1);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
+			|CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $2);
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+								}					
 			
-			|TYPE ID EQ CHARLITERAL SEMICOLON	{
-									  printf("\n RECOGNIZED RULE: Variable declaration %s\n", $2);
+			|CHAR ID EQ CHARLITERAL SEMICOLON	{
+									  printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $2);
 									  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 									} 
+			|ID EQ CHARLITERAL SEMICOLON	{
+								  printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $1);
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+								}
 ;
 
-StmtList:	
-	| Stmt StmtList
+StmtList:	Expr
+	| Expr StmtList
 ;
 
-Stmt:	SEMICOLON
-	| Expr SEMICOLON
-;
-
-Expr:	ID { printf("\n RECOGNIZED RULE: Simplest expression\n"); }
-	| ID EQ ID 	{ printf("\n RECOGNIZED RULE: Assignment statement\n"); }
-	| ID EQ NUMBER 	{ printf("\n RECOGNIZED RULE: Assignment statement\n"); }
-	| WRITE ID 	{ printf("\n RECOGNIZED RULE: WRITE statement\n"); }
+Expr:	SEMICOLON {}
+	| ID SEMICOLON { printf("RECOGNIZED RULE: Simplest expression\n\n"); }
+	| ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
+	| ID EQ NUMBER SEMICOLON 	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
+	| WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: WRITE statement\n\n"); }
 
 %%
 

@@ -1,5 +1,10 @@
 int x;
-int y;
+int x = 5;
+x = 55;
+char y;
+char y = 'l';
+y = 'z';
+
 x = 142857;
 y = x;
 z = k;
