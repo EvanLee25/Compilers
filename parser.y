@@ -44,6 +44,8 @@ char currentScope[50]; /* global or the name of the function */
 %token <character> DIVIDE
 %token <character> MODULUS
 
+%token <string> WRITE
+
 %token <number> NUMBER
 %token <string> ID
 %token <character> SEMICOLON
