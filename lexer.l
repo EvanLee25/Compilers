@@ -12,6 +12,8 @@ int words = 0;
 int chars = 0;
 int lines = 1;
 
+// test 
+
 %}
 
 %option yylineno
