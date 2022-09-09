@@ -88,29 +88,29 @@ Decl:	VarDecl
 	| StmtList
 ;
 
-VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable declaration %s\n\n", $2);
+VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration: %s\n\n", $2);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 
 			|INT ID EQ NUMBER SEMICOLON	{
-								  printf("RECOGNIZED RULE: Integer Variable declaration %s = %i\n\n", $2, $4);
+								  printf("RECOGNIZED RULE: Integer Variable Declaration: %s = %i\n\n", $2, $4);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 
 			|ID EQ NUMBER SEMICOLON	{
-								  printf("RECOGNIZED RULE: Integer Variable declaration %s\n\n", $1);
+								  printf("RECOGNIZED RULE: Integer Variable Declaration: %s\n\n", $1);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
-			|CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $2);
+			|CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration: %s\n\n", $2);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}					
 			
 			|CHAR ID EQ CHARLITERAL SEMICOLON	{
-									  printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $2);
+									  printf("RECOGNIZED RULE: Char Variable Declaration: %s\n\n", $2);
 									  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 									} 
 			|ID EQ CHARLITERAL SEMICOLON	{
-								  printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $1);
+								  printf("RECOGNIZED RULE: Char Variable Declaration: %s\n\n", $1);
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 ;
@@ -120,10 +120,10 @@ StmtList:	Expr
 ;
 
 Expr:	SEMICOLON {}
-	| ID SEMICOLON { printf("RECOGNIZED RULE: Simplest expression\n\n"); }
-	| ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
-	| ID EQ NUMBER SEMICOLON 	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
-	| WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: WRITE statement\n\n"); }
+	| ID SEMICOLON { printf("RECOGNIZED RULE: Simplest Expression\n\n"); }
+	| ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); }
+	| ID EQ NUMBER SEMICOLON 	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); }
+	| WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: WRITE Statement\n\n"); }
 
 %%
 
