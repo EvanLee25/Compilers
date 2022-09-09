@@ -66,54 +66,130 @@ char currentScope[50]; /* global or the name of the function */
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Expr
+%type <ast> Program DeclList Decl VarDecl BasicIntVarDecl BasicCharVarDecl StmtList Expr
 
 %start Program
 
 %%
 
-Program: DeclList { printf("\n Program -> DeclList \n");
+Program: DeclList { printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
 };
 
-DeclList:	Decl DeclList { printf("\n DeclList -> Decl DeclList \n");
+DeclList:	Decl DeclList { printf("\nDeclList -> Decl DeclList \n");
+		// ast
+		$1->left = $2;
+		$$ = $1;
 
 }
-			| Decl { printf("\n DeclList -> Decl \n");
+			| Decl { printf("\nDeclList -> Decl \n");
+			// ast
+			$$ = $1;
 
 };
 
-Decl:	VarDecl
-	| StmtList
-;
+Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
+		// ast
+		$$ = $1;
 
-VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable declaration %s\n\n", $2);
+}
+	| StmtList { printf("\nDecl -> StmtList \n");
+		// ast
+		$$ = $1;
+
+};
+
+VarDecl:	INT ID SEMICOLON { printf("RECOGNIZED RULE: Integer Variable Declaration: %s\n\n", $2);
+							   
+							   // ast
+							   $$->left = $1;
+							   $$->right = $2;
+
+							}
+
+
+			|INT BasicIntVarDecl SEMICOLON	{
+								  printf("RECOGNIZED RULE: Integer Variable declaration\n\n");
+
+								  //ast
+								  //$$->left = $1;
+								  //$$->right = $2;
+
+								  /*
+								  		 VarDecl
+									 INT       \------- BasicIntVarDecl
+									 				INT               NUMBER
+								  */
+		  
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 
-			|INT ID EQ NUMBER SEMICOLON	{
-								  printf("RECOGNIZED RULE: Integer Variable declaration %s = %i\n\n", $2, $4);
-								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-								}
+			|BasicIntVarDecl SEMICOLON	{
+								  printf("RECOGNIZED RULE: Integer Variable declaration \n\n");
 
-			|ID EQ NUMBER SEMICOLON	{
-								  printf("RECOGNIZED RULE: Integer Variable declaration %s\n\n", $1);
+								  // ast
+								  //$$ = $1;
+
+								  /*
+								  		=
+									ID	   NUMBER
+								  */
+
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
-			|CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $2);
+			|CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable declaration \n\n");
+
+								  // ast
+								  //$$->left = $1;
+								  //$$->right = $2;
+
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}					
 			
-			|CHAR ID EQ CHARLITERAL SEMICOLON	{
-									  printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $2);
-									  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+			|CHAR BasicCharVarDecl SEMICOLON { printf("RECOGNIZED RULE: Char Variable declaration \n\n");
+											
+											// ast
+											//$$->left = $1;
+											//$$->right = $2;
+									  		//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 									} 
-			|ID EQ CHARLITERAL SEMICOLON	{
-								  printf("RECOGNIZED RULE: Char Variable declaration %s\n\n", $1);
+
+			|BasicCharVarDecl SEMICOLON	{
+								  printf("RECOGNIZED RULE: Char Variable declaration \n\n");
+								  //$$ = $1;
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
 ;
+
+BasicIntVarDecl: ID EQ NUMBER { printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
+								  // ast
+								  //$$ = $2;
+								  //$$->left = $1;
+								  //$$->right = $2;
+
+								  /*
+										     =
+									 	 ID    NUMBER
+									        
+								  */
+
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+};
+
+BasicCharVarDecl: ID EQ CHARLITERAL { printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
+								  // ast
+								  //$$->left = $1;
+								  //$$->right = $2;
+
+								  /*
+								  		=
+									ID		CHARLITERAL
+								  */
+
+								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
+								}
+
 
 StmtList:	Expr
 	| Expr StmtList
@@ -122,7 +198,7 @@ StmtList:	Expr
 Expr:	SEMICOLON {}
 	| ID SEMICOLON { printf("RECOGNIZED RULE: Simplest expression\n\n"); }
 	| ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
-	| ID EQ NUMBER SEMICOLON 	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
+	| BasicIntVarDecl SEMICOLON 	{ printf("RECOGNIZED RULE: Assignment statement\n\n"); }
 	| WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: WRITE statement\n\n"); }
 
 %%
