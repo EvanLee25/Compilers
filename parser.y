@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* #include "symbolTable.h" */
 #include "AST.h"
@@ -71,12 +72,17 @@ char currentScope[50]; /* global or the name of the function */
 
 %%
 
-Program: DeclList  
-;
+Program: DeclList { printf("\n Program -> DeclList \n");
+		// ast
+		$$ = $1;
+};
 
-DeclList:	Decl DeclList
-	| Decl
-;
+DeclList:	Decl DeclList { printf("\n DeclList -> Decl DeclList \n");
+
+}
+			| Decl { printf("\n DeclList -> Decl \n");
+
+};
 
 Decl:	VarDecl
 	| StmtList
@@ -128,7 +134,7 @@ int main(int argc, char**argv)
 		yydebug = 1;
 	#endif
 */
-	printf("Compiler started. \n\n");
+	printf("\n\n ##### Compiler started ##### \n\n");
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
@@ -138,6 +144,8 @@ int main(int argc, char**argv)
 	  }
 	}
 	yyparse();
+
+	printf("\n##### COMPILER ENDED #####\n\n");
 }
 
 void yyerror(const char* s) {
