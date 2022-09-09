@@ -45,14 +45,14 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "char"  {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE CHAR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return CHAR;
 }
 
 "int"  {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE INT\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return INT;
      
 }
@@ -60,7 +60,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "if"  {
 	words++; chars += strlen(yytext);
 	printf("%s : IF STATEMENT\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return IF;
      
 }
@@ -68,7 +68,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "else"  {
 	words++; chars += strlen(yytext);
 	printf("%s : ELSE STATEMENT\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return ELSE;
      
 }
@@ -76,7 +76,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "while"  {
 	words++; chars += strlen(yytext);
 	printf("%s : WHILE STATEMENT\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return WHILE;
      
 }
@@ -84,7 +84,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "print"  {
 	words++; chars += strlen(yytext);
 	printf("%s : PRINT STATEMENT\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return PRINT;
      
 }
@@ -92,7 +92,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "=="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return DOUBLE_EQ;
      
 }
@@ -100,7 +100,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "!="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return NOT_EQ;
      
 }
@@ -108,7 +108,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "<="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return LT_EQ;
      
 }
@@ -116,7 +116,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 ">="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return GT_EQ;
      
 }
@@ -124,7 +124,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "+="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return PLUS_EQ;
      
 }
@@ -132,7 +132,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "-="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return MINUS_EQ;
      
 }
@@ -140,7 +140,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "*="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return MULTIPLY_EQ;
      
 }
@@ -148,7 +148,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "/="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return DIVIDE_EQ;
      
 }
@@ -156,23 +156,22 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "<"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return LT; 
 }
 
 ">"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return GT;
      
 }
 
-
 "="  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return EQ;
      
 }
@@ -181,7 +180,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "+"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return PLUS_OP;
      
 }
@@ -189,7 +188,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "*"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return MULTIPLY;
      
 }
@@ -197,7 +196,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "-"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return MINUS;
      
 }
@@ -205,7 +204,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "/"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return DIVIDE;
      
 }
@@ -213,7 +212,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "%"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return MODULUS;
      
 }
@@ -221,7 +220,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "("  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return LPAREN;
      
 }
@@ -229,7 +228,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 ")"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return RPAREN;
      
 }
@@ -237,7 +236,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "{"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return LBRACE;
      
 }
@@ -245,7 +244,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 "}"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return RBRACE;
      
 }
@@ -253,7 +252,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 ","  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
-    
+    yylval.string = strdup(yytext);
     return COMMA;
      
 }
@@ -261,6 +260,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 ";"  {
 	chars++;
 	printf("%s : SEMICOLON\n", yytext);
+	yylval.string = strdup(yytext);
     return SEMICOLON;
      
 }
