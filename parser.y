@@ -124,19 +124,6 @@ VarDecl:	INT ID SEMICOLON { printf("RECOGNIZED RULE: Integer Variable Declaratio
 		  
 								  //printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 								}
-;
-
-BasicIntVarDecl: ID EQ NUMBER { printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
-								  // ast
-								  //$$ = $2;
-								  //$$->left = $1;
-								  //$$->right = $2;
-
-								  /*
-										     =
-									 	 ID    NUMBER
-									        
-								  */
 
 			|BasicIntVarDecl SEMICOLON	{
 								  printf("RECOGNIZED RULE: Integer Variable declaration \n\n");
