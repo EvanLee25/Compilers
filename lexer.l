@@ -305,6 +305,6 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
      
 }
 
-.  {printf("%s: UNRECOGNIZED\n", yytext);}
+.  {printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);}
 
 %%
