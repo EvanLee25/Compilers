@@ -170,6 +170,12 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// ast
 							$$->left = $1;
 							$$->right = $2;
+
+							/*
+									VarDecl
+								CHAR	   \------ BasicCharVarDecl
+												ID				   CHARLITERAL
+							*/
 									  		
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 							} 
@@ -178,7 +184,14 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// WORKS
 
 							// ast
-							//$$ = $1;
+							$$ = $1;
+
+							/*
+										 VarDecl
+											|
+								 	BasicCharVarDecl
+							   	  ID				CHARLITERAL
+							*/
 								  
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 							}
