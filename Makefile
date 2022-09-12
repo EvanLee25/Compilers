@@ -11,7 +11,7 @@ lex.yy.c: lexer.l parser.tab.h
 
 parser: lex.yy.c parser.tab.c parser.tab.h
 	gcc -o parser parser.tab.c lex.yy.c
-	./parser ctestfile.gcupl
+	./parser testing.gcupl
 
 
 makeLexerWithMain:lexerWithMain.l

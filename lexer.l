@@ -81,6 +81,15 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
      
 }
 
+"write"  {
+	words++; chars += strlen(yytext);
+	printf("%s : WRITE STATEMENT\n", yytext);
+    yylval.string = strdup(yytext);
+    return WRITE;
+     
+}
+
+
 "print"  {
 	words++; chars += strlen(yytext);
 	printf("%s : PRINT STATEMENT\n", yytext);
