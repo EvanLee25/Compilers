@@ -75,6 +75,9 @@ char currentScope[50]; /* global or the name of the function */
 Program: DeclList { printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
+
+		printf("\n--- Abstract Syntax Tree ---\n\n");
+		printAST($$,0);
 };
 
 DeclList:	Decl DeclList { printf("\nDeclList -> Decl DeclList \n");
@@ -108,8 +111,23 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// WORKS
 
 							// ast
-							$$->left = $1;
-							$$->right = $2;
+							//$$->left = $1;
+							//$$->right = $2;
+							
+
+							$$ = AST_assignment("TYPE",$1,$2);
+							printf("-----------> %s\n", $$->LHS);
+							printf("-----------> %s", $$->RHS);
+							/*
+							Semantic Analysis
+							1. Verify that both variables have been declared
+							2. Verify that the type of RHS and LHS is the same
+							3. Decide what to do if the types are different
+							4. The Main Outcome:
+								If all semantic checks passed, generate intermediate representation code
+								4.1 Write the external C program to generate IR code
+							
+							*/
 
 							/*
 										VarDecl
@@ -123,13 +141,14 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// WORKS
 
 							// ast
-							$$->left = $1;
-							$$->right = $2;
+							//$$->left = $1;
+							//$$->right = $2;
+							//$$ = AST_right_tree_assignment("TYPE",$1,$2);
 
 							/*
 									 VarDecl
-							      INT       \------- BasicIntVarDecl
-							 					  INT               NUMBER
+							      INT       \-------      =
+							 					     ID       NUMBER
 							 */
 		  
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
@@ -153,8 +172,12 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// WORKS
 
 							// ast
-							$$->left = $1;
-							$$->right = $2;
+							//$$->left = $1;
+							//$$->right = $2;
+
+							$$ = AST_assignment("TYPE",$1,$2);
+							printf("-----------> %s\n", $$->LHS);
+							printf("-----------> %s", $$->RHS);
 
 							/*
 									VarDecl
@@ -205,9 +228,10 @@ BasicIntVarDecl: ID EQ NUMBER { //printf("RECOGNIZED RULE: Basic Integer Variabl
 							// WORKS	  
 
 							// ast
-							$$->left = $1;
-							$$->right = $3;
+							//$$->left = $1;
+							//$$->right = $3;
 							//$$ = $2; // @evan: this segfaults on Program -> DeclList after more than one variable declaration in source code???
+							//$$ = AST_assignment("=",$1,$2);
 
 							/*
 									=
