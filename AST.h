@@ -33,30 +33,6 @@ struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
 	
 }
 
-
-struct AST * AST_right_tree_assignment(char nodeType[50], char LHS[50], struct AST* right){
-	
-
-	struct AST* ASTassign = malloc(sizeof(struct AST));
-	strcpy(ASTassign->nodeType, nodeType);
-	strcpy(ASTassign->LHS, LHS);
-	strcpy(ASTassign->right, right);
-	
-
-/*
-	VarDecl 
-   /         \
-TYPE		   =
-			 /   \
-			x     y
-
-*/	
-	return ASTassign;
-	
-}
-
-
-
 struct AST * AST_BinaryExpression(char nodeType[50], char LHS[50], char RHS[50]){
 
 	struct AST* ASTBinExp = malloc(sizeof(struct AST));

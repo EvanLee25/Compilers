@@ -1,4 +1,8 @@
 int x;
+char a;
+x = 5;
+a = 'd';
+
 /*
 int b = 40;
 */

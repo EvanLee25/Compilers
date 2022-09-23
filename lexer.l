@@ -309,7 +309,7 @@ CHARLITERAL '([^'\n]|\\n|\\\\)'
 {NUMBER}  {
 	chars += strlen(yytext);
 	printf("%s : NUMBER\n", yytext);
-    yylval.number = atoi(strdup(yytext)); 
+    yylval.string = strdup(yytext); 
     return NUMBER;
      
 }

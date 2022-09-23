@@ -40,33 +40,33 @@ char currentScope[50]; /* global or the name of the function */
 %token <string> MINUS_EQ
 %token <string> MULTIPLY_EQ
 %token <string> DIVIDE_EQ
-%token <character> LT
-%token <character> GT
-%token <character> EQ
-%token <character> PLUS_OP
-%token <character> MULTIPLY
-%token <character> MINUS
-%token <character> DIVIDE
-%token <character> MODULUS
-%token <character> LPAREN
-%token <character> RPAREN
-%token <character> LBRACE
-%token <character> RBRACE
-%token <character> COMMA
-%token <character> SEMICOLON
+%token <string> LT
+%token <string> GT
+%token <string> EQ
+%token <string> PLUS_OP
+%token <string> MULTIPLY
+%token <string> MINUS
+%token <string> DIVIDE
+%token <string> MODULUS
+%token <string> LPAREN
+%token <string> RPAREN
+%token <string> LBRACE
+%token <string> RBRACE
+%token <string> COMMA
+%token <string> SEMICOLON
 
 %token <string> STRINGLITERAL
-%token <character> CHARLITERAL
+%token <string> CHARLITERAL
 %token <string> WRITE
 
 %token <string> ID
-%token <number> NUMBER
+%token <string> NUMBER
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 %printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl BasicIntVarDecl BasicCharVarDecl StmtList Expr
+%type <ast> Program DeclList Decl VarDecl StmtList Expr
 
 %start Program
 
@@ -111,10 +111,6 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// WORKS
 
 							// ast
-							//$$->left = $1;
-							//$$->right = $2;
-							
-
 							$$ = AST_assignment("TYPE",$1,$2);
 							printf("-----------> %s\n", $$->LHS);
 							printf("-----------> %s", $$->RHS);
@@ -137,44 +133,24 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							}
 
 
-			|	INT BasicIntVarDecl SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
-							// WORKS
+			|	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
+							// WORKS	  
 
 							// ast
-							//$$->left = $1;
-							//$$->right = $2;
-							//$$ = AST_right_tree_assignment("TYPE",$1,$2);
-
-							/*
-									 VarDecl
-							      INT       \-------      =
-							 					     ID       NUMBER
-							 */
-		  
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							}
-
-			|	BasicIntVarDecl SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
-							// WORKS
-
-							// ast
-							$$ = $1;
+							$$ = AST_BinaryExpression("=",$1,$3);
 
 							/*
 									=
-								ID	   NUMBER
+								ID    NUMBER
 							*/
 
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							}
+							};
 
 			|	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
 							// WORKS
 
 							// ast
-							//$$->left = $1;
-							//$$->right = $2;
-
 							$$ = AST_assignment("TYPE",$1,$2);
 							printf("-----------> %s\n", $$->LHS);
 							printf("-----------> %s", $$->RHS);
@@ -187,67 +163,11 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 							}					
 			
-			|	CHAR BasicCharVarDecl SEMICOLON	  { printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
-							// WORKS	
-
-							// ast
-							$$->left = $1;
-							$$->right = $2;
-
-							/*
-									VarDecl
-								CHAR	   \------ BasicCharVarDecl
-												ID				   CHARLITERAL
-							*/
-									  		
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							} 
-
-			|	BasicCharVarDecl SEMICOLON	  { printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
-							// WORKS
-
-							// ast
-							$$ = $1;
-
-							/*
-										 VarDecl
-											|
-								 	BasicCharVarDecl
-							   	  ID				CHARLITERAL
-							*/
-								  
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							}
-;
-
-
-/*----end vardecl-------------------------------------------------------------------------------------------------------*/
-
-
-BasicIntVarDecl: ID EQ NUMBER { //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
-							// WORKS	  
-
-							// ast
-							//$$->left = $1;
-							//$$->right = $3;
-							//$$ = $2; // @evan: this segfaults on Program -> DeclList after more than one variable declaration in source code???
-							//$$ = AST_assignment("=",$1,$2);
-
-							/*
-									=
-								ID    NUMBER
-							*/
-
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-};
-
-BasicCharVarDecl: ID EQ CHARLITERAL { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
+			|	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
 							// WORKS
 							
 							// ast
-							$$->left = $1;
-							$$->right = $3;
-							//$$ = $2;
+							$$ = AST_BinaryExpression("=",$1,$3);
 
 							/*
 									=
@@ -255,7 +175,12 @@ BasicCharVarDecl: ID EQ CHARLITERAL { //printf("RECOGNIZED RULE: Basic Charliter
 							*/
 
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-};
+							};
+;
+
+
+/*----end vardecl-------------------------------------------------------------------------------------------------------*/
+  
 
 
 StmtList:	Expr
