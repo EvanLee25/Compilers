@@ -144,8 +144,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								ID    NUMBER
 							*/
 
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							};
+							}
 
 			|	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
 							// WORKS
@@ -160,7 +159,6 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								CHAR	   ID
 							*/
 
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
 							}					
 			
 			|	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
@@ -175,7 +173,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							*/
 
 							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							};
+							}
 ;
 
 
@@ -194,9 +192,6 @@ Expr:	SEMICOLON {}
 
 	|	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); }
 		// WORKS
-
-  //|	BasicIntVarDecl SEMICOLON 	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); }
-		// REDUNDANT, SEE LINE 138
 
 	|	WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: Write Statement\n\n"); }
 		// WORKS
