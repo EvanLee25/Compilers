@@ -1,5 +1,5 @@
 int x;
-int y;
+int x;
 char a;
 int z;
 /*

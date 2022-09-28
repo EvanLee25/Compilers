@@ -18,7 +18,7 @@ int symTabIndex = 0;
 int SYMTAB_SIZE = 20;
 
 void symTabAccess(void){
-	printf("::::> Symbol table accessed.\n");
+	printf("::::> Symbol Table accessed.\n");
 }
 
 void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLength, char scope[50]){
@@ -32,6 +32,7 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 		strcpy(symTabItems[symTabIndex].scope, scope);
 		symTabItems[symTabIndex].isUsed = 0;
 		symTabIndex++;
+		printf("::::> Item added to the Symbol Table.\n");
 	
 }
 
@@ -59,10 +60,11 @@ int found(char itemName[50], char scope[50]){
 		int str2 = strcmp(symTabItems[i].scope,scope); 
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
-			printf("Syntax Error: Variable '%s' already declared.", itemName);
+			printf("::::> Syntax Error: Variable '%s' already declared.\n\n", itemName);
 			return 1; // found the ID in the table
 		}
 	}
+	printf("::::> No variable already declared.\n");
 	return 0;
 }
 

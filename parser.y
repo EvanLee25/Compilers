@@ -113,7 +113,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// symbol table
 							symTabAccess();
-							if (found($2,"GLOBAL") == 1) {
+							if (found($2,"G") == 1) {
 								exit(0); // variable already declalred
 							}
 							addItem($2, "VAR", "INT", 0, "G");
