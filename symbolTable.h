@@ -36,14 +36,14 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 }
 
 void showSymTable(){
-	printf("itemID    itemName    itemKind    itemType     ArrayLength    itemSCope    isUsed\n");
+	printf("itemID    itemName    itemKind    itemType     ArrayLength    itemScope    isUsed\n");
 	printf("-----------------------------------------------------------------------------------\n");
 	for (int i=0; i<symTabIndex; i++){
-		printf("%5d %15s  %7s  %7s %6d %15s %i\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].arrayLength, symTabItems[i].scope, symTabItems[i].isUsed);
+		printf("%5d %8s  %11s  %10s %12d %15s %9i\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].arrayLength, symTabItems[i].scope, symTabItems[i].isUsed);
 	}
 	
 
-	printf("-----------------------------------------------------------------------\n");
+	printf("-----------------------------------------------------------------------------------\n");
 }
 
 int found(char itemName[50], char scope[50]){
@@ -53,12 +53,13 @@ int found(char itemName[50], char scope[50]){
 	// Later on, you may want to return additional information
 
 	// Dirty loop, becuase it counts SYMTAB_SIZE times, no matter the size of the symbol table
-	for(int i=0; i<SYMTAB_SIZE; i++){
+	for(int i=0; i<symTabIndex+1; i++){
 		int str1 = strcmp(symTabItems[i].itemName, itemName); 
 		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[i].scope,scope); 
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
+			printf("Syntax Error: Variable '%s' already declared.", itemName);
 			return 1; // found the ID in the table
 		}
 	}

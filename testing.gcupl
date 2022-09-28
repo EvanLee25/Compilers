@@ -1,8 +1,11 @@
 int x;
+int y;
+char a;
+int z;
+/*
 char a;
 x = 5;
 a = 'd';
 
-/*
 int b = 40;
 */

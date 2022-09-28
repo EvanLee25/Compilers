@@ -110,7 +110,14 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 
 VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
 							// WORKS
+
+							// symbol table
 							symTabAccess();
+							if (found($2,"GLOBAL") == 1) {
+								exit(0); // variable already declalred
+							}
+							addItem($2, "VAR", "INT", 0, "G");
+
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
 							
@@ -131,7 +138,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 										VarDecl
 									INT        ID
 							*/
-
+				
 							}
 
 
@@ -150,6 +157,13 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 			|	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
 							// WORKS
+
+							// symbol table
+							symTabAccess();
+							if (found($2,"GLOBAL") == 1) {
+								exit(0); // variable already declalred
+							}
+							addItem($2, "VAR", "CHR", 0, "G");
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
@@ -220,6 +234,7 @@ int main(int argc, char**argv)
 	yyparse();
 
 	printf("\n##### COMPILER ENDED #####\n\n");
+	showSymTable();
 }
 
 void yyerror(const char* s) {
