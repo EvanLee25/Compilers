@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-/* #include "symbolTable.h" */
+#include "symbolTable.h"
 #include "AST.h"
 
 
@@ -64,7 +64,8 @@ char currentScope[50]; /* global or the name of the function */
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
-%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
+//not needed if NUMBER is a string
+//%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
 %type <ast> Program DeclList Decl VarDecl StmtList Expr
 
@@ -109,11 +110,12 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 
 VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
 							// WORKS
-
+							symTabAccess();
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
-							printf("-----------> %s\n", $$->LHS);
-							printf("-----------> %s", $$->RHS);
+							
+							//printf("-----------> %s\n", $$->LHS); //works, checks to see correct assignment
+							//printf("-----------> %s", $$->RHS);
 							/*
 							Semantic Analysis
 							1. Verify that both variables have been declared
@@ -122,7 +124,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							4. The Main Outcome:
 								If all semantic checks passed, generate intermediate representation code
 								4.1 Write the external C program to generate IR code
-							
+							5. For optimization, create a column in symbol table for "used" and set to false. Once used set to true
 							*/
 
 							/*
@@ -151,8 +153,9 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
-							printf("-----------> %s\n", $$->LHS);
-							printf("-----------> %s", $$->RHS);
+							
+							//printf("-----------> %s\n", $$->LHS);
+							//printf("-----------> %s", $$->RHS);
 
 							/*
 									VarDecl
