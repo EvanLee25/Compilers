@@ -5,3 +5,5 @@ int y;
 y = 89;
 char a;
 a = 'val';
+int z;
+z = y;
