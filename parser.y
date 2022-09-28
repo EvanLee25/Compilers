@@ -145,6 +145,9 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 			|	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
 							// WORKS	  
 
+							// symbol table
+							updateValue($1, "G", $3); // update the value of whatever id is passed in
+
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
 
@@ -180,6 +183,9 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 			
 			|	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
 							// WORKS
+
+							// symbol table
+							updateValue($1, "G", $3);
 							
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);

@@ -11,6 +11,7 @@ struct Entry
 	int arrayLength;
 	char scope[50];     // global, or the name of the function
 	int isUsed;       // 0 = F, 1 = T, is variable used? -optimization
+	char value[50];
 };
 
 struct Entry symTabItems[100];
@@ -36,15 +37,29 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 	
 }
 
+void updateValue(char itemName[50], char scope[50], char value[50]) {
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		if( str1 == 0 && str2 == 0){
+			strcpy(symTabItems[i].value, value); // update value in sym table
+		}
+	}
+
+}
+
 void showSymTable(){
-	printf("itemID    itemName    itemKind    itemType     ArrayLength    itemScope    isUsed\n");
-	printf("-----------------------------------------------------------------------------------\n");
+	printf("itemID    itemName    itemKind    itemType     ArrayLength    itemScope    isUsed    value\n");
+	printf("-------------------------------------------------------------------------------------------\n");
 	for (int i=0; i<symTabIndex; i++){
-		printf("%5d %8s  %11s  %10s %12d %15s %9i\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].arrayLength, symTabItems[i].scope, symTabItems[i].isUsed);
+		printf("%5d %8s  %11s  %10s %12d %15s %9i %9s\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].arrayLength, symTabItems[i].scope, symTabItems[i].isUsed, symTabItems[i].value);
 	}
 	
 
-	printf("-----------------------------------------------------------------------------------\n");
+	printf("-------------------------------------------------------------------------------------------\n");
 }
 
 int found(char itemName[50], char scope[50]){

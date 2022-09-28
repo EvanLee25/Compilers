@@ -25,7 +25,7 @@ DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
 NUMBER  {DIGIT}+
 STRINGLITERAL \"([^\\\"]|\\.)*\"
-CHARLITERAL '([^'\n]|\\n|\\\\)'
+CHARLITERAL \'([^\\\'']|\\.)*\'
 
 %%  
 
