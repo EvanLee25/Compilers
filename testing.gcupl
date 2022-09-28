@@ -1,9 +1,7 @@
 int x;
-x = 6393;
-x = 10;
+x = 1;
+write x;
 int y;
-y = 89;
-char a;
-a = 'val';
+y = 7;
 int z;
 z = y;

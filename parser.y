@@ -206,17 +206,28 @@ Expr:	SEMICOLON {
 		// WORKS
 		// @EVAN: are we sure we can do this? no type?
 
+
 	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
 		// WORKS
 
 		// symbol table
-		updateValue($1, "G", $3);
+		updateValue($1, "G", getValue($3, "G"));
 
 		// ast
 		$$ = AST_BinaryExpression("=",$1,$3);
 
+
 	} |	WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: Write Statement\n\n"); 
 		// WORKS
+
+		// get id's value from symbol table
+		// getValue($2, "G");      used in ast code
+
+		// semantic check: is the id initialized?
+		initialized($2, "G");
+
+		// ast
+		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
 
 	}
 

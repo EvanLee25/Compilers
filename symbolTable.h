@@ -51,6 +51,20 @@ void updateValue(char itemName[50], char scope[50], char value[50]) {
 
 }
 
+const char* getValue(char itemName[50], char scope[50]) {
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		if( str1 == 0 && str2 == 0){
+			return symTabItems[i].value;
+		}
+	}
+
+}
+
 void showSymTable(){
 	printf("itemID    itemName    itemKind    itemType     ArrayLength    itemScope    isUsed    value\n");
 	printf("-------------------------------------------------------------------------------------------\n");
@@ -80,6 +94,27 @@ int found(char itemName[50], char scope[50]){
 		}
 	}
 	printf("::::> No variable already declared.\n");
+	return 0;
+}
+
+int initialized(char itemName[50], char scope[50]){
+	// Lookup an identifier in the symbol table
+	// what about scope?
+	// return TRUE or FALSE
+	// Later on, you may want to return additional information
+
+	// Dirty loop, becuase it counts SYMTAB_SIZE times, no matter the size of the symbol table
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope,scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		if( str1 == 0 && str2 == 0){
+			printf("::::> Variable '%s' is declared.\n", itemName);
+			return 1; // found the ID in the table
+		}
+	}
+	printf("::::> Syntax Error: Variable '%s' has not yet been declared.\n\n", itemName);
 	return 0;
 }
 
