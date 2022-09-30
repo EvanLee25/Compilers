@@ -118,8 +118,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								printf("ERROR: Variable %s already declared.\n",$2);
 								exit(0); // variable already declalred
 							}
-
-							addItem($2, "VAR", "INT", 0, "G");
+							addItem($2, "VAR", "INT", 0, "G", 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
@@ -171,7 +170,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							if (found($2,"G") == 1) {
 								exit(0); // variable already declalred
 							}
-							addItem($2, "VAR", "CHR", 0, "G");
+							addItem($2, "VAR", "CHR", 0, "G", 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
@@ -242,6 +241,7 @@ Expr:	SEMICOLON {
 
 		// semantic check: is the id initialized?
 		initialized($2, "G");
+		isUsed($2, "G");
 
 		// ast
 		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));

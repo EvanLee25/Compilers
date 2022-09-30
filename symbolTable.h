@@ -22,7 +22,7 @@ void symTabAccess(void){
 	printf("::::> Symbol Table accessed.\n");
 }
 
-void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLength, char scope[50]){
+void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLength, char scope[50], int isUsed){
 	
 		// what about scope? should you add scope to this function?
 		symTabItems[symTabIndex].itemID = symTabIndex;
@@ -31,7 +31,7 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 		strcpy(symTabItems[symTabIndex].itemType, itemType);
 		symTabItems[symTabIndex].arrayLength = arrayLength;
 		strcpy(symTabItems[symTabIndex].scope, scope);
-		symTabItems[symTabIndex].isUsed = 0;
+		symTabItems[symTabIndex].isUsed = isUsed;
 		symTabIndex++;
 		printf("::::> Item added to the Symbol Table.\n");
 	
@@ -46,6 +46,20 @@ void updateValue(char itemName[50], char scope[50], char value[50]) {
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
 			strcpy(symTabItems[i].value, value); // update value in sym table
+		}
+	}
+
+}
+
+void isUsed(char itemName[50], char scope[50]) {
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		if( str1 == 0 && str2 == 0) {
+			symTabItems[i].isUsed = 1; // update value in sym table
 		}
 	}
 
