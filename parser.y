@@ -114,7 +114,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// symbol table
 							symTabAccess();
 							if (found($2,"G") == 1) {
-								exit(0); // variable already declalred
+								exit(0); // variable already declared
 							}
 							addItem($2, "VAR", "INT", 0, "G", 0);
 
@@ -142,11 +142,18 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 			} |	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
 							// WORKS	  
 							
-							// symbol table
+							// semantic checks
+							// is the variable already declared
 							symTabAccess();
 							if (found($1,"G") == 0) { //if variable not declared yet
 								printf("ERROR: Variable %s not initialized.",$1);
-								exit(0); // variable already declalred
+								exit(0); // variable already declared
+							}
+
+							// is the statement redundant
+							if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								printf("ERROR: Variable %s has already been declared as: %s.\n\n",$1,$3);
+								exit(0);
 							}
 
 							// symbol table
