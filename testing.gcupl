@@ -1,7 +1,10 @@
 int x;
-x = 1;
+x = 5;
 write x;
 int y;
-y = 7;
+y = x;
+write x;
 int z;
-z = y;
+z = 0;
+z = x;
+write z;

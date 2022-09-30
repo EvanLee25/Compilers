@@ -226,6 +226,12 @@ Expr:	SEMICOLON {
 	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
 		// WORKS
 
+		//semantic check in symbol table
+		symTabAccess();
+		if (found($1,"G") == 0 || found($3,"G") == 0) { //if variable not declared yet
+			printf("ERROR: Variable %s or %s not initialized.\n",$1,$3);
+			exit(0); // variable already declalred
+		}
 		// symbol table
 		updateValue($1, "G", getValue($3, "G"));
 
@@ -245,6 +251,10 @@ Expr:	SEMICOLON {
 
 		// ast
 		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
+		printf("TESTING AREA:::::::");
+		printf($$->nodeType);
+		printf($$->LHS);
+		printf($$->RHS);
 
 	}
 
