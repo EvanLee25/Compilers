@@ -1,11 +1,7 @@
 int x;
+x = 1;
+write x;
 int y;
-char a;
+y = 7;
 int z;
-/*
-char a;
-x = 5;
-a = 'd';
-
-int b = 40;
-*/
+z = y;

@@ -113,7 +113,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// symbol table
 							symTabAccess();
-							if (found($2,"GLOBAL") == 1) {
+							if (found($2,"G") == 1) {
 								exit(0); // variable already declalred
 							}
 							addItem($2, "VAR", "INT", 0, "G");
@@ -139,18 +139,19 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 									INT        ID
 							*/
 				
-							}
-
-
-			|	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
+			} |	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
 							// WORKS	  
 							
 							// symbol table
 							symTabAccess();
-							if (found($1,"GLOBAL") == 0) { //if variable not declared yet
+							if (found($1,"G") == 0) { //if variable not declared yet
 								printf("ERROR: Variable %s not initialized.",$1);
 								exit(0); // variable already declalred
 							}
+
+							// symbol table
+							updateValue($1, "G", $3); // update the value of whatever id is passed in
+
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
 
@@ -159,14 +160,12 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								ID    NUMBER
 							*/
 
-							}
-
-			|	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
+			} |	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
 							// WORKS
 
 							// symbol table
 							symTabAccess();
-							if (found($2,"GLOBAL") == 1) {
+							if (found($2,"G") == 1) {
 								exit(0); // variable already declalred
 							}
 							addItem($2, "VAR", "CHR", 0, "G");
@@ -180,12 +179,13 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							/*
 									VarDecl
 								CHAR	   ID
-							*/
-
-							}					
+							*/					
 			
-			|	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
+			} |	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
 							// WORKS
+
+							// symbol table
+							updateValue($1, "G", $3);
 							
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
@@ -195,8 +195,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								ID	   CHARLITERAL
 							*/
 
-							//printf("Items recognized: %s, %s, %c \n", $1, $2, $3);
-							}
+			}
 ;
 
 
@@ -208,16 +207,36 @@ StmtList:	Expr
 	| Expr StmtList
 ;
 
-Expr:	SEMICOLON {}
+Expr:	SEMICOLON {
 
-	|	ID SEMICOLON	{ printf("RECOGNIZED RULE: Simplest Expression\n\n"); }
+	} |	ID SEMICOLON	{ printf("RECOGNIZED RULE: Simplest Expression\n\n"); 
+		// WORKS
+		// @EVAN: are we sure we can do this? no type?
+
+
+	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
 		// WORKS
 
-	|	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); }
+		// symbol table
+		updateValue($1, "G", getValue($3, "G"));
+
+		// ast
+		$$ = AST_BinaryExpression("=",$1,$3);
+
+
+	} |	WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: Write Statement\n\n"); 
 		// WORKS
 
-	|	WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: Write Statement\n\n"); }
-		// WORKS
+		// get id's value from symbol table
+		// getValue($2, "G");      used in ast code
+
+		// semantic check: is the id initialized?
+		initialized($2, "G");
+
+		// ast
+		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
+
+	}
 
 %%
 
