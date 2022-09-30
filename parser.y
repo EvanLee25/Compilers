@@ -7,6 +7,7 @@
 
 #include "symbolTable.h"
 #include "AST.h"
+#include "IRcode.h"
 
 
 extern int yylex();
@@ -111,11 +112,13 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
 							// WORKS
 
-							// symbol table
+							//semantic check in symbol table
 							symTabAccess();
 							if (found($2,"G") == 1) {
+								printf("ERROR: Variable %s already declared.\n",$2);
 								exit(0); // variable already declalred
 							}
+
 							addItem($2, "VAR", "INT", 0, "G");
 
 							// ast
@@ -142,10 +145,10 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 			} |	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
 							// WORKS	  
 							
-							// symbol table
+							// semantic check in symbol table
 							symTabAccess();
 							if (found($1,"G") == 0) { //if variable not declared yet
-								printf("ERROR: Variable %s not initialized.",$1);
+								printf("ERROR: Variable %s not initialized.\n",$1);
 								exit(0); // variable already declalred
 							}
 
@@ -183,6 +186,13 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 			
 			} |	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
 							// WORKS
+							
+							// semantic check in symbol table
+							symTabAccess();
+							if (found($1,"G") == 0) { //if variable not declared yet
+								printf("ERROR: Variable %s not initialized.\n",$1);
+								exit(0); // variable already declalred
+							}
 
 							// symbol table
 							updateValue($1, "G", $3);
@@ -248,6 +258,9 @@ int main(int argc, char**argv)
 	#endif
 */
 	printf("\n\n ##### Compiler started ##### \n\n");
+	
+	//initialize IR Code File
+	initIRcodeFile();
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
