@@ -7,6 +7,7 @@
 
 #include "symbolTable.h"
 #include "AST.h"
+#include "IRcode.h"
 
 
 extern int yylex();
@@ -111,9 +112,10 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
 							// WORKS
 
-							// symbol table
+							//semantic check in symbol table
 							symTabAccess();
 							if (found($2,"G") == 1) {
+								printf("ERROR: Variable %s already declared.\n",$2);
 								exit(0); // variable already declared
 							}
 							addItem($2, "VAR", "INT", 0, "G", 0);
@@ -191,6 +193,13 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 			} |	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
 							// WORKS
 
+							// semantic check in symbol table
+							symTabAccess();
+							if (found($1,"G") == 0) { //if variable not declared yet
+								printf("ERROR: Variable %s not initialized.\n",$1);
+								exit(0); // variable already declalred
+							}
+
 							// symbol table
 							updateValue($1, "G", $3);
 							
@@ -224,6 +233,12 @@ Expr:	SEMICOLON {
 	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
 		// WORKS
 
+		//semantic check in symbol table
+		symTabAccess();
+		if (found($1,"G") == 0 || found($3,"G") == 0) { //if variable not declared yet
+			printf("ERROR: Variable %s or %s not initialized.\n",$1,$3);
+			exit(0); // variable already declalred
+		}
 		// symbol table
 		updateValue($1, "G", getValue($3, "G"));
 
@@ -243,6 +258,10 @@ Expr:	SEMICOLON {
 
 		// ast
 		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
+		printf("TESTING AREA:::::::");
+		printf($$->nodeType);
+		printf($$->LHS);
+		printf($$->RHS);
 
 	}
 
@@ -256,6 +275,9 @@ int main(int argc, char**argv)
 	#endif
 */
 	printf("\n\n ##### Compiler started ##### \n\n");
+	
+	//initialize IR Code File
+	initIRcodeFile();
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
