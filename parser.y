@@ -141,6 +141,13 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 				
 			} |	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
 							// WORKS	  
+							
+							// symbol table
+							symTabAccess();
+							if (found($1,"G") == 0) { //if variable not declared yet
+								printf("ERROR: Variable %s not initialized.",$1);
+								exit(0); // variable already declalred
+							}
 
 							// symbol table
 							updateValue($1, "G", $3); // update the value of whatever id is passed in
