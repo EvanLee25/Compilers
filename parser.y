@@ -154,6 +154,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// is the statement redundant
 							if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+							// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
 								printf("ERROR: Variable %s has already been declared as: %s.\n\n",$1,$3);
 								exit(0);
 							}
@@ -258,10 +259,10 @@ Expr:	SEMICOLON {
 
 		// ast
 		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
-		printf("TESTING AREA:::::::");
+		/*printf("TESTING AREA:::::::");
 		printf($$->nodeType);
 		printf($$->LHS);
-		printf($$->RHS);
+		printf($$->RHS);*/
 
 	}
 
@@ -274,7 +275,7 @@ int main(int argc, char**argv)
 		yydebug = 1;
 	#endif
 */
-	printf("\n\n ##### Compiler started ##### \n\n");
+	printf("\n\n ###################### COMPILER STARTED ###################### \n\n");
 	
 	//initialize IR Code File
 	initIRcodeFile();
@@ -288,8 +289,10 @@ int main(int argc, char**argv)
 	}
 	yyparse();
 
-	printf("\n##### COMPILER ENDED #####\n\n");
+	printf("\n\n ####################### COMPILER ENDED ####################### \n\n");
+	printf("\n\n ###################### SHOW SYMBOL TABLE ##################### \n\n\n");
 	showSymTable();
+	printf("\n\n ###################### END SYMBOL TABLE ###################### \n\n");
 }
 
 void yyerror(const char* s) {
