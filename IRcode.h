@@ -5,9 +5,10 @@
 #include <string.h>
 #include <unistd.h>
 
+
 void  initIRcodeFile(){
     FILE * IRcode;
-    IRcode = fopen("IRcode.ir", "a");
+    IRcode = fopen("IRcode.ir", "w");
     fprintf(IRcode, "#### IR Code ####\n\n");
     fclose(IRcode);
 }
@@ -28,10 +29,25 @@ void createAssignment(char * id1, char * id2){
     fclose(IRcode);
 }
 
-void createConstantIntAssignment (char id1[50], char num[50]){
-    //x = 5
+void createIntDefinition(char id[50]) {
+    // e.g int x;
+
     FILE * IRcode;
-    fprintf(IRcode, "%s = %s\n", id1, num);
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
+    fprintf(IRcode, "T%d = %s\n", itemID, id);
+    fclose(IRcode);
+}
+
+void createConstantIntAssignment(char id[50], char num[50]){
+    // e.g. x = 5;
+
+    FILE * IRcode;
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
+    fprintf(IRcode, "T%d = %s\n", itemID, num);
     fclose(IRcode);
 }
 

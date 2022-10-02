@@ -78,8 +78,9 @@ Program: DeclList { printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
 
-		printf("\n--- Abstract Syntax Tree ---\n\n");
+		printf("\n\n ######################## AST STARTED ######################### \n\n");
 		printAST($$,0);
+		printf("\n\n ######################### AST ENDED ########################## \n\n");
 };
 
 DeclList:	Decl DeclList { printf("\nDeclList -> Decl DeclList \n");
@@ -122,6 +123,9 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
+
+							// ir code
+							createIntDefinition($2);
 							
 							//printf("-----------> %s\n", $$->LHS); //works, checks to see correct assignment
 							//printf("-----------> %s", $$->RHS);
@@ -148,7 +152,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// is the variable already declared
 							symTabAccess();
 							if (found($1,"G") == 0) { //if variable not declared yet
-								printf("ERROR: Variable %s not initialized.",$1);
+								printf("::::> SYNTAX ERROR: Variable %s not initialized.\n",$1);
 								exit(0); // variable already declared
 							}
 
@@ -164,6 +168,9 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
+
+							// ir code
+							createConstantIntAssignment($1,$3);
 
 							/*
 									=
@@ -292,7 +299,7 @@ int main(int argc, char**argv)
 	printf("\n\n ####################### COMPILER ENDED ####################### \n\n");
 	printf("\n\n ###################### SHOW SYMBOL TABLE ##################### \n\n\n");
 	showSymTable();
-	printf("\n\n ###################### END SYMBOL TABLE ###################### \n\n");
+	printf("\n\n ###################### END SYMBOL TABLE ###################### \n\n\n\n");
 }
 
 void yyerror(const char* s) {
