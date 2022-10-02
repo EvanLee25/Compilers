@@ -16,7 +16,6 @@ struct AST{
 
 struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
 	
-
 	struct AST* ASTassign = malloc(sizeof(struct AST));
 	strcpy(ASTassign->nodeType, nodeType);
 	strcpy(ASTassign->LHS, LHS);
@@ -42,6 +41,7 @@ struct AST * AST_BinaryExpression(char nodeType[50], char LHS[50], char RHS[50])
 	return ASTBinExp;
 	
 }
+
 struct AST * AST_Type(char nodeType[50], char LHS[50], char RHS[50]){
 
 	struct AST* ASTtype = malloc(sizeof(struct AST));

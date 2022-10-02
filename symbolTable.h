@@ -110,7 +110,7 @@ char* getValue(char itemName[50], char scope[50]) {
 			return symTabItems[i].value;
 		}
 	}
-	return "NULL";
+	return NULL;
 }
 
 void showSymTable(){
@@ -141,7 +141,7 @@ int found(char itemName[50], char scope[50]){
 			return 1; // found the ID in the table
 		}
 	}
-	printf("::::> No variable already declared.\n");
+	printf("::::> Variable name is original.\n");
 	return 0;
 }
 
@@ -158,40 +158,78 @@ int initialized(char itemName[50], char scope[50]){
 		int str2 = strcmp(symTabItems[i].scope,scope); 
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
-			printf("::::> Variable '%s' is declared.\n", itemName);
+			printf("::::> Variable '%s' is declared.\n\n", itemName);
 			return 1; // found the ID in the table
 		}
 	}
 	printf("::::> Syntax Error: Variable '%s' has not yet been declared.\n\n", itemName);
+	exit(0);
 	return 0;
 }
 
-const char* getVariableType(char itemName[50], char scope[50]){
+char* getVariableType(char itemName[50], char scope[50]){
 	//char *name = "int";
 	//return name;
 
-	for(int i=0; i<SYMTAB_SIZE; i++){
+	for(int i=0; i<symTabIndex+1; i++){
 		int str1 = strcmp(symTabItems[i].itemName, itemName); 
 		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
-		int str2 = strcmp(symTabItems[i].scope,scope); 
+		int str2 = strcmp(symTabItems[i].scope, scope); 
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
-			return symTabItems[i].itemType; // found the ID in the table
+			return symTabItems[i].itemType;
 		}
 	}
 	return NULL;
 }
 
-int compareTypes(char itemName1[50], char itemName2[50],char scope[50]){
-	const char* idType1 = getVariableType(itemName1, scope);
-	const char* idType2 = getVariableType(itemName2, scope);
-	
-	printf("%s = %s\n", idType1, idType2);
+int compareTypes(char itemName1[50], char itemName2[50], char scope[50]){
+
+	char* idType1 = getVariableType(itemName1, scope);
+	char* idType2 = getVariableType(itemName2, scope);
 	
 	int typeMatch = strcmp(idType1, idType2);
 	if(typeMatch == 0){
+		printf("::::> Types are the same: %s = %s\n\n", idType1, idType2);
 		return 1; // types are matching
 	}
-	else return 0;
+	else {
+		printf("::::> Types are not the same: %s = %s\n\n", idType1, idType2);
+		exit(0); // types are not matching
+		return 0;
+	}
+}
+
+char* getVariableKind(char itemName[50], char scope[50]){
+	//char *name = "int";
+	//return name;
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		if( str1 == 0 && str2 == 0){
+			return symTabItems[i].itemKind;
+		}
+	}
+	return NULL;
+}
+
+int compareKinds(char itemName1[50], char itemName2[50], char scope[50]){
+
+	char* idKind1 = getVariableKind(itemName1, scope);
+	char* idKind2 = getVariableKind(itemName2, scope);
+	
+	int kindMatch = strcmp(idKind1, idKind2);
+	if(kindMatch == 0){
+		printf("::::> Kinds are the same: %s = %s\n\n", idKind1, idKind2);
+		return 1; // kinds are matching
+	}
+	else {
+		printf("::::> Kinds are not the same: %s = %s\n\n", idKind1, idKind2);
+		exit(0); // kinds are not matching
+		return 0;
+	}
 }
     

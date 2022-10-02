@@ -8,6 +8,7 @@
 #include "symbolTable.h"
 #include "AST.h"
 #include "IRcode.h"
+#include "assembly.h"
 
 
 extern int yylex();
@@ -81,6 +82,10 @@ Program: DeclList { printf("\nProgram -> DeclList \n");
 		printf("\n\n ######################## AST STARTED ######################### \n\n");
 		printAST($$,0);
 		printf("\n\n ######################### AST ENDED ########################## \n\n");
+
+		// end mips code
+		createEndOfAssemblyCode();
+		printf("\n\n ######################## MIPS CREATED ######################## \n\n");
 };
 
 DeclList:	Decl DeclList { printf("\nDeclList -> Decl DeclList \n");
@@ -110,15 +115,17 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 /*----start vardecl-----------------------------------------------------------------------------------------------------*/
 
 
-VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");
-							// WORKS
+VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");		
 
-							//semantic check in symbol table
-							symTabAccess();
-							if (found($2,"G") == 1) {
-								printf("ERROR: Variable %s already declared.\n",$2);
-								exit(0); // variable already declared
-							}
+							// semantic checks
+								// is the variable already declared?
+								symTabAccess();
+								if (found($2,"G") == 1) {
+									printf("ERROR: Variable %s already declared.\n",$2);
+									exit(0); // variable already declared
+								}
+
+							// symbol table
 							addItem($2, "VAR", "INT", 0, "G", 0);
 
 							// ast
@@ -126,42 +133,34 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// ir code
 							createIntDefinition($2);
+
+							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
+							//createMipsIntDeclaration($2);
 							
-							//printf("-----------> %s\n", $$->LHS); //works, checks to see correct assignment
-							//printf("-----------> %s", $$->RHS);
-							/*
-							Semantic Analysis
-							1. Verify that both variables have been declared
-							2. Verify that the type of RHS and LHS is the same
-							3. Decide what to do if the types are different
-							4. The Main Outcome:
-								If all semantic checks passed, generate intermediate representation code
-								4.1 Write the external C program to generate IR code
-							5. For optimization, create a column in symbol table for "used" and set to false. Once used set to true
-							*/
+							// code optimization
+								// N/A
 
 							/*
 										VarDecl
 									INT        ID
 							*/
 				
-			} |	ID EQ NUMBER SEMICOLON	{ //printf("RECOGNIZED RULE: Basic Integer Variable declaration \n\n");
-							// WORKS	  
+			} |	ID EQ NUMBER SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Initialization \n\n");
 							
 							// semantic checks
-							// is the variable already declared
-							symTabAccess();
-							if (found($1,"G") == 0) { //if variable not declared yet
-								printf("::::> SYNTAX ERROR: Variable %s not initialized.\n",$1);
-								exit(0); // variable already declared
-							}
+								// is the variable already declared
+								symTabAccess();
+								if (found($1,"G") == 0) { //if variable not declared yet
+									printf("::::> SYNTAX ERROR: Variable %s not initialized.\n",$1);
+									exit(0); // variable already declared
+								}
 
-							// is the statement redundant
-							if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
-							// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
-								printf("ERROR: Variable %s has already been declared as: %s.\n\n",$1,$3);
-								exit(0);
-							}
+								// is the statement redundant
+								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
+									printf("ERROR: Variable %s has already been declared as: %s.\n\n",$1,$3);
+									exit(0);
+								}
 
 							// symbol table
 							updateValue($1, "G", $3); // update the value of whatever id is passed in
@@ -172,47 +171,58 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							// ir code
 							createConstantIntAssignment($1,$3);
 
+							// mips code
+							createMipsIntAssignment($1, $3);
+
+							// code optimization
+								// N/A
+
 							/*
 									=
 								ID    NUMBER
 							*/
 
 			} |	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
-							// WORKS
 
-							// symbol table
-							symTabAccess();
-							if (found($2,"G") == 1) {
-								exit(0); // variable already declalred
-							}
+							// semantic checks
+								// is the variable already declared?
+								symTabAccess();
+								if (found($2,"G") == 1) {
+									exit(0); // variable already declared
+								}
+
+							// symbol table	
 							addItem($2, "VAR", "CHR", 0, "G", 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
 							
-							//printf("-----------> %s\n", $$->LHS);
-							//printf("-----------> %s", $$->RHS);
+							// code optimization
+								// N/A
 
 							/*
 									VarDecl
 								CHAR	   ID
 							*/					
 			
-			} |	ID EQ CHARLITERAL SEMICOLON	  { //printf("RECOGNIZED RULE: Basic Charliteral Variable declaration \n\n");
-							// WORKS
+			} |	ID EQ CHARLITERAL SEMICOLON	  { printf("RECOGNIZED RULE: Char Variable Initialization \n\n");				
 
-							// semantic check in symbol table
-							symTabAccess();
-							if (found($1,"G") == 0) { //if variable not declared yet
-								printf("ERROR: Variable %s not initialized.\n",$1);
-								exit(0); // variable already declalred
-							}
+							// semantic checks
+								// is the variable already declared?
+								symTabAccess();
+								if (found($1,"G") == 0) { // if variable not declared yet
+									printf("ERROR: Variable %s not initialized.\n",$1);
+									exit(0); // variable already declared
+								}
 
 							// symbol table
 							updateValue($1, "G", $3);
 							
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
+
+							// code optimization
+								// N/A
 
 							/*
 									=
@@ -234,42 +244,64 @@ StmtList:	Expr
 Expr:	SEMICOLON {
 
 	} |	ID SEMICOLON	{ printf("RECOGNIZED RULE: Simplest Expression\n\n"); 
-		// WORKS
+		
 		// @EVAN: are we sure we can do this? no type?
 
 
 	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
-		// WORKS
 
-		//semantic check in symbol table
-		symTabAccess();
-		if (found($1,"G") == 0 || found($3,"G") == 0) { //if variable not declared yet
-			printf("ERROR: Variable %s or %s not initialized.\n",$1,$3);
-			exit(0); // variable already declalred
-		}
+		// semantic checks
+			// are both variables already declared?
+			symTabAccess();
+			printf("\n");
+			if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
+				printf("ERROR: Variable %s or %s not initialized.\n",$1,$3);
+				exit(0); // variable already declared
+			}
+
+			// are the id's both variables?
+			compareKinds($1, $3, "G");
+
+			// are the types of the id's the same
+			compareTypes($1, $3, "G");
+
 		// symbol table
 		updateValue($1, "G", getValue($3, "G"));
 
 		// ast
 		$$ = AST_BinaryExpression("=",$1,$3);
 
+		// ir code
+		createIDtoIDAssignment($1, $3);
+
+		// mips code
+		createMipsIDtoIDAssignment($1, $3, "G");
+
+		// code optimization
+			// mark the two id's as used
+			isUsed($1, "G");
+			isUsed($3, "G");
+
 
 	} |	WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: Write Statement\n\n"); 
-		// WORKS
 
-		// get id's value from symbol table
-		// getValue($2, "G");      used in ast code
+		// semantic checks
+			// is the id initialized as a value?
+			initialized($2, "G");
 
-		// semantic check: is the id initialized?
-		initialized($2, "G");
-		isUsed($2, "G");
+		// symbol table
+			// N/A
 
 		// ast
 		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
-		/*printf("TESTING AREA:::::::");
-		printf($$->nodeType);
-		printf($$->LHS);
-		printf($$->RHS);*/
+
+		// ir code
+		//createWriteId($2);
+
+		// code optimization
+			// mark the id as used
+			isUsed($2, "G");
+
 
 	}
 
@@ -284,8 +316,11 @@ int main(int argc, char**argv)
 */
 	printf("\n\n ###################### COMPILER STARTED ###################### \n\n");
 	
-	//initialize IR Code File
+	// initialize ir code file
 	initIRcodeFile();
+
+	// initialize mips code file
+	initAssemblyFile();
 	
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))

@@ -1,5 +1,4 @@
 #include <string.h>
-// ---- Functions to handle IR code emissions ---- //
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,12 +19,19 @@ void createBinaryOperation(char op[1], const char* id1, const char* id2){
     fclose(IRcode);
 }
 
-void createAssignment(char * id1, char * id2){
-  // This is the temporary approach, until temporary variables management is implemented
+void createIDtoIDAssignment(char * id1, char * id2) {
+    // e.g. x = y;
+    // This is the temporary approach, until temporary variables management is implemented
     FILE * IRcode;
-    fprintf(IRcode, "T0 = %s\n", id1);
-    fprintf(IRcode, "T1 = %s\n", id2);
-    fprintf(IRcode, "T1 = T0\n");
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID1;
+    int itemID2;
+    itemID1 = getItemID(id1);
+    itemID2 = getItemID(id2);
+
+    //fprintf(IRcode, "T%d = %s\n", itemID1, id1);
+    //fprintf(IRcode, "T%d = %s\n", itemID2, id2);
+    fprintf(IRcode, "T%d = T%d\n", itemID1, itemID2);
     fclose(IRcode);
 }
 
@@ -36,6 +42,7 @@ void createIntDefinition(char id[50]) {
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id);
+
     fprintf(IRcode, "T%d = %s\n", itemID, id);
     fclose(IRcode);
 }
@@ -47,11 +54,14 @@ void createConstantIntAssignment(char id[50], char num[50]){
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id);
+
     fprintf(IRcode, "T%d = %s\n", itemID, num);
     fclose(IRcode);
 }
 
-void createWriteId(char * id){
+void createWriteId(char id[50]){
+    // e.g. write x;
+
     FILE * IRcode;
     //fprintf (IRcode, "output %s\n", id); // This is the intent... :)
 
