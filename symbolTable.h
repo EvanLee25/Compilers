@@ -1,6 +1,7 @@
 
 //Symbol table header
 #include <string.h>
+#include <stdio.h>
 
 struct Entry
 {
