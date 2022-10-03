@@ -3,3 +3,4 @@ x = 5;
 int y;
 y = 9;
 write x;
+write y;

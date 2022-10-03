@@ -66,9 +66,18 @@ void createMipsIntDeclaration(char id[50]) {
 
 }
 
-void createMIPSWriteId(char * id){
+void createMIPSWriteId(char id[50]){
     
-    
+    MIPScode = fopen("MIPScode.asm", "a");
+    int itemID;
+
+    itemID = getItemID(id);
+
+    fprintf(MIPScode, "\nli $v0, 1\n");
+    fprintf(MIPScode, "move $a0, $t%d\n", itemID);
+    fprintf(MIPScode, "syscall\n");
+
+    fclose(MIPScode);
 
 }
 

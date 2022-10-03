@@ -4,3 +4,5 @@ T0 = x
 T0 = 5
 T1 = y
 T1 = 9
+output T0
+output T1

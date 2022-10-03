@@ -63,10 +63,10 @@ void createWriteId(char id[50]){
     // e.g. write x;
 
     FILE * IRcode;
-    //fprintf (IRcode, "output %s\n", id); // This is the intent... :)
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
 
-    // This is what needs to be printed, but must manage temporary variables
-    // We hardcode T2 for now, but you must implement a mechanism to tell you which one...
-    fprintf (IRcode, "output %s\n", "T2");
+    fprintf (IRcode, "output T%d\n", itemID);
     fclose(IRcode);
 }

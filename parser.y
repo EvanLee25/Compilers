@@ -296,7 +296,10 @@ Expr:	SEMICOLON {
 		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
 
 		// ir code
-		//createWriteId($2);
+		createWriteId($2);
+
+		// mips code
+		createMIPSWriteId($2);
 
 		// code optimization
 			// mark the id as used
