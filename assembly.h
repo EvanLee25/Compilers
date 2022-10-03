@@ -104,9 +104,9 @@ void createMIPSWriteChar(char id[50]){
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $v0, 11      # call code to print a single character\n");
+    fprintf(MIPScode, "\nli $v0, 11      # call code to print a single char\n");
     fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
-    fprintf(MIPScode, "syscall         # system call to print integer\n");
+    fprintf(MIPScode, "syscall         # system call to print char\n");
 
     fclose(MIPScode);
 
