@@ -2,7 +2,10 @@
 
 T0 = x
 T0 = 5
+output T0
 T1 = y
 T1 = 9
-output T0
 output T1
+T2 = z
+T2 = 768
+output T2

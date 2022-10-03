@@ -1,6 +1,9 @@
 int x;
 x = 5;
+write x;
 int y;
 y = 9;
-write x;
 write y;
+int z;
+z = 768;
+write z;

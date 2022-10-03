@@ -47,7 +47,7 @@ void createMipsIntAssignment (char id[50], char num[50]){
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "li $t%d, %s\n", itemID, num);
+    fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
 
     fclose(MIPScode);
 }
@@ -73,9 +73,9 @@ void createMIPSWriteId(char id[50]){
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $v0, 1\n");
-    fprintf(MIPScode, "move $a0, $t%d\n", itemID);
-    fprintf(MIPScode, "syscall\n");
+    fprintf(MIPScode, "\nli $v0, 1       # call code to print an integer\n");
+    fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
+    fprintf(MIPScode, "syscall         # system call to print integer\n");
 
     fclose(MIPScode);
 
@@ -85,10 +85,10 @@ void createEndOfAssemblyCode(){
 
     MIPScode = fopen("MIPScode.asm", "a");
 
-    fprintf(MIPScode, "# -----------------\n");
+    fprintf(MIPScode, "\n# ----------------------\n");
     fprintf(MIPScode, "#  done, terminate program.\n\n");
-    fprintf(MIPScode, "li $v0, 10   # call code for terminate\n");
-    fprintf(MIPScode, "syscall      # system call (terminate)\n");
+    fprintf(MIPScode, "li $v0, 10      # call code to terminate program\n");
+    fprintf(MIPScode, "syscall         # system call (terminate)\n");
     fprintf(MIPScode, ".end main\n");
     fclose(MIPScode);
 }
