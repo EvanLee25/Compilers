@@ -38,7 +38,9 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 	
 }
 
-void updateValue(char itemName[50], char scope[50], char value[50]) {
+char* getVariableType(char itemName[50], char scope[50]){
+	//char *name = "int";
+	//return name;
 
 	for(int i=0; i<symTabIndex+1; i++){
 		int str1 = strcmp(symTabItems[i].itemName, itemName); 
@@ -46,7 +48,34 @@ void updateValue(char itemName[50], char scope[50], char value[50]) {
 		int str2 = strcmp(symTabItems[i].scope, scope); 
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
+			return symTabItems[i].itemType;
+		}
+	}
+	return NULL;
+}
+
+void updateValue(char itemName[50], char scope[50], char value[50]) {
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		
+		// get variable type
+		char* type = getVariableType(itemName, scope);
+
+		// determine if its int or char
+		int isInt = strcmp(type, "INT");
+		int isChar = strcmp(type, "CHR");
+
+		if( str1 == 0 && str2 == 0 && isInt == 0){
 			strcpy(symTabItems[i].value, value); // update value in sym table
+		} else if ( str1 == 0 && str2 == 0 && isChar == 0) {
+			// remove apostrophes
+			char *result = value + 1; // removes first character
+    		result[strlen(result) - 1] = '\0'; // removes last character
+			strcpy(symTabItems[i].value, result); // update value in sym table
 		}
 	}
 
@@ -165,22 +194,6 @@ int initialized(char itemName[50], char scope[50]){
 	printf("::::> Syntax Error: Variable '%s' has not yet been declared.\n\n", itemName);
 	exit(0);
 	return 0;
-}
-
-char* getVariableType(char itemName[50], char scope[50]){
-	//char *name = "int";
-	//return name;
-
-	for(int i=0; i<symTabIndex+1; i++){
-		int str1 = strcmp(symTabItems[i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
-		int str2 = strcmp(symTabItems[i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
-		if( str1 == 0 && str2 == 0){
-			return symTabItems[i].itemType;
-		}
-	}
-	return NULL;
 }
 
 int compareTypes(char itemName1[50], char itemName2[50], char scope[50]){
