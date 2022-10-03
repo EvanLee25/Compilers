@@ -52,6 +52,22 @@ void createMipsIntAssignment (char id[50], char num[50]){
     fclose(MIPScode);
 }
 
+void createMipsCharAssignment (char id[50], char chr[50]) {
+    // e.g. x = 5;
+
+    MIPScode = fopen("MIPScode.asm", "a");
+    int itemID;
+
+    itemID = getItemID(id);
+
+    // the char takes the first apostrophe for some reason, need to remove this
+    char *result = chr + 1; // removes first character
+
+    fprintf(MIPScode, "\nli $t%d, '%s'     # load the value of %s into $t%d\n", itemID, result, id, itemID);
+
+    fclose(MIPScode);
+}
+
 void createMipsIntDeclaration(char id[50]) {
     // e.g. int x;
 
@@ -66,7 +82,7 @@ void createMipsIntDeclaration(char id[50]) {
 
 }
 
-void createMIPSWriteId(char id[50]){
+void createMIPSWriteInt(char id[50]){
     
     MIPScode = fopen("MIPScode.asm", "a");
     int itemID;
@@ -74,6 +90,21 @@ void createMIPSWriteId(char id[50]){
     itemID = getItemID(id);
 
     fprintf(MIPScode, "\nli $v0, 1       # call code to print an integer\n");
+    fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
+    fprintf(MIPScode, "syscall         # system call to print integer\n");
+
+    fclose(MIPScode);
+
+}
+
+void createMIPSWriteChar(char id[50]){
+    
+    MIPScode = fopen("MIPScode.asm", "a");
+    int itemID;
+
+    itemID = getItemID(id);
+
+    fprintf(MIPScode, "\nli $v0, 11      # call code to print a single character\n");
     fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
     fprintf(MIPScode, "syscall         # system call to print integer\n");
 

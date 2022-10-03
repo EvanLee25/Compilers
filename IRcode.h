@@ -4,16 +4,17 @@
 #include <string.h>
 #include <unistd.h>
 
+FILE * IRcode;
 
 void  initIRcodeFile(){
-    FILE * IRcode;
+    
     IRcode = fopen("IRcode.ir", "w");
     fprintf(IRcode, "#### IR Code ####\n\n");
     fclose(IRcode);
 }
 
 void createBinaryOperation(char op[1], const char* id1, const char* id2){
-    FILE * IRcode;
+    
     IRcode = fopen("IRcode.ir", "a");
     fprintf(IRcode, "T1 = %s %s %s", id1, op, id2);
     fclose(IRcode);
@@ -22,7 +23,7 @@ void createBinaryOperation(char op[1], const char* id1, const char* id2){
 void createIDtoIDAssignment(char * id1, char * id2) {
     // e.g. x = y;
     // This is the temporary approach, until temporary variables management is implemented
-    FILE * IRcode;
+    
     IRcode = fopen("IRcode.ir", "a");
     int itemID1;
     int itemID2;
@@ -37,8 +38,7 @@ void createIDtoIDAssignment(char * id1, char * id2) {
 
 void createIntDefinition(char id[50]) {
     // e.g int x;
-
-    FILE * IRcode;
+    
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id);
@@ -47,10 +47,20 @@ void createIntDefinition(char id[50]) {
     fclose(IRcode);
 }
 
-void createConstantIntAssignment(char id[50], char num[50]){
-    // e.g. x = 5;
+void createCharDefinition(char id[50]) {
+    // e.g char a;
 
-    FILE * IRcode;
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
+
+    fprintf(IRcode, "T%d = %s\n", itemID, id);
+    fclose(IRcode);
+}
+
+void createIntAssignment(char id[50], char num[50]){
+    // e.g. x = 5;
+  
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id);
@@ -59,10 +69,24 @@ void createConstantIntAssignment(char id[50], char num[50]){
     fclose(IRcode);
 }
 
+void createCharAssignment(char id[50], char chr[50]){
+    // e.g. a = 'h';
+  
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
+
+    // remove the apostrophes from the char
+    char *result = chr + 1; // removes first character
+    result[strlen(result) - 1] = '\0'; // removes last character
+
+    fprintf(IRcode, "T%d = %s\n", itemID, result);
+    fclose(IRcode);
+}
+
 void createWriteId(char id[50]){
     // e.g. write x;
-
-    FILE * IRcode;
+  
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id);

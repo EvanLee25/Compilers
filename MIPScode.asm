@@ -9,16 +9,16 @@ li $v0, 1       # call code to print an integer
 move $a0, $t0   # move the value of x into $a0
 syscall         # system call to print integer
 
-li $t1, 9       # load the value of y into $t1
+li $t1, 91       # load the value of y into $t1
 
 li $v0, 1       # call code to print an integer
 move $a0, $t1   # move the value of y into $a0
 syscall         # system call to print integer
 
-li $t2, 768       # load the value of z into $t2
+li $t2, 'h'     # load the value of a into $t2
 
-li $v0, 1       # call code to print an integer
-move $a0, $t2   # move the value of z into $a0
+li $v0, 11      # call code to print a single character
+move $a0, $t2   # move the value of a into $a0
 syscall         # system call to print integer
 
 # ----------------------

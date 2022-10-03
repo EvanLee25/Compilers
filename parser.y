@@ -104,8 +104,7 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 		// ast
 		$$ = $1;
 
-}
-	| StmtList { printf("\nDecl -> StmtList \n");
+	} | StmtList { printf("\nDecl -> StmtList \n");
 		// ast
 		$$ = $1;
 
@@ -169,7 +168,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							$$ = AST_BinaryExpression("=",$1,$3);
 
 							// ir code
-							createConstantIntAssignment($1,$3);
+							createIntAssignment($1,$3);
 
 							// mips code
 							createMipsIntAssignment($1, $3);
@@ -196,6 +195,9 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
+
+							// ir code
+							createCharDefinition($2);
 							
 							// code optimization
 								// N/A
@@ -220,6 +222,12 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
+
+							// ir code
+							createCharAssignment($1, $3);
+
+							// mips code
+							createMipsCharAssignment($1, $3);
 
 							// code optimization
 								// N/A
@@ -299,7 +307,19 @@ Expr:	SEMICOLON {
 		createWriteId($2);
 
 		// mips code
-		createMIPSWriteId($2);
+			// get the type of the variable
+			char* type = getVariableType($2, "G");
+
+			// determine if its int or char
+			int isInt = strcmp(type, "INT");
+			int isChar = strcmp(type, "CHR");
+
+			// run correct mips function according to type
+			if (isInt == 0) { // if the variable is an integer
+				createMIPSWriteInt($2);
+			} else if (isChar == 0) { // if the variable is a char
+				createMIPSWriteChar($2);
+			}
 
 		// code optimization
 			// mark the id as used
