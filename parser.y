@@ -69,7 +69,7 @@ char currentScope[50]; /* global or the name of the function */
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Expr
+%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQ AddExpr
 
 %start Program
 
@@ -326,7 +326,50 @@ Expr:	SEMICOLON {
 			isUsed($2, "G");
 
 
+	} | IDEQ SEMICOLON { printf("RECOGNIZED RULE: Addition Statement\n\n"); 
+
+		// ast
+		$$ = $1;
+
+		
+
 	}
+
+
+
+IDEQ: ID EQ AddExpr {
+
+	// ast
+	// TODO: EVAN
+	//$$ = AST_assignment("=", $1, calculate($3));
+	// remove plus signs and spaces
+	// add remaining chars
+
+	} | ID EQ AddExpr {
+
+
+
+}
+	
+
+AddExpr:	  NUMBER PLUS_OP AddExpr {
+
+
+
+			} | ID PLUS_OP AddExpr {
+
+				
+
+			} | NUMBER {
+
+				
+
+			} | ID {
+
+
+
+}
+
 
 %%
 
