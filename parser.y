@@ -341,7 +341,12 @@ IDEQ: ID EQ AddExpr {
 
 	// ast
 	// TODO: EVAN
-	//$$ = AST_assignment("=", $1, calculate($3));
+	// TURN AddExpr INTO A STRING
+	
+	temp = calculate();
+	wipeArrays();
+	$$ = AST_assignment("=", $1, temp);
+	
 	// remove plus signs and spaces
 	// add remaining chars
 
@@ -354,19 +359,21 @@ IDEQ: ID EQ AddExpr {
 
 AddExpr:	  NUMBER PLUS_OP AddExpr {
 
-
+				addToNumArray($1);
+				addToOpArray($2);
 
 			} | ID PLUS_OP AddExpr {
 
-				
+				addToNumArray($1);
+				addToOpArray($2);
 
 			} | NUMBER {
 
-				
+				addToNumArray($1);
 
 			} | ID {
 
-
+				addToNumArray($1);
 
 }
 
