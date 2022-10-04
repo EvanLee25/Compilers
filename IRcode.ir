@@ -9,3 +9,9 @@ output T1
 T2 = a
 T2 = h
 output T2
+T3 = var1
+T3 = 7
+output T3
+T4 = chr1
+T4 = k
+output T4

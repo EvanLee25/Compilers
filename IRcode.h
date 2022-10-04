@@ -6,7 +6,7 @@
 
 FILE * IRcode;
 
-void  initIRcodeFile(){
+void initIRcodeFile(){
     
     IRcode = fopen("IRcode.ir", "w");
     fprintf(IRcode, "#### IR Code ####\n\n");
@@ -78,7 +78,6 @@ void createCharAssignment(char id[50], char chr[50]){
 
     // remove the apostrophes from the char
     char *result = chr + 1; // removes first character
-    result[strlen(result) - 1] = '\0'; // removes last character
 
     fprintf(IRcode, "T%d = %s\n", itemID, result);
     fclose(IRcode);
