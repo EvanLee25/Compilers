@@ -143,14 +143,14 @@ char* getValue(char itemName[50], char scope[50]) {
 }
 
 void showSymTable(){
-	printf("itemID    itemName    itemKind    itemType     ArrayLength    itemScope    isUsed    value\n");
-	printf("-------------------------------------------------------------------------------------------\n");
+	printf("itemID    itemName    itemKind    itemType    itemScope    isUsed    value\n");
+	printf("----------------------------------------------------------------------------\n");
 	for (int i=0; i<symTabIndex; i++){
-		printf("%5d %8s  %11s  %10s %12d %15s %9i %9s\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].arrayLength, symTabItems[i].scope, symTabItems[i].isUsed, symTabItems[i].value);
+		printf("%3d %11s  %11s  %10s %11s %10i %9s\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].scope, symTabItems[i].isUsed, symTabItems[i].value);
 	}
 	
 
-	printf("-------------------------------------------------------------------------------------------\n");
+	printf("----------------------------------------------------------------------------\n");
 }
 
 int found(char itemName[50], char scope[50]){
