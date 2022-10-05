@@ -72,9 +72,8 @@ int calculate() {
         //printf("\n%d\n", numArray[i]); // debug
         sum = sum + numArray[i];
     }
-    printf("\n%d\n", sum);
 
-    numCounter = 0;
+    printf("\nCalculation Completed, Total = %d.\n", sum);
 
     return sum;
 
@@ -82,8 +81,17 @@ int calculate() {
 
 void wipeArrays() {
 
-    //memset(numArray, 0, numCounter);
-    //memset(opArray, 0, opCounter);
-    //counter = 0;
+    for (int i = 0; i < numCounter; i++) {
+        //printf("\n\nbefore: %d\n\n", numArray[i]); // debug
+        numArray[i] = 0;
+        //printf("\n\nafter: %d\n\n", numArray[i]); // debug
+    }
+    for (int i = 0; i < opCounter; i++) {
+        opArray[i] = ' ';
+    }
+    printf("\nNumber Array & Operator Array Wiped.\n\n");
+
+    numCounter = 0;
+    opCounter = 0;
 
 }

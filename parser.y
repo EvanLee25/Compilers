@@ -343,13 +343,19 @@ IDEQ: ID EQ AddExpr {
 	// TODO: EVAN
 	// TURN AddExpr INTO A STRING
 
-	// turn the integer returned from calculate() into a string
-	char total[50];
-	sprintf(total, "%d", calculate());
-	printf("\n\ntotal: %s\n\n", total);
+	// calculations
+		// turn the integer returned from calculate() into a string
+		char total[50];
+		sprintf(total, "%d", calculate());
+
+		// wipe the arrays
+		wipeArrays();
+
+	// symbol table
+	updateValue($1, "G", total);
 		
 	// ast
-	$$ = AST_BinaryExpression("=", $1, total);
+	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));
 	
 	// remove plus signs and spaces
 	// add remaining chars

@@ -1,7 +1,5 @@
 int x;
 x = 5;
-write x;
 int y;
 y = 7;
-write y;
-x = y + 12 + 3 + 6;
+x = y + 8;
