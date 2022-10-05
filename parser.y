@@ -112,6 +112,9 @@ Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
 
 };
 
+StmtList:	 Expr StmtList {$1->left = $2; $$ = $1;}
+			| Expr {}
+;
 
 /*----start vardecl-----------------------------------------------------------------------------------------------------*/
 
@@ -247,10 +250,6 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
   
 
 
-StmtList:	Expr {$$ = $1;}
-	| Expr StmtList {$1->left = $2; $$ = $1;}
-;
-
 Expr:	SEMICOLON {
 
 	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
@@ -354,7 +353,7 @@ IDEQExpr: ID EQ AddExpr {
 		
 	// ast
 	//$$->left = AST_BinaryExpression("Expr", $1, $2);
-	$$->right = AST_BinaryExpression("=", $1, getValue($1, "G"));
+	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));
 	
 	// remove plus signs and spaces
 	// add remaining chars

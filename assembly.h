@@ -50,6 +50,7 @@ void createMIPSIntAssignment (char id[50], char num[50]){
     fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
 
     fclose(MIPScode);
+
 }
 
 void createMIPSCharAssignment (char id[50], char chr[50]) {
