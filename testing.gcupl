@@ -5,3 +5,14 @@ y = 7;
 write x;
 x = y + 8;
 write x;
+x = 14;
+write x;
+x = 88;
+write x;
+int z;
+z = 12;
+write z;
+int k;
+write x;
+write y;
+/*lines 6-11 dont work. var decl resets and makes work*/

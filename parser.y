@@ -71,7 +71,7 @@ char currentScope[50]; /* global or the name of the function */
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQ AddExpr
+%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQExpr AddExpr
 
 %start Program
 
@@ -247,16 +247,11 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
   
 
 
-StmtList:	Expr
-	| Expr StmtList
+StmtList:	Expr {$$ = $1;}
+	| Expr StmtList {$1->left = $2; $$ = $1;}
 ;
 
 Expr:	SEMICOLON {
-
-	} |	ID SEMICOLON	{ printf("RECOGNIZED RULE: Simplest Expression\n\n"); 
-		
-		// @EVAN: are we sure we can do this? no type?
-
 
 	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
 
@@ -328,7 +323,7 @@ Expr:	SEMICOLON {
 			isUsed($2, "G");
 
 
-	} | IDEQ SEMICOLON { printf("RECOGNIZED RULE: Addition Statement\n\n"); 
+	} | IDEQExpr SEMICOLON { printf("RECOGNIZED RULE: Addition Statement\n\n"); 
 
 		// ast
 		$$ = $1;
@@ -337,7 +332,7 @@ Expr:	SEMICOLON {
 
 
 
-IDEQ: ID EQ AddExpr {
+IDEQExpr: ID EQ AddExpr {
 
 	// ast
 	// TODO: EVAN
@@ -358,14 +353,11 @@ IDEQ: ID EQ AddExpr {
 	createMIPSAddition($1, getValue($1, "G"));
 		
 	// ast
-	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));
+	//$$->left = AST_BinaryExpression("Expr", $1, $2);
+	$$->right = AST_BinaryExpression("=", $1, getValue($1, "G"));
 	
 	// remove plus signs and spaces
 	// add remaining chars
-
-	} | ID EQ AddExpr {
-
-
 
 }
 	
