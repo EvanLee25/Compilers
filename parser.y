@@ -136,7 +136,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							createIntDefinition($2);
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
-							//createMipsIntDeclaration($2);
+							//createMIPSIntDeclaration($2);
 							
 							// code optimization
 								// N/A
@@ -173,7 +173,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							createIntAssignment($1,$3);
 
 							// mips code
-							createMipsIntAssignment($1, $3);
+							createMIPSIntAssignment($1, $3);
 
 							// code optimization
 								// N/A
@@ -229,7 +229,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 							createCharAssignment($1, $3);
 
 							// mips code
-							createMipsCharAssignment($1, $3);
+							createMIPSCharAssignment($1, $3);
 
 							// code optimization
 								// N/A
@@ -285,7 +285,7 @@ Expr:	SEMICOLON {
 		createIDtoIDAssignment($1, $3);
 
 		// mips code
-		createMipsIDtoIDAssignment($1, $3, "G");
+		createMIPSIDtoIDAssignment($1, $3, "G");
 
 		// code optimization
 			// mark the two id's as used
@@ -343,7 +343,7 @@ IDEQ: ID EQ AddExpr {
 	// TODO: EVAN
 	// TURN AddExpr INTO A STRING
 
-	// calculations
+	// calculations: code optimization
 		// turn the integer returned from calculate() into a string
 		char total[50];
 		sprintf(total, "%d", calculate());
@@ -353,6 +353,9 @@ IDEQ: ID EQ AddExpr {
 
 	// symbol table
 	updateValue($1, "G", total);
+
+	// mips code
+	createMIPSAddition($1, getValue($1, "G"));
 		
 	// ast
 	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));

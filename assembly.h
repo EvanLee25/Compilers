@@ -18,7 +18,7 @@ void  initAssemblyFile(){
 
 }
 
-void createMipsIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
+void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     // e.g. x = y;
 
     MIPScode = fopen("MIPScode.asm", "a");
@@ -39,7 +39,7 @@ void createMipsIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     fclose(MIPScode);
 }
 
-void createMipsIntAssignment (char id[50], char num[50]){
+void createMIPSIntAssignment (char id[50], char num[50]){
     // e.g. x = 5;
 
     MIPScode = fopen("MIPScode.asm", "a");
@@ -52,7 +52,7 @@ void createMipsIntAssignment (char id[50], char num[50]){
     fclose(MIPScode);
 }
 
-void createMipsCharAssignment (char id[50], char chr[50]) {
+void createMIPSCharAssignment (char id[50], char chr[50]) {
     // e.g. x = 5;
 
     MIPScode = fopen("MIPScode.asm", "a");
@@ -68,7 +68,7 @@ void createMipsCharAssignment (char id[50], char chr[50]) {
     fclose(MIPScode);
 }
 
-void createMipsIntDeclaration(char id[50]) {
+void createMIPSIntDeclaration(char id[50]) {
     // e.g. int x;
 
     MIPScode = fopen("MIPScode.asm", "a");
@@ -107,6 +107,21 @@ void createMIPSWriteChar(char id[50]){
     fprintf(MIPScode, "\nli $v0, 11      # call code to print a single char\n");
     fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
     fprintf(MIPScode, "syscall         # system call to print char\n");
+
+    fclose(MIPScode);
+
+}
+
+void createMIPSAddition(char id[50], char num[50]) {
+    // e.g. x = 5 + y + 7 + 12;
+    // this calculation is optimized to be done in the parser, so this is just another integer assignment
+
+    MIPScode = fopen("MIPScode.asm", "a");
+    int itemID;
+
+    itemID = getItemID(id);
+
+    fprintf(MIPScode, "\nli $t%d, %s       # load the added value of %s into $t%d\n", itemID, num, id, itemID);
 
     fclose(MIPScode);
 

@@ -2,4 +2,6 @@ int x;
 x = 5;
 int y;
 y = 7;
+write x;
 x = y + 8;
+write x;
