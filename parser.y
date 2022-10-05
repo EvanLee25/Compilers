@@ -4,11 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "symbolTable.h"
 #include "AST.h"
 #include "IRcode.h"
 #include "assembly.h"
+#include "calculator.h"
 
 
 extern int yylex();
@@ -331,8 +333,6 @@ Expr:	SEMICOLON {
 		// ast
 		$$ = $1;
 
-		
-
 	}
 
 
@@ -342,10 +342,14 @@ IDEQ: ID EQ AddExpr {
 	// ast
 	// TODO: EVAN
 	// TURN AddExpr INTO A STRING
-	
-	temp = calculate();
-	wipeArrays();
-	$$ = AST_assignment("=", $1, temp);
+
+	// turn the integer returned from calculate() into a string
+	char total[50];
+	sprintf(total, "%d", calculate());
+	printf("\n\ntotal: %s\n\n", total);
+		
+	// ast
+	$$ = AST_BinaryExpression("=", $1, total);
 	
 	// remove plus signs and spaces
 	// add remaining chars
@@ -364,7 +368,7 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 			} | ID PLUS_OP AddExpr {
 
-				addToNumArray($1);
+				addToNumArray(getValue($1, "G"));
 				addToOpArray($2);
 
 			} | NUMBER {
@@ -373,7 +377,7 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 			} | ID {
 
-				addToNumArray($1);
+				addToNumArray(getValue($1, "G"));
 
 }
 
