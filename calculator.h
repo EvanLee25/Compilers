@@ -66,11 +66,10 @@ int calculate() {
     revIntArray(numArray, numCounter);
     //revCharArray(opArray, opCounter);
 
-    int temp;
     int sum = 0;
     
     for (int i = 0; i < numCounter; i++) { 
-        //printf("\n%d\n", numArray[i]);
+        //printf("\n%d\n", numArray[i]); // debug
         sum = sum + numArray[i];
     }
     printf("\n%d\n", sum);
