@@ -2,6 +2,7 @@
 //Symbol table header
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 struct Entry
 {
@@ -33,6 +34,7 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 		symTabItems[symTabIndex].arrayLength = arrayLength;
 		strcpy(symTabItems[symTabIndex].scope, scope);
 		symTabItems[symTabIndex].isUsed = isUsed;
+		strcpy(symTabItems[symTabIndex].value, "NULL");
 		symTabIndex++;
 		printf("::::> Item added to the Symbol Table.\n");
 	
@@ -179,6 +181,7 @@ int initialized(char itemName[50], char scope[50]){
 	// what about scope?
 	// return TRUE or FALSE
 	// Later on, you may want to return additional information
+	char val[50];
 
 	// Dirty loop, becuase it counts SYMTAB_SIZE times, no matter the size of the symbol table
 	for(int i=0; i<symTabIndex+1; i++){
@@ -186,12 +189,16 @@ int initialized(char itemName[50], char scope[50]){
 		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[i].scope,scope); 
 		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
-		if( str1 == 0 && str2 == 0){
-			printf("::::> Variable '%s' is declared.\n\n", itemName);
-			return 1; // found the ID in the table
+		int str3 = strcmp(symTabItems[i].value, "NULL");
+
+		if(str1 == 0 && str2 == 0){
+			if (str3 != 0) {
+				printf("::::> Variable '%s' is assigned to a value.\n\n", itemName);
+				return 1; // found the ID in the table
+			}
 		}
 	}
-	printf("::::> Syntax Error: Variable '%s' has not yet been declared.\n\n", itemName);
+	printf("::::> Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n", itemName);
 	exit(0);
 	return 0;
 }

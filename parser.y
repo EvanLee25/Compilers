@@ -259,9 +259,12 @@ Expr:	SEMICOLON {
 			symTabAccess();
 			printf("\n");
 			if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
-				printf("ERROR: Variable %s or %s not initialized.\n",$1,$3);
+				printf("ERROR: Variable %s or %s not declared.\n",$1,$3);
 				exit(0); // variable already declared
 			}
+
+			// does the second id have a value?
+			initialized($3, "G");
 
 			// are the id's both variables?
 			compareKinds($1, $3, "G");
@@ -337,6 +340,9 @@ IDEQExpr: ID EQ AddExpr {
 	// TODO: EVAN
 	// TURN AddExpr INTO A STRING
 
+	// semantic checks
+		// inside AddExpr
+
 	// calculations: code optimization
 		// turn the integer returned from calculate() into a string
 		char total[50];
@@ -347,16 +353,15 @@ IDEQExpr: ID EQ AddExpr {
 
 	// symbol table
 	updateValue($1, "G", total);
+		
+	// ast
+	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));
+
+	// ir code
+	createIntAssignment($1, total);
 
 	// mips code
 	createMIPSAddition($1, getValue($1, "G"));
-		
-	// ast
-	//$$->left = AST_BinaryExpression("Expr", $1, $2);
-	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));
-	
-	// remove plus signs and spaces
-	// add remaining chars
 
 }
 	
@@ -368,15 +373,26 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 			} | ID PLUS_OP AddExpr {
 
+				// semantic checks
+					// does the id have a value?
+					initialized($1, "G");
+
+				// add to number array
 				addToNumArray(getValue($1, "G"));
 				addToOpArray($2);
 
 			} | NUMBER {
 
+				// add to number array
 				addToNumArray($1);
 
 			} | ID {
 
+				// semantic checks
+					// does the id have a value?
+					initialized($1, "G");
+
+				// add to number array
 				addToNumArray(getValue($1, "G"));
 
 }
