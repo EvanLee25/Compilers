@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 struct Entry
 {
 	int itemID;
@@ -36,7 +40,7 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 		symTabItems[symTabIndex].isUsed = isUsed;
 		strcpy(symTabItems[symTabIndex].value, "NULL");
 		symTabIndex++;
-		printf("::::> Item added to the Symbol Table.\n");
+		printf(ANSI_COLOR_GREEN "::::> Item added to the Symbol Table.\n" ANSI_COLOR_RESET);
 	
 }
 
@@ -172,7 +176,7 @@ int found(char itemName[50], char scope[50]){
 			return 1; // found the ID in the table
 		}
 	}
-	printf("::::> Variable name is original.\n");
+	printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Variable name is not already used.\n" ANSI_COLOR_RESET);
 	return 0;
 }
 
@@ -193,12 +197,12 @@ int initialized(char itemName[50], char scope[50]){
 
 		if(str1 == 0 && str2 == 0){
 			if (str3 != 0) {
-				printf("::::> Variable '%s' is assigned to a value.\n\n", itemName);
+				printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Variable '%s' is assigned to a value.\n" ANSI_COLOR_RESET, itemName);
 				return 1; // found the ID in the table
 			}
 		}
 	}
-	printf("::::> Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n", itemName);
+	printf(ANSI_COLOR_RED "::::> CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" ANSI_COLOR_RESET, itemName);
 	exit(0);
 	return 0;
 }
@@ -210,11 +214,11 @@ int compareTypes(char itemName1[50], char itemName2[50], char scope[50]){
 	
 	int typeMatch = strcmp(idType1, idType2);
 	if(typeMatch == 0){
-		printf("::::> Types are the same: %s = %s\n\n", idType1, idType2);
+		printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Types are the same: %s = %s\n\n" ANSI_COLOR_RESET, idType1, idType2);
 		return 1; // types are matching
 	}
 	else {
-		printf("::::> Types are not the same: %s = %s\n\n", idType1, idType2);
+		printf(ANSI_COLOR_RED "::::> CHECK FAILED: Types are not the same: %s = %s\n\n" ANSI_COLOR_RESET, idType1, idType2);
 		exit(0); // types are not matching
 		return 0;
 	}
@@ -243,11 +247,11 @@ int compareKinds(char itemName1[50], char itemName2[50], char scope[50]){
 	
 	int kindMatch = strcmp(idKind1, idKind2);
 	if(kindMatch == 0){
-		printf("::::> Kinds are the same: %s = %s\n\n", idKind1, idKind2);
+		printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Kinds are the same: %s = %s\n\n" ANSI_COLOR_RESET, idKind1, idKind2);
 		return 1; // kinds are matching
 	}
 	else {
-		printf("::::> Kinds are not the same: %s = %s\n\n", idKind1, idKind2);
+		printf(ANSI_COLOR_RED "::::> CHECK FAILED: Kinds are not the same: %s = %s\n\n" ANSI_COLOR_RESET, idKind1, idKind2);
 		exit(0); // kinds are not matching
 		return 0;
 	}
