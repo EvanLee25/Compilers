@@ -131,7 +131,7 @@ void createEndOfAssemblyCode(){
 
     MIPScode = fopen("MIPScode.asm", "a");
 
-    fprintf(MIPScode, "\n# ----------------------\n");
+    fprintf(MIPScode, "\n# -----------------------\n");
     fprintf(MIPScode, "#  done, terminate program.\n\n");
     fprintf(MIPScode, "li $v0, 10      # call code to terminate program\n");
     fprintf(MIPScode, "syscall         # system call (terminate)\n");
