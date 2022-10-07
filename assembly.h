@@ -7,9 +7,8 @@
 FILE * MIPScode;
 
 void  initAssemblyFile(){
-    // Creates a MIPS file with a generic header that needs to be in every file       
+         
     MIPScode = fopen("MIPScode.asm", "w");
-    
     fprintf(MIPScode, ".globl main\n");
     fprintf(MIPScode, ".text\n");
     fprintf(MIPScode, "main:\n");

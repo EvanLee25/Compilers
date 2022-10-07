@@ -4,15 +4,26 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
+#define GREEN   "\x1b[32m"
+#define BGREEN  "\x1b[1;32m"
+#define RED     "\x1b[1;31m"
+#define ORANGE 	"\x1b[33m"
+#define BORANGE "\x1b[1;33m"
+#define PINK	"\x1b[95m"
+#define BPINK	"\x1b[1;95m"
+#define BLUE    "\x1b[34m"
+#define BBLUE   "\x1b[1;94m"
+#define BCYAN	"\x1b[1;96m"
+#define BYELLOW "\x1b[1;103m"
+#define GRAY	"\x1b[90m"
+#define BOLD	"\e[1;37m"
+#define RESET   "\x1b[0m"
 
 struct Entry
 {
 	int itemID;
-	char itemName[50];  //the name of the identifier
-	char itemKind[8];  //is it a function or a variable?
+	char itemName[50];  // the name of the identifier
+	char itemKind[8];  // is it a function or a variable?
 	char itemType[8];  // Is it int, char, etc.?
 	int arrayLength;
 	char scope[50];     // global, or the name of the function
@@ -25,7 +36,7 @@ int symTabIndex = 0;
 int SYMTAB_SIZE = 20;
 
 void symTabAccess(void) {
-	printf("::::> Symbol Table accessed.\n");
+	printf(GREEN "::::> Symbol Table accessed.\n" RESET);
 }
 
 void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLength, char scope[50], int isUsed){
@@ -40,7 +51,7 @@ void addItem(char itemName[50], char itemKind[8], char itemType[8], int arrayLen
 		symTabItems[symTabIndex].isUsed = isUsed;
 		strcpy(symTabItems[symTabIndex].value, "NULL");
 		symTabIndex++;
-		printf(ANSI_COLOR_GREEN "::::> Item added to the Symbol Table.\n" ANSI_COLOR_RESET);
+		printf(GREEN "::::> Item added to the Symbol Table.\n" RESET);
 	
 }
 
@@ -149,14 +160,23 @@ char* getValue(char itemName[50], char scope[50]) {
 }
 
 void showSymTable(){
-	printf("itemID    itemName    itemKind    itemType    itemScope    isUsed    value\n");
-	printf("----------------------------------------------------------------------------\n");
+	printf(BOLD "itemID    itemName    itemKind    itemType    itemScope    isUsed    value\n" RESET);
+	printf(BOLD "----------------------------------------------------------------------------\n" RESET);
 	for (int i=0; i<symTabIndex; i++){
-		printf("%3d %11s  %11s  %10s %11s %10i %9s\n",symTabItems[i].itemID, symTabItems[i].itemName, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].scope, symTabItems[i].isUsed, symTabItems[i].value);
+		printf(BOLD "%3d " RESET, symTabItems[i].itemID);
+		printf(BORANGE "%11s  " RESET, symTabItems[i].itemName);
+		printf(BOLD "%11s  %10s %11s %10i " RESET, symTabItems[i].itemKind, symTabItems[i].itemType, symTabItems[i].scope, symTabItems[i].isUsed);
+		
+		// if value is null print gray
+		if (strcmp(symTabItems[i].value, "NULL") == 0) {
+			printf(GRAY "%9s\n" RESET, symTabItems[i].value);
+		} else {
+			printf(BORANGE "%9s\n" RESET, symTabItems[i].value);
+		}
 	}
 	
 
-	printf("----------------------------------------------------------------------------\n");
+	printf(BOLD "----------------------------------------------------------------------------\n" RESET);
 }
 
 int found(char itemName[50], char scope[50]){
@@ -176,7 +196,7 @@ int found(char itemName[50], char scope[50]){
 			return 1; // found the ID in the table
 		}
 	}
-	printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Variable name is not already used.\n" ANSI_COLOR_RESET);
+	printf(BGREEN "::::> CHECK PASSED: Variable name is not already used.\n" RESET);
 	return 0;
 }
 
@@ -197,12 +217,12 @@ int initialized(char itemName[50], char scope[50]){
 
 		if(str1 == 0 && str2 == 0){
 			if (str3 != 0) {
-				printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Variable '%s' is assigned to a value.\n" ANSI_COLOR_RESET, itemName);
+				printf(BGREEN "::::> CHECK PASSED: Variable '%s' is assigned to a value.\n\n" RESET, itemName);
 				return 1; // found the ID in the table
 			}
 		}
 	}
-	printf(ANSI_COLOR_RED "::::> CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" ANSI_COLOR_RESET, itemName);
+	printf(RED "::::> CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" RESET, itemName);
 	exit(0);
 	return 0;
 }
@@ -214,11 +234,11 @@ int compareTypes(char itemName1[50], char itemName2[50], char scope[50]){
 	
 	int typeMatch = strcmp(idType1, idType2);
 	if(typeMatch == 0){
-		printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Types are the same: %s = %s\n\n" ANSI_COLOR_RESET, idType1, idType2);
+		printf(BGREEN "::::> CHECK PASSED: Types are the same: %s = %s\n\n" RESET, idType1, idType2);
 		return 1; // types are matching
 	}
 	else {
-		printf(ANSI_COLOR_RED "::::> CHECK FAILED: Types are not the same: %s = %s\n\n" ANSI_COLOR_RESET, idType1, idType2);
+		printf(RED "::::> CHECK FAILED: Types are not the same: %s = %s\n\n" RESET, idType1, idType2);
 		exit(0); // types are not matching
 		return 0;
 	}
@@ -247,11 +267,11 @@ int compareKinds(char itemName1[50], char itemName2[50], char scope[50]){
 	
 	int kindMatch = strcmp(idKind1, idKind2);
 	if(kindMatch == 0){
-		printf(ANSI_COLOR_GREEN "::::> CHECK PASSED: Kinds are the same: %s = %s\n\n" ANSI_COLOR_RESET, idKind1, idKind2);
+		printf(BGREEN "::::> CHECK PASSED: Kinds are the same: %s = %s\n\n" RESET, idKind1, idKind2);
 		return 1; // kinds are matching
 	}
 	else {
-		printf(ANSI_COLOR_RED "::::> CHECK FAILED: Kinds are not the same: %s = %s\n\n" ANSI_COLOR_RESET, idKind1, idKind2);
+		printf(RED "::::> CHECK FAILED: Kinds are not the same: %s = %s\n\n" RESET, idKind1, idKind2);
 		exit(0); // kinds are not matching
 		return 0;
 	}

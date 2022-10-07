@@ -73,7 +73,9 @@ int calculate() {
         sum = sum + numArray[i];
     }
 
-    printf("\nCalculation Completed, Total = %d.\n", sum);
+    printf(GREEN "Calculation Completed, Total = " RESET);
+    printf(BOLD "%d" RESET, sum);
+    printf(GRAY ".\n" RESET);
 
     return sum;
 
@@ -89,7 +91,7 @@ void wipeArrays() {
     for (int i = 0; i < opCounter; i++) {
         opArray[i] = ' ';
     }
-    printf("\nNumber Array & Operator Array Wiped.\n\n");
+    printf(GREEN "Number Array & Operator Array Wiped.\n" RESET);
 
     numCounter = 0;
     opCounter = 0;

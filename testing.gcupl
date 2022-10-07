@@ -1,31 +1,12 @@
 int x;
-x = 5;
 int y;
-y = 7;
 int z;
-int k;
-write x;
-x = y+8;
-write x;
-x = 14;
-write x;
-x = 88;
-write x;
-z = 12;
-write z;
-write x;
-write y;
-
-/* THIS WORKS IDK WHY
-int x;
-x = 5;
-int y;
+int w;
+char a;
+char b;
 y = 10;
-int z;
-z = 15;
-write x;
-x = y + z + 5;
-write x;
-write y;
-y = 10 + 9;
-*/ 
+b = 'h';
+x = 4;
+z = 6;
+a = 'p';
+w = x + y + 1;

@@ -11,6 +11,7 @@
 #include "IRcode.h"
 #include "assembly.h"
 #include "calculator.h"
+#include "ctype.h"
 
 
 extern int yylex();
@@ -81,13 +82,19 @@ Program: DeclList { printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
 
-		printf("\n\n ######################## AST STARTED ######################### \n\n");
+		printf("\n\n ########################" RESET);
+		printf(BPINK " AST STARTED " RESET);
+		printf("######################### \n\n" RESET);
 		printAST($$,0);
-		printf("\n\n ######################### AST ENDED ########################## \n\n");
+		printf("\n\n #########################" RESET);
+		printf(PINK " AST ENDED " RESET);
+		printf("########################## \n\n" RESET);
 
 		// end mips code
 		createEndOfAssemblyCode();
-		printf("\n\n ######################## MIPS CREATED ######################## \n\n");
+		printf("\n\n #######################" RESET);
+		printf(BPINK " MIPS GENERATED " RESET);
+		printf("####################### \n\n" RESET);
 };
 
 DeclList:	Decl DeclList { printf("\nDeclList -> Decl DeclList \n");
@@ -119,7 +126,7 @@ StmtList:	 Expr StmtList {$1->left = $2; $$ = $1;}
 /*----start vardecl-----------------------------------------------------------------------------------------------------*/
 
 
-VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaration\n\n");		
+VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Declaration\n\n" RESET);		
 
 							// semantic checks
 								// is the variable already declared?
@@ -149,7 +156,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 									INT        ID
 							*/
 				
-			} |	ID EQ NUMBER SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Initialization \n\n");
+			} |	ID EQ NUMBER SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
 							
 							// semantic checks
 								// is the variable already declared
@@ -186,7 +193,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								ID    NUMBER
 							*/
 
-			} |	CHAR ID SEMICOLON	{ printf("RECOGNIZED RULE: Char Variable Declaration \n\n");
+			} |	CHAR ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Char Variable Declaration \n\n" RESET);
 
 							// semantic checks
 								// is the variable already declared?
@@ -212,7 +219,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 								CHAR	   ID
 							*/					
 			
-			} |	ID EQ CHARLITERAL SEMICOLON	  { printf("RECOGNIZED RULE: Char Variable Initialization \n\n");				
+			} |	ID EQ CHARLITERAL SEMICOLON	  { printf(GRAY "RECOGNIZED RULE: Char Variable Initialization \n\n" RESET);		
 
 							// semantic checks
 								// is the variable already declared?
@@ -252,7 +259,7 @@ VarDecl:	INT ID SEMICOLON	{ printf("RECOGNIZED RULE: Integer Variable Declaratio
 
 Expr:	SEMICOLON {
 
-	} |	ID EQ ID SEMICOLON	{ printf("RECOGNIZED RULE: Assignment Statement\n\n"); 
+	} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
 		// semantic checks
 			// are both variables already declared?
@@ -290,7 +297,7 @@ Expr:	SEMICOLON {
 			isUsed($3, "G");
 
 
-	} |	WRITE ID SEMICOLON 	{ printf("RECOGNIZED RULE: Write Statement\n\n"); 
+	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement\n\n" RESET); 
 
 		// semantic checks
 			// is the id initialized as a value?
@@ -325,7 +332,7 @@ Expr:	SEMICOLON {
 			isUsed($2, "G");
 
 
-	} | IDEQExpr SEMICOLON { printf("RECOGNIZED RULE: Addition Statement\n\n"); 
+	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
 
 		// ast
 		$$ = $1;
@@ -355,13 +362,13 @@ IDEQExpr: ID EQ AddExpr {
 	updateValue($1, "G", total);
 		
 	// ast
-	$$ = AST_BinaryExpression("=", $1, getValue($1, "G"));
+	$$ = AST_BinaryExpression("=", $1, total);
 
 	// ir code
 	createIntAssignment($1, total);
 
 	// mips code
-	createMIPSAddition($1, getValue($1, "G"));
+	createMIPSAddition($1, total);
 
 }
 	
@@ -369,7 +376,7 @@ IDEQExpr: ID EQ AddExpr {
 AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 				addToNumArray($1);
-				addToOpArray($2);
+				//addToOpArray($2);
 
 			} | ID PLUS_OP AddExpr {
 
@@ -379,7 +386,7 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
-				addToOpArray($2);
+				//addToOpArray($2);
 
 			} | NUMBER {
 
@@ -407,7 +414,7 @@ int main(int argc, char**argv)
 		yydebug = 1;
 	#endif
 */
-	printf("\n\n ###################### COMPILER STARTED ###################### \n\n");
+	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
 	
 	// initialize ir code file
 	initIRcodeFile();
@@ -424,13 +431,19 @@ int main(int argc, char**argv)
 	}
 	yyparse();
 
-	printf("\n\n ####################### COMPILER ENDED ####################### \n\n");
-	printf("\n\n ###################### SHOW SYMBOL TABLE ##################### \n\n\n");
+	printf("\n\n #######################" RESET);
+	printf(BOLD " COMPILER ENDED " RESET);
+	printf("####################### \n\n" RESET);
+	printf("\n\n ######################" RESET);
+	printf(BPINK " SHOW SYMBOL TABLE " RESET);
+	printf("##################### \n\n\n\n" RESET);
 	showSymTable();
-	printf("\n\n ###################### END SYMBOL TABLE ###################### \n\n\n\n");
+	printf("\n\n\n ######################" RESET);
+	printf(PINK " END SYMBOL TABLE " RESET);
+	printf("###################### \n\n\n\n" RESET);
 }
 
 void yyerror(const char* s) {
-	fprintf(stderr, "Parse error: %s\n", s);
+	fprintf(stderr, RED "\nBison Parse Error: %s\n" RESET, s);
 	exit(1);
 }
