@@ -1,12 +1,8 @@
 int x;
 int y;
 int z;
-int w;
-char a;
-char b;
-y = 10;
-b = 'h';
+int k;
+k = 1;
 x = 4;
-z = 6;
-a = 'p';
-w = x + y + 1;
+y = 6;
+z = x + y + 5 + k;

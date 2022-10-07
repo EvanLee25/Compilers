@@ -331,11 +331,21 @@ Expr:	SEMICOLON {
 			// mark the id as used
 			isUsed($2, "G");
 
+		/*
+					Expr
+			  WRITE     getValue(ID)
+		*/
+
 
 	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
 
 		// ast
 		$$ = $1;
+
+		/*
+					=
+				ID	  NUMBER
+		*/
 
 	}
 
@@ -370,6 +380,10 @@ IDEQExpr: ID EQ AddExpr {
 	// mips code
 	createMIPSAddition($1, total);
 
+	// code optimization
+		// mark the id as used
+		isUsed($1, "G");
+
 }
 	
 
@@ -388,6 +402,10 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 				addToNumArray(getValue($1, "G"));
 				//addToOpArray($2);
 
+				// code optimization
+					// mark the id as used
+					isUsed($1, "G");
+
 			} | NUMBER {
 
 				// add to number array
@@ -401,6 +419,10 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
+
+				// code optimization
+					// mark the id as used
+					isUsed($1, "G");
 
 }
 
