@@ -7,9 +7,8 @@
 FILE * MIPScode;
 
 void  initAssemblyFile(){
-    // Creates a MIPS file with a generic header that needs to be in every file       
+         
     MIPScode = fopen("MIPScode.asm", "w");
-    
     fprintf(MIPScode, ".globl main\n");
     fprintf(MIPScode, ".text\n");
     fprintf(MIPScode, "main:\n");
@@ -50,6 +49,7 @@ void createMIPSIntAssignment (char id[50], char num[50]){
     fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
 
     fclose(MIPScode);
+
 }
 
 void createMIPSCharAssignment (char id[50], char chr[50]) {
@@ -131,7 +131,7 @@ void createEndOfAssemblyCode(){
 
     MIPScode = fopen("MIPScode.asm", "a");
 
-    fprintf(MIPScode, "\n# ----------------------\n");
+    fprintf(MIPScode, "\n# -----------------------\n");
     fprintf(MIPScode, "#  done, terminate program.\n\n");
     fprintf(MIPScode, "li $v0, 10      # call code to terminate program\n");
     fprintf(MIPScode, "syscall         # system call (terminate)\n");

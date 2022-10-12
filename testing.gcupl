@@ -1,10 +1,9 @@
 int x;
-x = 5;
 int y;
-y = 7;
-write x;
-y = 5 + y;
-write y;
-
-
-/*lines 6-11 dont work. var decl resets and makes work*/
+int z;
+int k;
+k = 1;
+x = 4;
+y = 6;
+z = x + y + 5 + k;
+write z;

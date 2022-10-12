@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
+
+#define PINK "\x1b[1;95m"
+#define RESET "\x1b[0m"
 
 #define YY_DECL int yylex()
 #include  "parser.tab.h"
@@ -314,6 +318,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
-.  {printf("%s : Unrecognized symbol at line %d char %d\n", yytext,lines,chars);}
+.  {printf("%s", yytext);
+	printf(PINK" : Unrecognized symbol at line %d char %d\n" RESET, lines,chars);}
 
 %%
