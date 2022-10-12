@@ -95,39 +95,6 @@ int getItemID(char itemName[50]) {
 
 }
 
-
-int redundantValue(char itemName[50], char scope[50], char value[50]) {
-
-	for(int i=0; i<symTabIndex+1; i++){
-		int str1 = strcmp(symTabItems[i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
-		int str2 = strcmp(symTabItems[i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
-		int str3 = strcmp(symTabItems[i].value, value);
-
-		if( str1 == 0 && str2 == 0 && str3 == 0){
-			return 0;
-		}
-		
-	}
-	return 1;
-
-}
-
-void isUsed(char itemName[50], char scope[50]) {
-
-	for(int i=0; i<symTabIndex+1; i++){
-		int str1 = strcmp(symTabItems[i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
-		int str2 = strcmp(symTabItems[i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
-		if( str1 == 0 && str2 == 0) {
-			symTabItems[i].isUsed = 1; // update value in sym table
-		}
-	}
-
-}
-
 char* getValue(char itemName[50], char scope[50]) {
 
 	for(int i=0; i<symTabIndex+1; i++){
@@ -246,3 +213,42 @@ int compareKinds(char itemName1[50], char itemName2[50], char scope[50]){
 	}
 }
     
+/*-----------------OPTIMIZATION FUNCTIONS-----------------------------------*/
+
+int redundantValue(char itemName[50], char scope[50], char value[50]) {
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		int str3 = strcmp(symTabItems[i].value, value);
+
+		if( str1 == 0 && str2 == 0 && str3 == 0){
+			return 0;
+		}	
+	}
+	return 1;
+}
+
+void isUsed(char itemName[50], char scope[50]) {
+
+	for(int i=0; i<symTabIndex+1; i++){
+		int str1 = strcmp(symTabItems[i].itemName, itemName); 
+		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
+		int str2 = strcmp(symTabItems[i].scope, scope); 
+		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+		if( str1 == 0 && str2 == 0) {
+			symTabItems[i].isUsed = 1; // update value in sym table
+		}
+	}
+
+}
+
+/*
+//go through symbol table and look for isUsed = 0.
+//then 
+void cleanAssemblyCodeOfUnsuedVariables(){
+	for(int i=0; i<symTabAccess+1; i++)
+}
+*/
