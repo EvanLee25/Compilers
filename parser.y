@@ -34,6 +34,8 @@ char operator;
 
 %token <string> CHAR
 %token <string> INT
+%token <string> FLOAT
+
 %token <string> IF
 %token <string> ELSE
 %token <string> WHILE
@@ -100,7 +102,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQExpr AddExpr Math Operator
+%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQExpr Math Operator
 
 %start Program
 
@@ -160,7 +162,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								// is the variable already declared?
 								symTabAccess();
 								if (found($2,"G") == 1) {
-									printf("ERROR: Variable %s already declared.\n",$2);
+									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2);
 									exit(0); // variable already declared
 								}
 
@@ -253,14 +255,14 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								// is the variable already declared?
 								symTabAccess();
 								if (found($1,"G") == 0) { // if variable not declared yet
-									printf(RED "::::> CHECK FAILED: Variable %s not initialized.\n" RESET,$1);
+									printf(RED "::::> CHECK FAILED: Variable '%s' not initialized.\n" RESET,$1);
 									exit(0); // variable already declared
 								}
 
 								// is the statement redundant
 								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
 								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
-									printf(RED "::::> CHECK FAILED: Variable %s has already been declared as: %s.\n\n" RESET,$1,$3);
+									printf(RED "::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
 									exit(0);
 								}
 
@@ -284,7 +286,36 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								ID	   CHARLITERAL
 							*/
 
-			}
+			} | FLOAT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Float Variable Declaration\n\n" RESET);		
+
+							// semantic checks
+								// is the variable already declared?
+								symTabAccess();
+								if (found($2,"G") == 1) {
+									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2);
+									exit(0); // variable already declared
+								}
+
+							// symbol table
+							addItem($2, "VAR", "FLT", 0, "G", 0);
+
+							// ast
+							$$ = AST_assignment("TYPE",$1,$2);
+
+							// ir code
+							//createIntDefinition($2);
+
+							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
+							//createMIPSIntDeclaration($2);
+							
+							// code optimization
+								// N/A
+
+							/*
+										VarDecl
+									INT        ID
+							*/
+}		
 ;
 
 
@@ -390,10 +421,9 @@ IDEQExpr: ID EQ Math {
 
 	// ast
 	// TODO: EVAN
-	// TURN AddExpr INTO A STRING
 
 	// semantic checks
-		// inside AddExpr
+		// inside Math
 
 	// calculations: code optimization
 		// turn the integer returned from calculate() into a string
@@ -424,7 +454,6 @@ IDEQExpr: ID EQ Math {
 Math: 		NUMBER Operator Math {
 
 				addToNumArray($1);
-				//printf("\n\n%s\n\n", $2); // print operator
 				addToOpArray($2);
 
 			} | ID Operator Math {
@@ -463,52 +492,6 @@ Math: 		NUMBER Operator Math {
 						printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
 						exit(0);
 					}
-
-				// add to number array
-				addToNumArray(getValue($1, "G"));
-
-				// code optimization
-					// mark the id as used
-					isUsed($1, "G");
-
-}
-	
-
-AddExpr:	  NUMBER PLUS_OP AddExpr {
-
-				addToNumArray($1);
-				//addToOpArray($2);
-
-			} | ID PLUS_OP AddExpr {
-
-				// semantic checks
-					// does the id have a value?
-					initialized($1, "G");
-
-					// is the id a char?
-					if(isChar($1) == 1) {
-						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
-						exit(0);
-					}
-
-				// add to number array
-				addToNumArray(getValue($1, "G"));
-				//addToOpArray($2);
-
-				// code optimization
-					// mark the id as used
-					isUsed($1, "G");
-
-			} | NUMBER {
-
-				// add to number array
-				addToNumArray($1);
-
-			} | ID {
-
-				// semantic checks
-					// does the id have a value?
-					initialized($1, "G");		
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));

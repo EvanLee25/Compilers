@@ -53,6 +53,13 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
     return CHAR;
 }
 
+"float"  {
+	words++; chars += strlen(yytext);
+	printf("%s : TYPE CHAR\n", yytext);
+    yylval.string = strdup(yytext);
+    return FLOAT;
+}
+
 "int"  {
 	words++; chars += strlen(yytext);
 	printf("%s : TYPE INT\n", yytext);
