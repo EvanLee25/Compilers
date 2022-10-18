@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+//@Hunter TODO: Can you add comments for what each color should be used for?
 #define GREEN   "\x1b[32m"
 #define BGREEN  "\x1b[1;32m"
 #define RED     "\x1b[1;31m"
@@ -276,10 +277,31 @@ void isUsed(char itemName[50], char scope[50]) {
 
 }
 
-/*
+
 //go through symbol table and look for isUsed = 0.
 //then 
 void cleanAssemblyCodeOfUnsuedVariables(){
-	for(int i=0; i<symTabAccess+1; i++)
+	int unusedVariables[200]; //make array with size equal to number of variables in symbol table
+	int counter = 0;
+	printf(BCYAN "Looking for unused variables to remove.\n" RESET);
+	
+	for(int i=0; i<symTabIndex; i++){
+		//check if any variable in the symbol table is unused. If so add to array
+		if(symTabItems[i].isUsed == 0){
+			//printf("ITEM NAME: %s \n",symTabItems[i].itemName); //troubleshoot
+			unusedVariables[counter] = symTabItems[i].itemID;
+			counter++;
+
+		}
+		
+	}	
+	
+	for(int i=0;i<counter;i++){
+		printf(BCYAN "\n$T%i is unused, removing from optimized MIPS code.\n" RESET,unusedVariables[i]);
+	}
+	//https://stackoverflow.com/questions/3501338/c-read-file-line-by-line
+
+
+	
+	
 }
-*/

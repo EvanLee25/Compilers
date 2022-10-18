@@ -222,6 +222,14 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
+"^"  {
+	chars++;
+	printf("%s : OPERATOR\n", yytext);
+    yylval.string = strdup(yytext);
+    return EXPONENT;
+     
+}
+
 "%"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);

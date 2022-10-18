@@ -52,6 +52,7 @@ char currentScope[50]; /* global or the name of the function */
 %token <string> MULTIPLY
 %token <string> MINUS
 %token <string> DIVIDE
+%token <string> EXPONENT
 %token <string> MODULUS
 %token <string> LPAREN
 %token <string> RPAREN
@@ -66,6 +67,32 @@ char currentScope[50]; /* global or the name of the function */
 
 %token <string> ID
 %token <string> NUMBER
+
+/* For order of operations:
+%left PLUS_OP
+%left MINUS
+%left MULTIPLY
+%left DIVIDE
+%right EXPONENT
+
+Binop: '+' | '-' ... | '^'
+*/
+
+/* For function decl:
+FunDecl: Type ID Leftparen ParamDecl Rightparen Block
+
+Mid rule action:
+FunDecl: Type ID {printf("Function declared \n"); SymbtabAdd($1,$2,"G");} Leftparen ParamDecl Rightparen Block
+
+note: return type must match to variable returned
+	  for mid action rule, it will currently not work since it will take Type ID as a function before we even know.
+	  possible solution, add a keyword to our language to identify function intentionality such as:
+	  function int getNum(){return 1;}
+
+AST for function decl:
+
+
+*/
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
@@ -97,13 +124,13 @@ Program: DeclList { printf("\nProgram -> DeclList \n");
 		printf("####################### \n\n" RESET);
 };
 
-DeclList:	Decl DeclList { printf("\nDeclList -> Decl DeclList \n");
+DeclList:	Decl DeclList {
 		// ast
 		$1->left = $2;
 		$$ = $1;
 
 }
-			| Decl { printf("\nDeclList -> Decl \n");
+			| Decl {
 			// ast
 			$$ = $1;
 
@@ -456,6 +483,7 @@ int main(int argc, char**argv)
 	printf("\n\n #######################" RESET);
 	printf(BOLD " COMPILER ENDED " RESET);
 	printf("####################### \n\n" RESET);
+	
 	printf("\n\n ######################" RESET);
 	printf(BPINK " SHOW SYMBOL TABLE " RESET);
 	printf("##################### \n\n\n\n" RESET);
@@ -463,6 +491,12 @@ int main(int argc, char**argv)
 	printf("\n\n\n ######################" RESET);
 	printf(PINK " END SYMBOL TABLE " RESET);
 	printf("###################### \n\n\n\n" RESET);
+	
+	printf("\n\n\n ######################" RESET);
+	printf(PINK " REMOVE UNUSED VARIABLES " RESET);
+	printf("###################### \n\n\n\n" RESET);
+	cleanAssemblyCodeOfUnsuedVariables();
+	printf("############################################# \n\n\n\n" RESET);
 }
 
 void yyerror(const char* s) {
