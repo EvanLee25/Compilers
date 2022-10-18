@@ -47,6 +47,17 @@ void createIntDefinition(char id[50]) {
     fclose(IRcode);
 }
 
+void createFloatDefinition(char id[50]) {
+    // e.g float f;
+    
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
+
+    fprintf(IRcode, "T%d = %s\n", itemID, id);
+    fclose(IRcode);
+}
+
 void createCharDefinition(char id[50]) {
     // e.g char a;
 
@@ -60,6 +71,17 @@ void createCharDefinition(char id[50]) {
 
 void createIntAssignment(char id[50], char num[50]){
     // e.g. x = 5;
+  
+    IRcode = fopen("IRcode.ir", "a");
+    int itemID;
+    itemID = getItemID(id);
+
+    fprintf(IRcode, "T%d = %s\n", itemID, num);
+    fclose(IRcode);
+}
+
+void createFloatAssignment(char id[50], char num[50]){
+    // e.g. f = 5;
   
     IRcode = fopen("IRcode.ir", "a");
     int itemID;

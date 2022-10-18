@@ -28,6 +28,7 @@ LETTER  [_a-zA-Z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
 NUMBER  {DIGIT}+
+FLOAT_NUM [0-9]+["."][0-9]+
 STRINGLITERAL \"([^\\\"]|\\.)*\"
 CHARLITERAL \'([^\\\'']|\\.)*\'
 
@@ -330,6 +331,14 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	printf("%s : NUMBER\n", yytext);
     yylval.string = strdup(yytext); 
     return NUMBER;
+     
+}
+
+{FLOAT_NUM}  {
+	chars += strlen(yytext);
+	printf("%s : FLOAT_NUM\n", yytext);
+    yylval.string = strdup(yytext); 
+    return FLOAT_NUM;
      
 }
 

@@ -31,9 +31,9 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     itemValue1 = getValue(id1, scope);
     itemValue2 = getValue(id2, scope);
 
-    fprintf(MIPScode, "li $t%d, %s\n", itemID1, itemValue1);
+    fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
     //fprintf(MIPScode, "li $t%d, %s\n", itemID2, itemValue2); // this just prints that the second id is the value that it already is, redundant
-    fprintf(MIPScode, "move $t%d, $t%d\n", itemID2, itemID1); // TODO: i think rn this moves the second regidster to the first instead of copying
+    fprintf(MIPScode, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
 
     fclose(MIPScode);
 }
@@ -47,6 +47,22 @@ void createMIPSIntAssignment (char id[50], char num[50]){
     itemID = getItemID(id);
 
     fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
+
+    fclose(MIPScode);
+
+}
+
+void createMIPSFloatAssignment (char id[50], char num[50]){
+    // e.g. x = 5;
+
+    // SEPARATE FILE FOR f: .float 1.0 HERE
+
+    MIPScode = fopen("MIPScode.asm", "a");
+    int itemID;
+
+    itemID = getItemID(id);
+
+    fprintf(MIPScode, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
 
     fclose(MIPScode);
 
@@ -92,6 +108,21 @@ void createMIPSWriteInt(char id[50]){
     fprintf(MIPScode, "\nli $v0, 1       # call code to print an integer\n");
     fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
     fprintf(MIPScode, "syscall         # system call to print integer\n");
+
+    fclose(MIPScode);
+
+}
+
+void createMIPSWriteFloat(char id[50]){
+    
+    MIPScode = fopen("MIPScode.asm", "a");
+    int itemID;
+
+    itemID = getItemID(id);
+
+    fprintf(MIPScode, "\nli $v0, 2       # call code to print a float\n");
+    fprintf(MIPScode, "mov.s $f12, $f%d   # move the value of %s into $f12\n", itemID, id);
+    fprintf(MIPScode, "syscall         # system call to print float\n");
 
     fclose(MIPScode);
 

@@ -35,6 +35,7 @@ char operator;
 %token <string> CHAR
 %token <string> INT
 %token <string> FLOAT
+%token <string> FLOAT_NUM
 
 %token <string> IF
 %token <string> ELSE
@@ -303,7 +304,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							$$ = AST_assignment("TYPE",$1,$2);
 
 							// ir code
-							//createIntDefinition($2);
+							createFloatDefinition($2);
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
 							//createMIPSIntDeclaration($2);
@@ -315,7 +316,82 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 										VarDecl
 									INT        ID
 							*/
-}		
+				} |	ID EQ FLOAT_NUM SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
+							
+							// semantic checks
+								// is the variable already declared
+								symTabAccess();
+								if (found($1,"G") == 0) { //if variable not declared yet
+									printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized.\n\n" RESET,$1);
+									exit(0); // variable already declared
+								}
+
+								// is the statement redundant
+								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
+									printf(RED "\n::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
+									exit(0);
+								}
+
+							// symbol table
+							updateValue($1, "G", $3); // update the value of whatever id is passed in
+
+							// ast
+							$$ = AST_BinaryExpression("=",$1,$3);
+
+							// ir code
+							createFloatAssignment($1,$3);
+
+							// mips code
+							createMIPSFloatAssignment($1, $3);
+
+							// code optimization
+								// N/A
+
+							/*
+									=
+								ID    NUMBER
+							*/
+
+			} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
+
+				// semantic checks
+					// are both variables already declared?
+					symTabAccess();
+					printf("\n");
+					if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
+						printf("ERROR: Variable %s or %s not declared.\n",$1,$3);
+						exit(0); // variable already declared
+					}
+
+					// does the second id have a value?
+					initialized($3, "G");
+
+					// are the id's both variables?
+					compareKinds($1, $3, "G");
+
+					// are the types of the id's the same
+					compareTypes($1, $3, "G");
+
+				// symbol table
+				updateValue($1, "G", getValue($3, "G"));
+
+				// ast
+				$$ = AST_BinaryExpression("=",$1,$3);
+
+				// ir code
+				createIDtoIDAssignment($1, $3);
+
+				// mips code
+				createMIPSIDtoIDAssignment($1, $3, "G");
+
+				// code optimization
+					// mark the two id's as used
+					isUsed($1, "G");
+					isUsed($3, "G");
+
+
+}
 ;
 
 
@@ -385,12 +461,15 @@ Expr:	SEMICOLON {
 			// determine if its int or char
 			int isInt = strcmp(type, "INT");
 			int isChar = strcmp(type, "CHR");
+			int isFloat = strcmp(type, "FLT");
 
 			// run correct mips function according to type
 			if (isInt == 0) { // if the variable is an integer
 				createMIPSWriteInt($2);
 			} else if (isChar == 0) { // if the variable is a char
 				createMIPSWriteChar($2);
+			} else if (isFloat == 0) {
+				createMIPSWriteFloat($2);
 			}
 
 		// code optimization
@@ -555,5 +634,6 @@ int main(int argc, char**argv)
 
 void yyerror(const char* s) {
 	fprintf(stderr, RED "\nBison Parse Error: %s\n" RESET, s);
+	showSymTable();
 	exit(1);
 }
