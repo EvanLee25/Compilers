@@ -364,6 +364,8 @@ int calculate() {
     // loop through the operator array and perform order of operations
     while (numCounter != 1) {
 
+        //Look for L and R parentheses
+
         while (haveMult(opArray) == 1 || haveDiv(opArray) == 1) {
 
             for (int i = 0; i < opCounter; i++) {

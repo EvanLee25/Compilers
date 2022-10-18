@@ -45,6 +45,10 @@ char operator;
 %token <string> LT
 %token <string> GT
 %token <string> EQ
+%token <string> PLUS_EQ
+%token <string> MULT_EQ
+%token <string> SUB_EQ
+%token <string> DIV_EQ
 %token <string> PLUS_OP
 %token <string> MULT_OP
 %token <string> SUB_OP
@@ -562,7 +566,7 @@ int main(int argc, char**argv)
 	printf("\n\n\n ######################" RESET);
 	printf(PINK " REMOVE UNUSED VARIABLES " RESET);
 	printf("###################### \n\n\n\n" RESET);
-	cleanAssemblyCodeOfUnsuedVariables();
+	//cleanAssemblyCodeOfUnsuedVariables();
 	printf("############################################# \n\n\n\n" RESET);
 }
 
