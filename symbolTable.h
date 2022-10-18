@@ -98,6 +98,7 @@ void updateValue(char itemName[50], char scope[50], char value[50]) {
 
 }
 
+
 int getItemID(char itemName[50]) {
 
 	for(int i=0; i<symTabIndex+1; i++){

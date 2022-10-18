@@ -1,9 +1,8 @@
 int x;
 int y;
 int z;
-int k;
-k = 1;
+char k;
+k = 'h';
 x = 4;
 y = 6;
-z = x + y + 5 + k;
-write z;
+z = 7 + 10 - 8 * 9 / 2;
