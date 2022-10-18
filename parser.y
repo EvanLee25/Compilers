@@ -20,6 +20,7 @@ extern FILE* yyin;
 
 void yyerror(const char* s);
 char currentScope[50]; /* global or the name of the function */
+char operator;
 
 %}
 
@@ -41,17 +42,13 @@ char currentScope[50]; /* global or the name of the function */
 %token <string> NOT_EQ
 %token <string> LT_EQ
 %token <string> GT_EQ
-%token <string> PLUS_EQ
-%token <string> MINUS_EQ
-%token <string> MULTIPLY_EQ
-%token <string> DIVIDE_EQ
 %token <string> LT
 %token <string> GT
 %token <string> EQ
 %token <string> PLUS_OP
-%token <string> MULTIPLY
-%token <string> MINUS
-%token <string> DIVIDE
+%token <string> MULT_OP
+%token <string> SUB_OP
+%token <string> DIV_OP
 %token <string> EXPONENT
 %token <string> MODULUS
 %token <string> LPAREN
@@ -99,13 +96,13 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQExpr AddExpr
+%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQExpr AddExpr Math Operator
 
 %start Program
 
 %%
 
-Program: DeclList { printf("\nProgram -> DeclList \n");
+Program: DeclList { //printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
 
@@ -136,18 +133,18 @@ DeclList:	Decl DeclList {
 
 };
 
-Decl:	VarDecl { printf("\nDecl -> VarDecl \n");
+Decl:	VarDecl { //printf("\nDecl -> VarDecl \n");
 		// ast
 		$$ = $1;
 
-	} | StmtList { printf("\nDecl -> StmtList \n");
+	} | StmtList { //printf("\nDecl -> StmtList \n");
 		// ast
 		$$ = $1;
 
 };
 
 StmtList:	 Expr StmtList {$1->left = $2; $$ = $1;}
-			| Expr {}
+			| Expr {$$ = $1;}
 ;
 
 /*----start vardecl-----------------------------------------------------------------------------------------------------*/
@@ -189,14 +186,14 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								// is the variable already declared
 								symTabAccess();
 								if (found($1,"G") == 0) { //if variable not declared yet
-									printf("::::> SYNTAX ERROR: Variable %s not initialized.\n",$1);
+									printf(RED "::::> CHECK FAILED: Variable %s not initialized.\n" RESET,$1);
 									exit(0); // variable already declared
 								}
 
 								// is the statement redundant
 								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
 								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
-									printf("ERROR: Variable %s has already been declared as: %s.\n\n",$1,$3);
+									printf(RED "::::> CHECK FAILED: Variable %s has already been declared as: %s.\n\n" RESET,$1,$3);
 									exit(0);
 								}
 
@@ -252,8 +249,15 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								// is the variable already declared?
 								symTabAccess();
 								if (found($1,"G") == 0) { // if variable not declared yet
-									printf("ERROR: Variable %s not initialized.\n",$1);
+									printf(RED "::::> CHECK FAILED: Variable %s not initialized.\n" RESET,$1);
 									exit(0); // variable already declared
+								}
+
+								// is the statement redundant
+								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
+									printf(RED "::::> CHECK FAILED: Variable %s has already been declared as: %s.\n\n" RESET,$1,$3);
+									exit(0);
 								}
 
 							// symbol table
@@ -378,7 +382,7 @@ Expr:	SEMICOLON {
 
 
 
-IDEQExpr: ID EQ AddExpr {
+IDEQExpr: ID EQ Math {
 
 	// ast
 	// TODO: EVAN
@@ -412,6 +416,58 @@ IDEQExpr: ID EQ AddExpr {
 		isUsed($1, "G");
 
 }
+
+Math: 		NUMBER Operator Math {
+
+				addToNumArray($1);
+				//printf("\n\n%s\n\n", $2); // print operator
+				addToOpArray($2);
+
+			} | ID Operator Math {
+
+				// semantic checks
+					// does the id have a value?
+					initialized($1, "G");
+
+					// is the id a char?
+					if (isChar($1) == 1) {
+						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+						exit(0);
+					}
+
+				// add to number array
+				addToNumArray(getValue($1, "G"));
+				addToOpArray($2);
+
+				// code optimization
+					// mark the id as used
+					isUsed($1, "G");
+
+			} | NUMBER {
+
+				// add to number array
+				addToNumArray($1);
+
+			} | ID {
+
+				// semantic checks
+					// does the id have a value?
+					initialized($1, "G");
+
+					// is the id a char?
+					if (isChar($1) == 1) {
+						printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+						exit(0);
+					}
+
+				// add to number array
+				addToNumArray(getValue($1, "G"));
+
+				// code optimization
+					// mark the id as used
+					isUsed($1, "G");
+
+}
 	
 
 AddExpr:	  NUMBER PLUS_OP AddExpr {
@@ -424,6 +480,12 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 				// semantic checks
 					// does the id have a value?
 					initialized($1, "G");
+
+					// is the id a char?
+					if(isChar($1) == 1) {
+						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+						exit(0);
+					}
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
@@ -442,7 +504,7 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 				// semantic checks
 					// does the id have a value?
-					initialized($1, "G");
+					initialized($1, "G");		
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
@@ -452,6 +514,11 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 					isUsed($1, "G");
 
 }
+
+Operator: PLUS_OP {}	
+		| SUB_OP {}
+		| MULT_OP {}
+		| DIV_OP {}
 
 
 %%
