@@ -202,7 +202,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
-    return MULTIPLY;
+    return MULT_OP;
      
 }
 
@@ -210,7 +210,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
-    return MINUS;
+    return SUB_OP;
      
 }
 
@@ -218,7 +218,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
-    return DIVIDE;
+    return DIV_OP;
      
 }
 

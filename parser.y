@@ -42,10 +42,6 @@ char operator;
 %token <string> NOT_EQ
 %token <string> LT_EQ
 %token <string> GT_EQ
-%token <string> PLUS_EQ
-%token <string> MINUS_EQ
-%token <string> MULTIPLY_EQ
-%token <string> DIVIDE_EQ
 %token <string> LT
 %token <string> GT
 %token <string> EQ
@@ -394,11 +390,6 @@ IDEQExpr: ID EQ Math {
 
 }
 
-IDEQExpr2:	ID EQ Math {
-
-
-}
-
 Math: 		NUMBER Operator Math {
 
 				addToNumArray($1);
@@ -411,9 +402,15 @@ Math: 		NUMBER Operator Math {
 					// does the id have a value?
 					initialized($1, "G");
 
+					// is the id a char?
+					if (isChar($1) == 1) {
+						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+						exit(0);
+					}
+
 				// add to number array
 				addToNumArray(getValue($1, "G"));
-				//addToOpArray($2);
+				addToOpArray($2);
 
 				// code optimization
 					// mark the id as used
@@ -429,6 +426,12 @@ Math: 		NUMBER Operator Math {
 				// semantic checks
 					// does the id have a value?
 					initialized($1, "G");
+
+					// is the id a char?
+					if (isChar($1) == 1) {
+						printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+						exit(0);
+					}
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
@@ -451,6 +454,12 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 					// does the id have a value?
 					initialized($1, "G");
 
+					// is the id a char?
+					if(isChar($1) == 1) {
+						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+						exit(0);
+					}
+
 				// add to number array
 				addToNumArray(getValue($1, "G"));
 				//addToOpArray($2);
@@ -468,7 +477,7 @@ AddExpr:	  NUMBER PLUS_OP AddExpr {
 
 				// semantic checks
 					// does the id have a value?
-					initialized($1, "G");
+					initialized($1, "G");		
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));

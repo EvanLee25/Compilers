@@ -185,7 +185,7 @@ int initialized(char itemName[50], char scope[50]){
 
 		if(str1 == 0 && str2 == 0){
 			if (str3 != 0) {
-				printf(BGREEN "::::> CHECK PASSED: Variable '%s' is assigned to a value.\n\n" RESET, itemName);
+				printf(BGREEN "\n::::> CHECK PASSED: Variable '%s' is assigned to a value.\n" RESET, itemName);
 				return 1; // found the ID in the table
 			}
 		}
@@ -275,6 +275,18 @@ void isUsed(char itemName[50], char scope[50]) {
 		}
 	}
 
+}
+
+int isChar(char itemName[50]) {
+
+	char* type = getVariableType(itemName, "G");
+	int isChar = strcmp(type, "CHR");
+
+	if (isChar == 0) {
+		return 1; // check failed
+	} else {
+		return 0;
+	}
 }
 
 /*
