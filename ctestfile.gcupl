@@ -1,0 +1,17 @@
+int x;
+int x = 5;
+x = 55;
+char y;
+char y = 'l';
+y = 'z';
+
+x = 142857;
+y = x;
+z = k;
+
+/*
+print(x, "\n");
+1x = 142857;
+*/
+
+~

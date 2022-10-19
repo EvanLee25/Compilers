@@ -1,0 +1,30 @@
+Program -----> DeclList
+
+DeclList -----> Decl DeclList 
+              | Decl
+
+Decl -----> VarDecl 
+          | StmtList
+
+StmtList -----> Expr 
+              | Expr StmtList
+
+VarDecl -----> INT ID;
+             | ID EQ NUMBER;
+             | CHAR ID;
+             | ID EQ CHARLITERAL;
+
+Expr -----> SEMICOLON
+          | ID EQ ID;
+          | WRITE ID;
+          | IDEQExpr;
+
+IDEQExpr -----> ID EQ AddExpr
+
+AddExpr -----> NUMBER PLUS_OP AddExpr
+             | ID PLUS_OP AddExpr
+             | NUMBER
+             | ID
+
+
+

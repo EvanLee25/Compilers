@@ -1,0 +1,9 @@
+#### IR Code ####
+
+T0 = f
+T1 = g
+T2 = h
+T0 = 1.5
+T1 = 2.5
+T2 = T0
+output T2
