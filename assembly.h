@@ -5,22 +5,59 @@
 #include <unistd.h>
 
 FILE * MIPScode;
+FILE * tempMIPS;
 
-void  initAssemblyFile(){
+void initAssemblyFile(){
          
+    tempMIPS = fopen("tempMIPS.asm", "w");
+    fprintf(tempMIPS, "\n.text\n");
+    fprintf(tempMIPS, "main:\n");
+    fprintf(tempMIPS, "# -----------------------\n");
+    fclose(tempMIPS);
+
     MIPScode = fopen("MIPScode.asm", "w");
     fprintf(MIPScode, ".globl main\n");
-    fprintf(MIPScode, ".text\n");
-    fprintf(MIPScode, "main:\n");
-    fprintf(MIPScode, "# -----------------------\n");
+    fprintf(MIPScode, ".data\n\n");
     fclose(MIPScode);
+
+}
+
+void appendFiles(char source[50], char destination[50]) {
+
+    FILE *fp1, *fp2;
+    char c;
+
+    // Open one file for reading
+    fp1 = fopen(source, "r");
+    if (fp1 == NULL) {
+        printf("%s file does not exist..", source);
+        exit(0);
+    }
+
+    // Open another file for appending content
+    fp2 = fopen(destination, "a");
+    if (fp2 == NULL) {
+        printf("%s file does not exist...", destination);
+        exit(0);
+    }
+
+    // Read content from file
+    c = fgetc(fp1);
+    while (c != EOF) {
+        fputc(c,fp2);
+        c = fgetc(fp1);
+    }
+
+    printf("\nContent in %s appended to %s", source, destination);
+    fclose(fp1);
+    fclose(fp2);
 
 }
 
 void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     // e.g. x = y;
 
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID1;
     int itemID2;
     char* itemValue1;
@@ -31,47 +68,52 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     itemValue1 = getValue(id1, scope);
     itemValue2 = getValue(id2, scope);
 
-    fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
-    //fprintf(MIPScode, "li $t%d, %s\n", itemID2, itemValue2); // this just prints that the second id is the value that it already is, redundant
-    fprintf(MIPScode, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
+    fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
+    //fprintf(tempMIPS, "li $t%d, %s\n", itemID2, itemValue2); // this just prints that the second id is the value that it already is, redundant
+    fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 }
 
 void createMIPSIntAssignment (char id[50], char num[50]){
     // e.g. x = 5;
 
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
+    fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 
 }
 
 void createMIPSFloatAssignment (char id[50], char num[50]){
-    // e.g. x = 5;
+    // e.g. f = 5;
 
     // SEPARATE FILE FOR f: .float 1.0 HERE
-
     MIPScode = fopen("MIPScode.asm", "a");
+
+    fprintf(MIPScode, "%s: .float %s\n", id, num);
+
+    fclose(MIPScode);
+
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
+    fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 
 }
 
 void createMIPSCharAssignment (char id[50], char chr[50]) {
     // e.g. x = 5;
 
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
@@ -79,67 +121,67 @@ void createMIPSCharAssignment (char id[50], char chr[50]) {
     // the char takes the first apostrophe for some reason, need to remove this
     char *result = chr + 1; // removes first character
 
-    fprintf(MIPScode, "\nli $t%d, '%s'     # load the value of %s into $t%d\n", itemID, result, id, itemID);
+    fprintf(tempMIPS, "\nli $t%d, '%s'     # load the value of %s into $t%d\n", itemID, result, id, itemID);
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 }
 
 void createMIPSIntDeclaration(char id[50]) {
     // e.g. int x;
 
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "li $t%d, %s\n", itemID, id);
+    fprintf(tempMIPS, "li $t%d, %s\n", itemID, id);
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 
 }
 
 void createMIPSWriteInt(char id[50]){
     
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $v0, 1       # call code to print an integer\n");
-    fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
-    fprintf(MIPScode, "syscall         # system call to print integer\n");
+    fprintf(tempMIPS, "\nli $v0, 1       # call code to print an integer\n");
+    fprintf(tempMIPS, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
+    fprintf(tempMIPS, "syscall         # system call to print integer\n");
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 
 }
 
 void createMIPSWriteFloat(char id[50]){
     
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $v0, 2       # call code to print a float\n");
-    fprintf(MIPScode, "mov.s $f12, $f%d   # move the value of %s into $f12\n", itemID, id);
-    fprintf(MIPScode, "syscall         # system call to print float\n");
+    fprintf(tempMIPS, "\nli $v0, 2         # call code to print a float\n");
+    fprintf(tempMIPS, "mov.s $f12, $f%d   # move the value of %s into $f12\n", itemID, id);
+    fprintf(tempMIPS, "syscall           # system call to print float\n");
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 
 }
 
 void createMIPSWriteChar(char id[50]){
     
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $v0, 11      # call code to print a single char\n");
-    fprintf(MIPScode, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
-    fprintf(MIPScode, "syscall         # system call to print char\n");
+    fprintf(tempMIPS, "\nli $v0, 11      # call code to print a single char\n");
+    fprintf(tempMIPS, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
+    fprintf(tempMIPS, "syscall         # system call to print char\n");
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
 
 }
 
@@ -147,25 +189,37 @@ void createMIPSAddition(char id[50], char num[50]) {
     // e.g. x = 5 + y + 7 + 12;
     // this calculation is optimized to be done in the parser, so this is just another integer assignment
 
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
     itemID = getItemID(id);
 
-    fprintf(MIPScode, "\nli $t%d, %s       # load the added value of %s into $t%d\n", itemID, num, id, itemID);
+    fprintf(tempMIPS, "\nli $t%d, %s       # load the added value of %s into $t%d\n", itemID, num, id, itemID);
 
-    fclose(MIPScode);
+    fclose(tempMIPS);
+
+}
+
+void makeMIPSNewLine() {
+
+    tempMIPS = fopen("tempMIPS.asm", "a");
+
+    fprintf(tempMIPS, "\naddi $a0, $0 0xA  # new line\n");
+    fprintf(tempMIPS, "addi $v0, $0 0xB  # new line\n");
+    fprintf(tempMIPS, "syscall           # syscall to print new line\n");
+
+    fclose(tempMIPS);
 
 }
 
 void createEndOfAssemblyCode(){
 
-    MIPScode = fopen("MIPScode.asm", "a");
+    tempMIPS = fopen("tempMIPS.asm", "a");
 
-    fprintf(MIPScode, "\n# -----------------------\n");
-    fprintf(MIPScode, "#  done, terminate program.\n\n");
-    fprintf(MIPScode, "li $v0, 10      # call code to terminate program\n");
-    fprintf(MIPScode, "syscall         # system call (terminate)\n");
-    fprintf(MIPScode, ".end main\n");
-    fclose(MIPScode);
+    fprintf(tempMIPS, "\n# -----------------------\n");
+    fprintf(tempMIPS, "#  done, terminate program.\n\n");
+    fprintf(tempMIPS, "li $v0, 10      # call code to terminate program\n");
+    fprintf(tempMIPS, "syscall         # system call (terminate)\n");
+    fprintf(tempMIPS, ".end main\n");
+    fclose(tempMIPS);
 }

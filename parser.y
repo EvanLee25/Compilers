@@ -64,6 +64,7 @@ char operator;
 %token <string> RBRACE
 %token <string> COMMA
 %token <string> SEMICOLON
+%token <string> NEWLINECHAR
 
 %token <string> STRINGLITERAL
 %token <string> CHARLITERAL
@@ -123,6 +124,7 @@ Program: DeclList { //printf("\nProgram -> DeclList \n");
 
 		// end mips code
 		createEndOfAssemblyCode();
+		appendFiles("tempMIPS.asm", "MIPScode.asm");
 		printf("\n\n #######################" RESET);
 		printf(BPINK " MIPS GENERATED " RESET);
 		printf("####################### \n\n" RESET);
@@ -353,45 +355,55 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								ID    NUMBER
 							*/
 
-			} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
+				} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
-				// semantic checks
-					// are both variables already declared?
-					symTabAccess();
-					printf("\n");
-					if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
-						printf("ERROR: Variable %s or %s not declared.\n",$1,$3);
-						exit(0); // variable already declared
-					}
+					// semantic checks
+						// are both variables already declared?
+						symTabAccess();
+						printf("\n");
+						if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
+							printf("ERROR: Variable %s or %s not declared.\n",$1,$3);
+							exit(0); // variable already declared
+						}
 
-					// does the second id have a value?
-					initialized($3, "G");
+						// does the second id have a value?
+						initialized($3, "G");
 
-					// are the id's both variables?
-					compareKinds($1, $3, "G");
+						// are the id's both variables?
+						compareKinds($1, $3, "G");
 
-					// are the types of the id's the same
-					compareTypes($1, $3, "G");
+						// are the types of the id's the same
+						compareTypes($1, $3, "G");
 
-				// symbol table
-				updateValue($1, "G", getValue($3, "G"));
+					// symbol table
+					updateValue($1, "G", getValue($3, "G"));
 
-				// ast
-				$$ = AST_BinaryExpression("=",$1,$3);
+					// ast
+					$$ = AST_BinaryExpression("=",$1,$3);
 
-				// ir code
-				createIDtoIDAssignment($1, $3);
+					// ir code
+					createIDtoIDAssignment($1, $3);
 
-				// mips code
-				createMIPSIDtoIDAssignment($1, $3, "G");
+					// mips code
+					createMIPSIDtoIDAssignment($1, $3, "G");
 
-				// code optimization
-					// mark the two id's as used
-					isUsed($1, "G");
-					isUsed($3, "G");
+					// code optimization
+						// mark the two id's as used
+						isUsed($1, "G");
+						isUsed($3, "G");
 
 
-}
+				} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
+
+						// ast
+						$$ = $1;
+
+						/*
+									=
+								ID	  NUMBER
+						*/
+
+				}
 ;
 
 
@@ -480,6 +492,10 @@ Expr:	SEMICOLON {
 					Expr
 			  WRITE     getValue(ID)
 		*/
+
+	} | WRITE NEWLINECHAR SEMICOLON { printf(GRAY "RECOGNIZED RULE: Print New Line\n\n" RESET); 
+
+			makeMIPSNewLine();
 
 
 	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 

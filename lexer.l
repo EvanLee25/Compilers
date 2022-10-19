@@ -294,6 +294,14 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
+"~nl"  {
+	chars++;
+	printf("%s : NEWLINECHAR\n", yytext);
+	yylval.string = strdup(yytext);
+    return NEWLINECHAR;
+     
+}
+
 {STRINGLITERAL}  {
 	chars++;
 	printf("%s : STRING LITERAL\n", yytext);

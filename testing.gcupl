@@ -1,3 +1,15 @@
 float f;
-f = 1.9;
+float g;
+int x;
+int y;
+int z;
+x = 10;
+y = 5;
+z = x * y + 50;
+f = 1.0;
+g = 2.0;
 write f;
+write ~nl;      /* this is how to write a newline */
+write g;
+write ~nl;
+write z;
