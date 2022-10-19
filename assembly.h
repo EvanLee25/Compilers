@@ -62,16 +62,24 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     int itemID2;
     char* itemValue1;
     char* itemValue2;
+    int type = strcmp(getVariableType(id1, "G"), "CHR");
 
     itemID1 = getItemID(id1);
     itemID2 = getItemID(id2);
     itemValue1 = getValue(id1, scope);
     itemValue2 = getValue(id2, scope);
 
-    fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
-    //fprintf(tempMIPS, "li $t%d, %s\n", itemID2, itemValue2); // this just prints that the second id is the value that it already is, redundant
-    fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
+    if (type == 1) { // if not char
 
+        fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
+        fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
+
+    } else if (type == 0) { // if char
+
+        fprintf(tempMIPS, "\nli $t%d, '%s'       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
+        fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
+        
+    }
     fclose(tempMIPS);
 }
 
@@ -118,10 +126,7 @@ void createMIPSCharAssignment (char id[50], char chr[50]) {
 
     itemID = getItemID(id);
 
-    // the char takes the first apostrophe for some reason, need to remove this
-    char *result = chr + 1; // removes first character
-
-    fprintf(tempMIPS, "\nli $t%d, '%s'     # load the value of %s into $t%d\n", itemID, result, id, itemID);
+    fprintf(tempMIPS, "\nli $t%d, '%s'     # load the value of %s into $t%d\n", itemID, chr, id, itemID);
 
     fclose(tempMIPS);
 }

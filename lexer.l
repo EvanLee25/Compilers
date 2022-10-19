@@ -235,8 +235,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
     return EXPONENT;
-     
-}
+}  
 
 "%"  {
 	chars++;
@@ -283,6 +282,14 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
     return COMMA;
+     
+}
+
+"'"  {
+	chars++;
+	printf("%s : APOSTROPHE\n", yytext);
+    yylval.string = strdup(yytext);
+    return APOSTROPHE;
      
 }
 

@@ -65,6 +65,8 @@ char operator;
 %token <string> COMMA
 %token <string> SEMICOLON
 %token <string> NEWLINECHAR
+%token <string> APOSTROPHE
+%token <string> LETTER
 
 %token <string> STRINGLITERAL
 %token <string> CHARLITERAL
@@ -254,6 +256,9 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 			
 			} |	ID EQ CHARLITERAL SEMICOLON	  { printf(GRAY "RECOGNIZED RULE: Char Variable Initialization \n\n" RESET);		
 
+							// remove apostrophes from charliteral
+							char* str = removeApostrophes($3);
+
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -263,23 +268,23 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								}
 
 								// is the statement redundant
-								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								if (redundantValue($1, "G", str) == 0) { // if statement is redundant
 								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
 									printf(RED "::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
 									exit(0);
 								}
 
 							// symbol table
-							updateValue($1, "G", $3);
+							updateValue($1, "G", str);
 							
 							// ast
-							$$ = AST_BinaryExpression("=",$1,$3);
+							$$ = AST_BinaryExpression("=",$1,str);
 
 							// ir code
-							createCharAssignment($1, $3);
+							createCharAssignment($1, str);
 
 							// mips code
-							createMIPSCharAssignment($1, $3);
+							createMIPSCharAssignment($1, str);
 
 							// code optimization
 								// N/A
@@ -374,6 +379,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 						// are the types of the id's the same
 						compareTypes($1, $3, "G");
+						showSymTable();
 
 					// symbol table
 					updateValue($1, "G", getValue($3, "G"));

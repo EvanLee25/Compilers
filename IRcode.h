@@ -98,10 +98,7 @@ void createCharAssignment(char id[50], char chr[50]){
     int itemID;
     itemID = getItemID(id);
 
-    // remove the apostrophes from the char
-    char *result = chr + 1; // removes first character
-
-    fprintf(IRcode, "T%d = %s\n", itemID, result);
+    fprintf(IRcode, "T%d = '%s'\n", itemID, chr);
     fclose(IRcode);
 }
 

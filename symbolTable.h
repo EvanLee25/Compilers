@@ -88,14 +88,8 @@ void updateValue(char itemName[50], char scope[50], char value[50]) {
 		int isChar = strcmp(type, "CHR");
 		int isFloat = strcmp(type, "FLT");
 
-		if( str1 == 0 && str2 == 0 && isInt == 0 || str1 == 0 && str2 == 0 && isFloat == 0) {
+		if( str1 == 0 && str2 == 0 ) {
 			strcpy(symTabItems[i].value, value); // update value in sym table
-		} else if ( str1 == 0 && str2 == 0 && isChar == 0) {
-			// remove apostrophes
-			//printf(PINK "\n\n--------PASS--------\n\n" RESET);
-			char *result = value + 1; // removes first character
-    		result[strlen(result) - 1] = '\0'; // removes last character
-			strcpy(symTabItems[i].value, result); // update value in sym table
 		}
 	}
 
@@ -290,6 +284,14 @@ int isChar(char itemName[50]) {
 	} else {
 		return 0;
 	}
+}
+
+char* removeApostrophes(char str[50]) {
+
+	char *result = str + 1; // removes first character
+    result[strlen(result) - 1] = '\0'; // removes last character
+	return result;
+
 }
 
 /*

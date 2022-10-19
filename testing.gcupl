@@ -1,15 +1,15 @@
-float f;
-float g;
+char a;
+char b;
 int x;
-int y;
-int z;
-x = 10;
-y = 5;
-z = x * y + 50;
-f = 1.0;
-g = 2.0;
-write f;
-write ~nl;      /* this is how to write a newline */
-write g;
+x = 12;
+a = 'a';
+b = 'b';
+write a;
 write ~nl;
-write z;
+write b;
+b = a;
+write ~nl;
+write b;
+write ~nl;
+write x;
+
