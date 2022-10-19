@@ -1,15 +1,8 @@
-char a;
-char b;
-int x;
-x = 12;
-a = 'a';
-b = 'b';
-write a;
-write ~nl;
-write b;
-b = a;
-write ~nl;
-write b;
-write ~nl;
-write x;
+float f;
+float g;
+float h;
+f = 1.5;
+g = 2.5;
+h = f;
+write h;
 

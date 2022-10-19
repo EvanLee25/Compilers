@@ -379,7 +379,6 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 						// are the types of the id's the same
 						compareTypes($1, $3, "G");
-						showSymTable();
 
 					// symbol table
 					updateValue($1, "G", getValue($3, "G"));
@@ -576,9 +575,9 @@ Math: 		NUMBER Operator Math {
 				// code optimization
 					// mark the id as used
 					isUsed($1, "G");
-
+			
 			} | NUMBER {
-
+ 
 				// add to number array
 				addToNumArray($1);
 
@@ -645,13 +644,13 @@ int main(int argc, char**argv)
 	showSymTable();
 	printf("\n\n\n ######################" RESET);
 	printf(PINK " END SYMBOL TABLE " RESET);
-	printf("###################### \n\n\n\n" RESET);
+	printf("###################### \n\n" RESET);
 	
-	printf("\n\n\n ######################" RESET);
-	printf(PINK " REMOVE UNUSED VARIABLES " RESET);
-	printf("###################### \n\n\n\n" RESET);
+	//printf("\n\n\n ######################" RESET);
+	//printf(PINK " REMOVE UNUSED VARIABLES " RESET);
+	//printf("###################### \n\n\n\n" RESET);
 	//cleanAssemblyCodeOfUnsuedVariables();
-	printf("############################################# \n\n\n\n" RESET);
+	//printf("############################################# \n\n\n\n" RESET);
 }
 
 void yyerror(const char* s) {

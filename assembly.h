@@ -62,23 +62,29 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     int itemID2;
     char* itemValue1;
     char* itemValue2;
-    int type = strcmp(getVariableType(id1, "G"), "CHR");
+    int typeInt = strcmp(getVariableType(id1, "G"), "INT");
+    int typeChar = strcmp(getVariableType(id1, "G"), "CHR");
+    int typeFloat = strcmp(getVariableType(id1, "G"), "FLT");
 
     itemID1 = getItemID(id1);
     itemID2 = getItemID(id2);
     itemValue1 = getValue(id1, scope);
     itemValue2 = getValue(id2, scope);
 
-    if (type == 1) { // if not char
+    if (typeInt == 0) { // if not char
 
         fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
         fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
 
-    } else if (type == 0) { // if char
+    } else if (typeChar == 0) { // if char
 
         fprintf(tempMIPS, "\nli $t%d, '%s'       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
         fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
-        
+
+    } else if (typeFloat == 0) {
+
+        fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d, %s = %s\n", itemID1, id2, id2, itemID1, id1, id2);
+
     }
     fclose(tempMIPS);
 }
