@@ -1,8 +1,9 @@
-float f;
-float g;
-float h;
-f = 1.5;
-g = 2.5;
-h = f;
-write h;
-
+char foo[5];
+int foo;
+foo[0] = 'h';
+foo[1] = 'e';
+foo[2] = 'l';
+foo[3] = 'l';
+foo[4] = 'o';
+foo = 12 + 1 * 9;
+write foo;
