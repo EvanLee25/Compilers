@@ -261,6 +261,22 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
+"["  {
+	chars++;
+	printf("%s : LBRACE\n", yytext);
+    yylval.string = strdup(yytext);
+    return LBRACE;
+     
+}
+
+"]"  {
+	chars++;
+	printf("%s : RBRACE\n", yytext);
+    yylval.string = strdup(yytext);
+    return RBRACE;
+     
+}
+
 "{"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
