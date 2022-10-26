@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #define PINK "\x1b[1;95m"
+#define RED  "\x1b[1;31m"
 #define RESET "\x1b[0m"
 
 #define YY_DECL int yylex()
@@ -382,6 +383,6 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 }
 
 .  {printf("%s", yytext);
-	printf(PINK" : Unrecognized symbol at line %d char %d\n" RESET, lines,chars);}
+	printf(RED " : Unrecognized symbol on line %d\n" RESET, lines);}
 
 %%
