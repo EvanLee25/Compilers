@@ -20,15 +20,15 @@ void createBinaryOperation(char op[1], const char* id1, const char* id2){
     fclose(IRcode);
 }
 
-void createIDtoIDAssignment(char * id1, char * id2) {
+void createIDtoIDAssignment(char * id1, char * id2, char scope[50]) {
     // e.g. x = y;
     // This is the temporary approach, until temporary variables management is implemented
     
     IRcode = fopen("IRcode.ir", "a");
     int itemID1;
     int itemID2;
-    itemID1 = getItemID(id1);
-    itemID2 = getItemID(id2);
+    itemID1 = getItemID(id1,scope);
+    itemID2 = getItemID(id2,scope);
 
     //fprintf(IRcode, "T%d = %s\n", itemID1, id1);
     //fprintf(IRcode, "T%d = %s\n", itemID2, id2);
@@ -36,78 +36,78 @@ void createIDtoIDAssignment(char * id1, char * id2) {
     fclose(IRcode);
 }
 
-void createIntDefinition(char id[50]) {
+void createIntDefinition(char id[50],char scope[50]) {
     // e.g int x;
     
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(IRcode, "T%d = %s\n", itemID, id);
     fclose(IRcode);
 }
 
-void createFloatDefinition(char id[50]) {
+void createFloatDefinition(char id[50], char scope[50]) {
     // e.g float f;
     
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(IRcode, "T%d = %s\n", itemID, id);
     fclose(IRcode);
 }
 
-void createCharDefinition(char id[50]) {
+void createCharDefinition(char id[50],char scope[50]) {
     // e.g char a;
 
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(IRcode, "T%d = %s\n", itemID, id);
     fclose(IRcode);
 }
 
-void createIntAssignment(char id[50], char num[50]){
+void createIntAssignment(char id[50], char num[50],char scope[50]){
     // e.g. x = 5;
   
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(IRcode, "T%d = %s\n", itemID, num);
     fclose(IRcode);
 }
 
-void createFloatAssignment(char id[50], char num[50]){
+void createFloatAssignment(char id[50], char num[50],char scope[50]){
     // e.g. f = 5;
   
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(IRcode, "T%d = %s\n", itemID, num);
     fclose(IRcode);
 }
 
-void createCharAssignment(char id[50], char chr[50]){
+void createCharAssignment(char id[50], char chr[50], char scope[50]){
     // e.g. a = 'h';
   
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(IRcode, "T%d = '%s'\n", itemID, chr);
     fclose(IRcode);
 }
 
-void createWriteId(char id[50]){
+void createWriteId(char id[50], char scope[50]){
     // e.g. write x;
   
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf (IRcode, "output T%d\n", itemID);
     fclose(IRcode);

@@ -66,8 +66,8 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     int typeChar = strcmp(getVariableType(id1, "G"), "CHR");
     int typeFloat = strcmp(getVariableType(id1, "G"), "FLT");
 
-    itemID1 = getItemID(id1);
-    itemID2 = getItemID(id2);
+    itemID1 = getItemID(id1, scope);
+    itemID2 = getItemID(id2, scope);
     itemValue1 = getValue(id1, scope);
     itemValue2 = getValue(id2, scope);
 
@@ -89,13 +89,13 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     fclose(tempMIPS);
 }
 
-void createMIPSIntAssignment (char id[50], char num[50]){
+void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
     // e.g. x = 5;
 
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
 
@@ -103,7 +103,7 @@ void createMIPSIntAssignment (char id[50], char num[50]){
 
 }
 
-void createMIPSFloatAssignment (char id[50], char num[50]){
+void createMIPSFloatAssignment (char id[50], char num[50], char scope[50]){
     // e.g. f = 5;
 
     // SEPARATE FILE FOR f: .float 1.0 HERE
@@ -116,7 +116,7 @@ void createMIPSFloatAssignment (char id[50], char num[50]){
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
 
@@ -124,26 +124,26 @@ void createMIPSFloatAssignment (char id[50], char num[50]){
 
 }
 
-void createMIPSCharAssignment (char id[50], char chr[50]) {
+void createMIPSCharAssignment (char id[50], char chr[50], char scope[50]) {
     // e.g. x = 5;
 
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nli $t%d, '%s'     # load the value of %s into $t%d\n", itemID, chr, id, itemID);
 
     fclose(tempMIPS);
 }
 
-void createMIPSIntDeclaration(char id[50]) {
+void createMIPSIntDeclaration(char id[50], char scope[50]) {
     // e.g. int x;
 
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "li $t%d, %s\n", itemID, id);
 
@@ -151,12 +151,12 @@ void createMIPSIntDeclaration(char id[50]) {
 
 }
 
-void createMIPSWriteInt(char id[50]){
+void createMIPSWriteInt(char id[50], char scope[50]){
     
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nli $v0, 1       # call code to print an integer\n");
     fprintf(tempMIPS, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
@@ -166,12 +166,12 @@ void createMIPSWriteInt(char id[50]){
 
 }
 
-void createMIPSWriteFloat(char id[50]){
+void createMIPSWriteFloat(char id[50], char scope[50]){
     
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nli $v0, 2         # call code to print a float\n");
     fprintf(tempMIPS, "mov.s $f12, $f%d   # move the value of %s into $f12\n", itemID, id);
@@ -181,12 +181,12 @@ void createMIPSWriteFloat(char id[50]){
 
 }
 
-void createMIPSWriteChar(char id[50]){
+void createMIPSWriteChar(char id[50], char scope[50]){
     
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nli $v0, 11      # call code to print a single char\n");
     fprintf(tempMIPS, "move $a0, $t%d   # move the value of %s into $a0\n", itemID, id);
@@ -196,14 +196,14 @@ void createMIPSWriteChar(char id[50]){
 
 }
 
-void createMIPSAddition(char id[50], char num[50]) {
+void createMIPSAddition(char id[50], char num[50], char scope[50]) {
     // e.g. x = 5 + y + 7 + 12;
     // this calculation is optimized to be done in the parser, so this is just another integer assignment
 
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID;
 
-    itemID = getItemID(id);
+    itemID = getItemID(id, scope);
 
     fprintf(tempMIPS, "\nli $t%d, %s       # load the added value of %s into $t%d\n", itemID, num, id, itemID);
 

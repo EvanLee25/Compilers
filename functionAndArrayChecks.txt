@@ -1,0 +1,61 @@
+Function Declaration
+    - parameters
+        -could limit number of parameters and have a column for each parameter (not elegant)
+        - ParamList = array of parameters
+            - struct funcEntry{
+                string funcName;
+                string returnType;
+            }
+            - struct paramEntry{
+                string paramName;
+                string paramType;
+                paramEntry[10] ParamList;
+            }
+    - body
+    - return values
+
+arrays
+    - bounds
+    - values
+
+Semantic actions by parser
+    - symbol table management: global vs function scope
+
+Building the AST
+
+    - Function
+                funcName
+            type        ParamList
+                                body
+
+            ParamList
+        param 1    ParamList
+                param2      ParamList
+                        param3      null
+
+Semantic checks
+    - verify that function use matches Declaration
+    - result = average(a,b,c);
+    Checks:
+        - the function has been declared
+        - check return type of "average()" vs type of  "result"
+        - check number of parameters vs Declaration
+        - check the type of each parameter
+
+        average (1,1,1)   vs.     int x,y,z = 1;  average (x,y,z)
+
+        - check result/return value has been declared
+
+        result = avg (a,b,c)
+
+        or
+
+        void function(){
+            float result;
+            result = average (a,b,c)
+        }
+
+
+IR code
+
+Assembly

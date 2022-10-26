@@ -21,6 +21,8 @@ extern FILE* yyin;
 void yyerror(const char* s);
 char currentScope[50]; /* global or the name of the function */
 char operator;
+//initialize scope and symbol table
+char scope[50] = "G" ;
 
 %}
 
@@ -36,6 +38,7 @@ char operator;
 %token <string> INT
 %token <string> FLOAT
 %token <string> FLOAT_NUM
+%token <string> VOID
 
 %token <string> IF
 %token <string> ELSE
@@ -60,6 +63,8 @@ char operator;
 %token <string> MODULUS
 %token <string> LPAREN
 %token <string> RPAREN
+%token <string> LBRACKET
+%token <string> RBRACKET
 %token <string> LBRACE
 %token <string> RBRACE
 %token <string> COMMA
@@ -106,7 +111,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl StmtList Expr IDEQExpr Math Operator
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDecl Block StmtList Expr IDEQExpr Math Operator
 
 %start Program
 
@@ -144,15 +149,59 @@ DeclList:	Decl DeclList {
 
 };
 
-Decl:	VarDecl { //printf("\nDecl -> VarDecl \n");
+Decl:	FuncDecl {
 		// ast
 		$$ = $1;
 
-	} | StmtList { //printf("\nDecl -> StmtList \n");
+	} | StmtList {
 		// ast
 		$$ = $1;
 
+	} | VarDecl {
+		// ast
+		$$ = $1;	
 };
+
+FuncDecl: VOID ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope);} ParamDecl RPAREN Block {
+							//showSymTable();
+							printf("\nFUNCTION DECLARATION FOUND.\n");
+							addItem("testing","FUNC","VOID","NULL",$2,0);
+							// ast
+							$$ = AST_assignment("FUNC",$1,$2);
+						
+						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+							//showSymTable();
+							printf("\nFUNCTION DECLARATION FOUND.\n");
+
+							// ast
+							//$$ = $1;
+						
+						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+							//showSymTable();
+							printf("\nFUNCTION DECLARATION FOUND.\n");
+
+							// ast
+							//$$ = $1;
+						
+						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+							//showSymTable();
+							printf("\nFUNCTION DECLARATION FOUND.\n");
+
+							// ast
+							//$$ = $1;	
+							
+						}
+
+ParamDecl: COMMA {//$$ = $1;
+}
+
+Block: LBRACKET RBRACKET {
+	// ast
+	//$$ = $1;
+	
+	// reset scope back to global after function is over
+	strcpy(scope,"G");
+}
 
 StmtList:	 Expr StmtList {$1->left = $2; $$ = $1;}
 			| Expr {$$ = $1;}
@@ -166,19 +215,19 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
-								if (found($2,"G") == 1) {
+								if (found($2,scope) == 1) {
 									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2);
 									exit(0); // variable already declared
 								}
 
 							// symbol table
-							addItem($2, "VAR", "INT", 0, "G", 0);
+							addItem($2, "VAR", "INT", 0, scope, 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
 
 							// ir code
-							createIntDefinition($2);
+							createIntDefinition($2, scope);
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
 							//createMIPSIntDeclaration($2);
@@ -196,29 +245,29 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared
 								symTabAccess();
-								if (found($1,"G") == 0) { //if variable not declared yet
+								if (found($1,scope) == 0) { //if variable not declared yet
 									printf(RED "::::> CHECK FAILED: Variable %s not initialized.\n" RESET,$1);
 									exit(0); // variable already declared
 								}
 
 								// is the statement redundant
-								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								if (redundantValue($1, scope, $3) == 0) { // if statement is redundant
 								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
 									printf(RED "::::> CHECK FAILED: Variable %s has already been declared as: %s.\n\n" RESET,$1,$3);
 									exit(0);
 								}
 
 							// symbol table
-							updateValue($1, "G", $3); // update the value of whatever id is passed in
+							updateValue($1, scope, $3); // update the value of whatever id is passed in
 
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
 
 							// ir code
-							createIntAssignment($1,$3);
+							createIntAssignment($1,$3, scope);
 
 							// mips code
-							createMIPSIntAssignment($1, $3);
+							createMIPSIntAssignment($1, $3, scope);
 
 							// code optimization
 								// N/A
@@ -233,18 +282,18 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
-								if (found($2,"G") == 1) {
+								if (found($2,scope) == 1) {
 									exit(0); // variable already declared
 								}
 
 							// symbol table	
-							addItem($2, "VAR", "CHR", 0, "G", 0);
+							addItem($2, "VAR", "CHR", 0, scope, 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
 
 							// ir code
-							createCharDefinition($2);
+							createCharDefinition($2, scope);
 							
 							// code optimization
 								// N/A
@@ -262,29 +311,29 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
-								if (found($1,"G") == 0) { // if variable not declared yet
+								if (found($1,scope) == 0) { // if variable not declared yet
 									printf(RED "::::> CHECK FAILED: Variable '%s' not initialized.\n" RESET,$1);
 									exit(0); // variable already declared
 								}
 
 								// is the statement redundant
-								if (redundantValue($1, "G", str) == 0) { // if statement is redundant
+								if (redundantValue($1, scope, str) == 0) { // if statement is redundant
 								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
 									printf(RED "::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
 									exit(0);
 								}
 
 							// symbol table
-							updateValue($1, "G", str);
+							updateValue($1, scope, str);
 							
 							// ast
 							$$ = AST_BinaryExpression("=",$1,str);
 
 							// ir code
-							createCharAssignment($1, str);
+							createCharAssignment($1, str, scope);
 
 							// mips code
-							createMIPSCharAssignment($1, str);
+							createMIPSCharAssignment($1, str, scope);
 
 							// code optimization
 								// N/A
@@ -299,19 +348,19 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
-								if (found($2,"G") == 1) {
+								if (found($2,scope) == 1) {
 									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2);
 									exit(0); // variable already declared
 								}
 
 							// symbol table
-							addItem($2, "VAR", "FLT", 0, "G", 0);
+							addItem($2, "VAR", "FLT", 0, scope, 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
 
 							// ir code
-							createFloatDefinition($2);
+							createFloatDefinition($2, scope);
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
 							//createMIPSIntDeclaration($2);
@@ -328,29 +377,29 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared
 								symTabAccess();
-								if (found($1,"G") == 0) { //if variable not declared yet
+								if (found($1,scope) == 0) { //if variable not declared yet
 									printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized.\n\n" RESET,$1);
 									exit(0); // variable already declared
 								}
 
 								// is the statement redundant
-								if (redundantValue($1, "G", $3) == 0) { // if statement is redundant
+								if (redundantValue($1, scope, $3) == 0) { // if statement is redundant
 								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
 									printf(RED "\n::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
 									exit(0);
 								}
 
 							// symbol table
-							updateValue($1, "G", $3); // update the value of whatever id is passed in
+							updateValue($1, scope, $3); // update the value of whatever id is passed in
 
 							// ast
 							$$ = AST_BinaryExpression("=",$1,$3);
 
 							// ir code
-							createFloatAssignment($1,$3);
+							createFloatAssignment($1,$3, scope);
 
 							// mips code
-							createMIPSFloatAssignment($1, $3);
+							createMIPSFloatAssignment($1, $3, scope);
 
 							// code optimization
 								// N/A
@@ -366,36 +415,36 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 						// are both variables already declared?
 						symTabAccess();
 						printf("\n");
-						if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
+						if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
 							printf("ERROR: Variable %s or %s not declared.\n",$1,$3);
 							exit(0); // variable already declared
 						}
 
 						// does the second id have a value?
-						initialized($3, "G");
+						initialized($3, scope);
 
 						// are the id's both variables?
-						compareKinds($1, $3, "G");
+						compareKinds($1, $3, scope);
 
 						// are the types of the id's the same
-						compareTypes($1, $3, "G");
+						compareTypes($1, $3, scope);
 
 					// symbol table
-					updateValue($1, "G", getValue($3, "G"));
+					updateValue($1, scope, getValue($3, scope));
 
 					// ast
 					$$ = AST_BinaryExpression("=",$1,$3);
 
 					// ir code
-					createIDtoIDAssignment($1, $3);
+					createIDtoIDAssignment($1, $3, scope);
 
 					// mips code
-					createMIPSIDtoIDAssignment($1, $3, "G");
+					createMIPSIDtoIDAssignment($1, $3, scope);
 
 					// code optimization
 						// mark the two id's as used
-						isUsed($1, "G");
-						isUsed($3, "G");
+						isUsed($1, scope);
+						isUsed($3, scope);
 
 
 				} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
@@ -424,56 +473,56 @@ Expr:	SEMICOLON {
 			// are both variables already declared?
 			symTabAccess();
 			printf("\n");
-			if (found($1,"G") == 0 || found($3,"G") == 0) { // if variable not declared yet
+			if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
 				printf("ERROR: Variable %s or %s not declared.\n",$1,$3);
 				exit(0); // variable already declared
 			}
 
 			// does the second id have a value?
-			initialized($3, "G");
+			initialized($3, scope);
 
 			// are the id's both variables?
-			compareKinds($1, $3, "G");
+			compareKinds($1, $3, scope);
 
 			// are the types of the id's the same
-			compareTypes($1, $3, "G");
+			compareTypes($1, $3, scope);
 
 		// symbol table
-		updateValue($1, "G", getValue($3, "G"));
+		updateValue($1, scope, getValue($3, scope));
 
 		// ast
 		$$ = AST_BinaryExpression("=",$1,$3);
 
 		// ir code
-		createIDtoIDAssignment($1, $3);
+		createIDtoIDAssignment($1, $3, scope);
 
 		// mips code
-		createMIPSIDtoIDAssignment($1, $3, "G");
+		createMIPSIDtoIDAssignment($1, $3, scope);
 
 		// code optimization
 			// mark the two id's as used
-			isUsed($1, "G");
-			isUsed($3, "G");
+			isUsed($1, scope);
+			isUsed($3, scope);
 
 
 	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement\n\n" RESET); 
 
 		// semantic checks
 			// is the id initialized as a value?
-			initialized($2, "G");
+			initialized($2, scope);
 
 		// symbol table
 			// N/A
 
 		// ast
-		$$ = AST_BinaryExpression("Expr", $1, getValue($2, "G"));
+		$$ = AST_BinaryExpression("Expr", $1, getValue($2, scope));
 
 		// ir code
-		createWriteId($2);
+		createWriteId($2, scope);
 
 		// mips code
 			// get the type of the variable
-			char* type = getVariableType($2, "G");
+			char* type = getVariableType($2, scope);
 
 			// determine if its int or char
 			int isInt = strcmp(type, "INT");
@@ -482,16 +531,16 @@ Expr:	SEMICOLON {
 
 			// run correct mips function according to type
 			if (isInt == 0) { // if the variable is an integer
-				createMIPSWriteInt($2);
+				createMIPSWriteInt($2, scope);
 			} else if (isChar == 0) { // if the variable is a char
-				createMIPSWriteChar($2);
+				createMIPSWriteChar($2, scope);
 			} else if (isFloat == 0) {
-				createMIPSWriteFloat($2);
+				createMIPSWriteFloat($2, scope);
 			}
 
 		// code optimization
 			// mark the id as used
-			isUsed($2, "G");
+			isUsed($2, scope);
 
 		/*
 					Expr
@@ -534,20 +583,20 @@ IDEQExpr: ID EQ Math {
 		wipeArrays();
 
 	// symbol table
-	updateValue($1, "G", total);
+	updateValue($1, scope, total);
 		
 	// ast
 	$$ = AST_BinaryExpression("=", $1, total);
 
 	// ir code
-	createIntAssignment($1, total);
+	createIntAssignment($1, total, scope);
 
 	// mips code
-	createMIPSAddition($1, total);
+	createMIPSAddition($1, total, scope);
 
 	// code optimization
 		// mark the id as used
-		isUsed($1, "G");
+		isUsed($1, scope);
 
 }
 
@@ -560,21 +609,21 @@ Math: 		NUMBER Operator Math {
 
 				// semantic checks
 					// does the id have a value?
-					initialized($1, "G");
+					initialized($1, scope);
 
 					// is the id a char?
-					if (isChar($1) == 1) {
+					if (isChar($1,scope) == 1) {
 						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
 						exit(0);
 					}
 
 				// add to number array
-				addToNumArray(getValue($1, "G"));
+				addToNumArray(getValue($1, scope));
 				addToOpArray($2);
 
 				// code optimization
 					// mark the id as used
-					isUsed($1, "G");
+					isUsed($1, scope);
 			
 			} | NUMBER {
  
@@ -585,20 +634,20 @@ Math: 		NUMBER Operator Math {
 
 				// semantic checks
 					// does the id have a value?
-					initialized($1, "G");
+					initialized($1, scope);
 
 					// is the id a char?
-					if (isChar($1) == 1) {
+					if (isChar($1,scope) == 1) {
 						printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
 						exit(0);
 					}
 
 				// add to number array
-				addToNumArray(getValue($1, "G"));
+				addToNumArray(getValue($1, scope));
 
 				// code optimization
 					// mark the id as used
-					isUsed($1, "G");
+					isUsed($1, scope);
 
 }
 
@@ -618,7 +667,10 @@ int main(int argc, char**argv)
 	#endif
 */
 	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
-	
+
+	initializeSymbolTable();
+
+
 	// initialize ir code file
 	initIRcodeFile();
 

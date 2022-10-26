@@ -1,9 +1,7 @@
 #### IR Code ####
 
-T0 = f
-T1 = g
-T2 = h
-T0 = 1.5
-T1 = 2.5
-T2 = T0
-output T2
+T0 = y
+T1 = z
+T2 = k
+T3 = i
+T4 = x

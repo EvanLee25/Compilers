@@ -1,8 +1,7 @@
-float f;
-float g;
-float h;
-f = 1.5;
-g = 2.5;
-h = f;
-write h;
-
+char y;
+float z;
+int k;
+char i;
+void evan (,) {}
+void testfunction (,) {}
+int x;

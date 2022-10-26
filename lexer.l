@@ -69,6 +69,14 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
+"void"  {
+	words++; chars += strlen(yytext);
+	printf("%s : TYPE VOID\n", yytext);
+    yylval.string = strdup(yytext);
+    return VOID;
+     
+}
+
 "if"  {
 	words++; chars += strlen(yytext);
 	printf("%s : IF STATEMENT\n", yytext);
@@ -261,7 +269,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
-"{"  {
+"["  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
@@ -269,11 +277,27 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
-"}"  {
+"]"  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
     return RBRACE;
+     
+}
+
+"{"  {
+	chars++;
+	printf("%s : Left Bracket\n", yytext);
+    yylval.string = strdup(yytext);
+    return LBRACKET;
+     
+}
+
+"}"  {
+	chars++;
+	printf("%s : Right Bracket\n", yytext);
+    yylval.string = strdup(yytext);
+    return RBRACKET;
      
 }
 

@@ -3,8 +3,17 @@ Program -----> DeclList
 DeclList -----> Decl DeclList 
               | Decl
 
-Decl -----> VarDecl 
+Decl -----> FuncDecl
+          | VarDecl 
           | StmtList
+
+FuncDecl -----> Type ID LPAREN ParamDecl RPAREN Block
+
+ParamDecl -----> ???
+
+Block -----> ???
+
+Type -----> ???
 
 StmtList -----> Expr 
               | Expr StmtList
