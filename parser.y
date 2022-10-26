@@ -529,6 +529,26 @@ Expr:	SEMICOLON {
 			// ast
 			$$ = AST_assignment($1,$3,$6);
 
+
+	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
+
+			// turn the integer returned from calculate() into a string
+			char total[50];
+			sprintf(total, "%d", calculate());
+
+			// wipe the arrays
+			wipeArrays();
+	
+			// convert index to integer
+			int index = atoi($3);
+
+			// array table
+			modifyIndex(index, total);
+
+			// ast
+			$$ = AST_assignment($1,$3,total);
+
+	
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Array Index\n\n" RESET);
 
 			// convert index to integer
@@ -542,6 +562,7 @@ Expr:	SEMICOLON {
 
 			// ast
 			$$ = AST_assignment($1,$3,str);
+
 
 } 
 
@@ -593,10 +614,10 @@ Math: 		NUMBER Operator Math {
 					initialized($1, "G");
 
 					// is the id a char?
-					if (isChar($1) == 1) {
-						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
-						exit(0);
-					}
+					// if (isChar($1) == 1) {
+					// 	printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+					// 	exit(0);
+					// }
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
@@ -617,11 +638,11 @@ Math: 		NUMBER Operator Math {
 					// does the id have a value?
 					initialized($1, "G");
 
-					// is the id a char?
-					if (isChar($1) == 1) {
-						printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
-						exit(0);
-					}
+					// // is the id a char?
+					// if (isChar($1) == 1) {
+					// 	printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
+					// 	exit(0);
+					// }
 
 				// add to number array
 				addToNumArray(getValue($1, "G"));
