@@ -138,7 +138,7 @@ Program: DeclList { //printf("\nProgram -> DeclList \n");
 		printf("####################### \n\n" RESET);
 };
 
-DeclList:	Decl DeclList {
+DeclList:   Decl DeclList {
 		// ast
 		$1->left = $2;
 		$$ = $1;
@@ -154,41 +154,38 @@ Decl:	FuncDecl {
 		// ast
 		$$ = $1;
 
+	} | VarDecl {
+		// ast
+		$$ = $1;
+
 	} | StmtList {
 		// ast
 		$$ = $1;
 
-	} | VarDecl {
-		// ast
-		$$ = $1;	
-	} | ArrDecl {
-
-		$$ = $1;
-
 };
 
-FuncDecl: VOID ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope);} ParamDecl RPAREN Block {
+FuncDecl: VOID ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"VOID"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope);} ParamDecl RPAREN Block {
 							//showSymTable();
 							printf("\nFUNCTION DECLARATION FOUND.\n");
-							addItem("testing","FUNC","VOID","NULL",$2,0);
+							addItem("testing","FUNC","VOID",$2,0);
 							// ast
 							$$ = AST_assignment("FUNC",$1,$2);
 						
-						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"INT"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
 							//showSymTable();
 							printf("\nFUNCTION DECLARATION FOUND.\n");
 
 							// ast
 							//$$ = $1;
 						
-						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"CHAR"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
 							//showSymTable();
 							printf("\nFUNCTION DECLARATION FOUND.\n");
 
 							// ast
 							//$$ = $1;
 						
-						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"FLOAT"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
 							//showSymTable();
 							printf("\nFUNCTION DECLARATION FOUND.\n");
 
@@ -208,7 +205,7 @@ Block: LBRACKET RBRACKET {
 	strcpy(scope,"G");
 }
 
-StmtList:	 Expr StmtList {$1->left = $2; $$ = $1;}
+StmtList:	| Expr StmtList {$1->left = $2; $$ = $1;}
 			| Expr {$$ = $1;}
 ;
 
@@ -226,7 +223,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								}
 
 							// symbol table
-							addItem($2, "VAR", "INT", 0, scope, 0);
+							addItem($2, "VAR", "INT", scope, 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
@@ -292,7 +289,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								}
 
 							// symbol table	
-							addItem($2, "VAR", "CHR", 0, scope, 0);
+							addItem($2, "VAR", "CHR", scope, 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
@@ -359,7 +356,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								}
 
 							// symbol table
-							addItem($2, "VAR", "FLT", 0, scope, 0);
+							addItem($2, "VAR", "FLT", scope, 0);
 
 							// ast
 							$$ = AST_assignment("TYPE",$1,$2);
@@ -462,7 +459,50 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								ID	  NUMBER
 						*/
 
-				}
+				
+
+				// ARRAY DECLARATIONS ----------------------------------------------------------------------
+
+				} | INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
+
+							// semantic checks
+								// is the array already declared?
+								symTabAccess();
+								if (found($2,$2) == 1) {
+									printf(RED "\nERROR: Array '%s' already declared.\n" RESET,$2);
+									exit(0); // variable already declared
+								}
+
+							// symbol table
+							//addItem($2, "ARR", "INT", scope, 0);
+							//updateValue($2, scope, $4);
+
+							// array table
+							addArray($2, "ARR", "INT", $4, scope);
+							//initArray($2, $4);
+							//addIndex(0, "15");
+							//showArrTable();
+
+							// ast
+							$$ = AST_assignment(" ARR",$1,$2);
+
+
+			} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Array Index\n\n" RESET);
+
+							// convert index to integer
+							int index = atoi($3);
+
+							// remove apostrophes from charliteral
+							char* str = removeApostrophes($6);
+
+							// array table
+							modifyIndex(index, str);
+
+							// ast
+							$$ = AST_assignment($1,$3,str);
+
+
+} 
 ;
 
 
@@ -557,7 +597,7 @@ Expr:	SEMICOLON {
 			makeMIPSNewLine();
 
 
-	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
+	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Math Statement\n\n" RESET); 
 
 		// ast
 		$$ = $1;
@@ -718,8 +758,8 @@ ArrDecl:	INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: I
 								}
 
 							// symbol table
-							addItem($2, "ARR", "INT", 0, $2, 0);
-							updateValue($2, $2, $4);
+							addItem($2, "ARR", "INT", scope, 0);
+							updateValue($2, scope, $4);
 
 							// array table
 							
@@ -746,7 +786,7 @@ ArrDecl:	INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: I
 								}
 
 							// symbol table
-							addItem($2, "ARR", "CHR", 0, $2, 0);
+							addItem($2, "ARR", "CHR", $2, 0);
 							updateValue($2, $2, $4);
 
 							// array table							
@@ -801,10 +841,10 @@ int main(int argc, char**argv)
 	printf("##################### \n\n\n\n" RESET);
 	showSymTable();
 
-	printf("\n\n ######################" RESET);
-	printf(BPINK " SHOW ARRAY TABLES " RESET);
-	printf("##################### \n\n\n\n" RESET);
-	showArrTable();
+	//printf("\n\n ######################" RESET);
+	//printf(BPINK " SHOW ARRAY TABLES " RESET);
+	//printf("##################### \n\n\n\n" RESET);
+	//showArrTable();
 
 	printf("\n\n\n ######################" RESET);
 	printf(PINK " END SYMBOL TABLE " RESET);
