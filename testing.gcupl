@@ -1,11 +1,3 @@
-char y;
-float z;
-int k;
-int foo2[2];
-char i;
-void evan (,) {}
-void testfunction (,) {}
-int x;
-int foo[12];
+void func () {
 
-x = 10;
+}

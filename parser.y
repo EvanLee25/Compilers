@@ -112,7 +112,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDecl Block StmtList Expr IDEQExpr Math Operator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList ParamDecl Block StmtList Expr IDEQExpr Math Operator ArrDecl
 
 %start Program
 
@@ -164,38 +164,92 @@ Decl:	FuncDecl {
 
 };
 
-FuncDecl: VOID ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"VOID"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope);} ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
-							addItem("testing","FUNC","VOID",$2,0);
-							// ast
-							$$ = AST_assignment("FUNC",$1,$2);
+FuncDecl: VOID ID LPAREN {  printf(GREEN "Function declared \n" RESET); 
+
+								symTabAccess(); 
+								addSymbolTable($2); 
+								strcpy(scope,$2); 
+								printf(":::::::::SCOPE = %s:::::::", scope);
+
+							} ParamDeclList RPAREN Block {
+
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
+								//addItem("testing","FUNC","VOID","NULL",$2,0);
+								// ast
+								$$ = AST_assignment("FUNC",$1,$2);
 						
-						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"INT"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
+						} | INT ID LPAREN { printf(GREEN "Function declared \n" RESET);
+						
+								symTabAccess(); 
+								addSymbolTable($2); 
+								strcpy(scope,$2); 
+								printf(":::::::::SCOPE = %s:::::::",scope); 
+
+							} ParamDeclList RPAREN Block {
+
 							//showSymTable();
 							printf("\nFUNCTION DECLARATION FOUND.\n");
 
 							// ast
 							//$$ = $1;
 						
-						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"CHAR"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
-
-							// ast
-							//$$ = $1;
+						} | CHAR ID LPAREN { printf(GREEN "Function declared \n" RESET); 
 						
-						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"FLOAT"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
+								symTabAccess(); 
+								addSymbolTable($2); 
+								strcpy(scope,$2); 
+								printf(":::::::::SCOPE = %s:::::::",scope); 
 
-							// ast
-							//$$ = $1;	
+							} ParamDeclList RPAREN Block {
+
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
+
+								// ast
+								//$$ = $1;
+							
+						} | FLOAT ID LPAREN { printf(GREEN "Function declared \n" RESET); 
+						
+								symTabAccess(); 
+								addSymbolTable($2); 
+								strcpy(scope,$2); 
+								printf(":::::::::SCOPE = %s:::::::",scope); 
+
+							} ParamDeclList RPAREN Block {
+
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
+
+								// ast
+								//$$ = $1;	
 							
 						}
 
-ParamDecl: COMMA {//$$ = $1;
-}
+ParamDeclList: ParamDecl COMMA ParamDeclList {
+
+					$1->left = $2;
+					$$ = $1;
+
+				} | ParamDecl {
+
+					$$ = $1;
+
+				}
+
+ParamDecl:	| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PARA","INT","NULL",scope,0);
+
+				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PARA","FLT","NULL",scope,0);
+
+				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PARA","CHR","NULL",scope,0);
+
+				}
 
 Block: LBRACKET RBRACKET {
 	// ast
