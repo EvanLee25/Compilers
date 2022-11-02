@@ -76,6 +76,44 @@ void initializeSymbolTable(){
 
 }
 
+char* addBrackets(char str[50], char num[50]) {
+	char arrBrackets[50];
+	char str1[50];
+	strcpy(arrBrackets, "[");
+	strcat(arrBrackets, num);
+	strcat(arrBrackets, "]");
+	//printf(BPINK "\n\n%s\n\n" RESET, arrBrackets);
+	strcpy(str1, str);
+	strcat(str1, arrBrackets);
+	//printf(BPINK "\n\n%s\n\n" RESET, str1);
+	return str1;
+}
+
+void removeChar(char * str, char charToRemove){
+    int i, j;
+    int len = strlen(str);
+    for(i=0; i<len; i++)
+    {
+        if(str[i] == charToRemove)
+        {
+            for(j=i; j<len; j++)
+            {
+                str[j] = str[j+1];
+            }
+            len--;
+            i--;
+        }
+    }
+    
+}
+
+void removeBraces(char str[MAX_NAME_LENGTH]) {
+	char ch = '[';
+	char ch2 = ']';
+	removeChar(str, ch);
+	removeChar(str, ch2);
+}
+
 void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8], char scope[MAX_NAME_LENGTH], int isUsed){
 		for (int i = 0; i<numOfSymbolTables;i++){ //iterate through all scopes
 			int str1 = strcmp(symbolTableScopes[i], scope);
@@ -179,7 +217,8 @@ void updateArrayValue(char itemName[MAX_NAME_LENGTH], int arrayIndex ,char scope
 int getItemID(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
-
+	//printf(BPINK "\nSCOPE = %s" RESET, scope);
+	printf(BPINK "\ngetItemID:  itemID = %s" RESET, itemName);
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
 		

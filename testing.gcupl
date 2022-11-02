@@ -1,30 +1,21 @@
-char y;
-float z;
-int k;
-int foo2[2];
-foo2[0] = 23;
-char doo[4];
-doo[1] = 'd';
-char i;
 
-void evan (,) {
-    int a;
-    int b;
-    int c;
-    write ~nl;
-    int foo[3];
-    foo[1] = 3;
-    a = 10;
-    char doo[4];
-    doo[3] = 'o';
-}
-void testfunction (,) {
-    int foo[3];
-    char easy[5];
-}
+int foo[9];
 int x;
-int foo[12];
-foo[2] = 4;
+int z;
+char a;
+float y;
+y = 9.8;
+a = 'a';
+foo[0] = 4 + 4;
+foo[1] = 12;
+foo[2] = 5;
+x = 15;
+z = 22;
+write x;
+write ~nl;
+write y;
+write ~nl;
+write a;
 
-x = 10;
+
 

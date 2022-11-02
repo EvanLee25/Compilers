@@ -331,7 +331,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							$$ = AST_BinaryExpression("=",$1,$3);
 
 							// ir code
-							createIntAssignment($1,$3, scope);
+							createIntAssignment($1, $3, scope);
 
 							// mips code
 							createMIPSIntAssignment($1, $3, scope);
@@ -634,11 +634,22 @@ Expr:	SEMICOLON {
 			// convert index to integer
 			int index = atoi($3);
 
-			//symbol table value update
+			// symbol table
 			updateArrayValue($1, index, scope, "INT", $6);
 
 			// ast
 			$$ = AST_assignment($1,$3,$6);
+
+			// ir code
+			char temp[50];
+			strcpy(temp, addBrackets($1, $3));
+			printf(BORANGE "\n\n%s\n\n" RESET, temp);
+			createIntAssignment(temp, $6, scope);
+
+			// mips code
+			// remove braces for mips
+			removeBraces(temp);
+			createMIPSIntAssignment(temp, $6, scope);
 
 
 	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
@@ -646,6 +657,7 @@ Expr:	SEMICOLON {
 			// turn the integer returned from calculate() into a string
 			char total[50];
 			sprintf(total, "%d", calculate());
+			wipeArrays();
 	
 			// convert index to integer
 			int index = atoi($3);
@@ -655,6 +667,16 @@ Expr:	SEMICOLON {
 
 			// ast
 			$$ = AST_assignment($1,$3,total);
+
+			// ir code
+			char temp[50];
+			strcpy(temp, addBrackets($1, $3));
+			printf(BORANGE "\n\n%s\n\n" RESET, temp);
+			createIntAssignment(temp, total, scope);
+
+			// mips code
+			removeBraces(temp);
+			createMIPSIntAssignment(temp, total, scope);
 
 	
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Array Index\n\n" RESET);
@@ -671,6 +693,14 @@ Expr:	SEMICOLON {
 			// ast
 			$$ = AST_assignment($1,$3,str);
 
+			// ir code
+			char temp[50];
+			strcpy(temp, addBrackets($1, $3));
+			printf(BORANGE "\n\n%s\n\n" RESET, temp);
+			createIntAssignment(temp, str, scope);
+
+			// mips code
+			createMIPSCharAssignment(temp, str, scope);
 
 } 
 
@@ -702,7 +732,7 @@ IDEQExpr: ID EQ Math {
 	createIntAssignment($1, total, scope);
 
 	// mips code
-	createMIPSAddition($1, total, scope);
+	createMIPSIntAssignment($1, total, scope);
 
 	// code optimization
 		// mark the id as used
@@ -779,38 +809,91 @@ ArrDecl:
 			
 
 			} | INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
-				//int foo[4];
+				// e.g. int foo[4];
+
 							// semantic checks
-								// is the array already declared?
-								symTabAccess();
-								if (found($2,scope) == 1) {
-									printf(RED "\nERROR: Array '%s' already declared.\n" RESET,$2);
-									exit(0); // variable already declared
+							symTabAccess();
+
+								// is the range > 0?
+								if (atoi($4) <= 0) {
+									printf(RED "\nERROR: Array range must be greater than 0.\n" RESET,$2);
+									showSymTable(); // show symbol table
+									exit(0); // array already declared
 								}
 
+								// is the array already declared in this scope?			
+								// add "[0]" to the ID
+								char str1[50];
+								strcpy(str1, addBrackets($2, "0"));
 
+								if (found(str1, scope) == 1) {
+									printf(RED "\nERROR: Array '%s' already declared in this scope.\n" RESET,$2);
+									showSymTable(); // show symbol table
+									exit(0); // array already declared
+								}
+
+							// symbol table
 							addArray($2, "ARR", "INT", $4, scope);
 
 							// ast
 							$$ = AST_assignment("ARR",$1,$2);
 
+							// ir code
+							int range = atoi($4);
+							//printf("\n%d\n", range);
+							for (int i = 0; i < range; i++) {
+								char temp[50];
+								char temp2[50];
+								sprintf(temp, "%d", i);
+								printf("\ntemp = %s", temp);
+								strcpy(temp2, addBrackets($2,temp));
+								printf("\ntemp2 = %s", temp2);
+								createIntDefinition(temp2, scope);
+							}
+
 
 			} | CHAR ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization With Range\n\n" RESET);
-
+				// e.g. char foo[5];
+	
 							// semantic checks
+							symTabAccess();
+
+								// is the range > 0?
+								if (atoi($4) <= 0) {
+									printf(RED "\nERROR: Array range must be greater than 0.\n" RESET,$2);
+									showSymTable(); // show symbol table
+									exit(0); // array already declared
+								}
+
 								// is the array already declared?
-								symTabAccess();
-								if (found($2,scope) == 1) {
-									printf(RED "\nERROR: Array '%s' already declared.\n" RESET,$2);
+								// add "[0]" to the ID
+								char str1[50];
+								strcpy(str1, addBrackets($2, "0"));
+
+								if (found(str1, scope) == 1) {
+									printf(RED "\nERROR: Array '%s' already declared in this scope.\n" RESET,$2);
+									showSymTable();
 									exit(0); // variable already declared
 								}
 
-							//symboltable
+							// symbol table
 							addArray($2, "ARR", "CHR", $4, scope);
 
 							// ast
 							$$ = AST_assignment("ARR",$1,$2);
 
+							// ir code
+							int range = atoi($4);
+							//printf("\n%d\n", range);
+							for (int i = 0; i < range; i++) {
+								char temp[50];
+								char temp2[50];
+								sprintf(temp, "%d", i);
+								printf("\ntemp = %s", temp);
+								strcpy(temp2, addBrackets($2,temp));
+								printf("\ntemp2 = %s", temp2);
+								createIntDefinition(temp2, scope);
+							}
 
 }; 
 

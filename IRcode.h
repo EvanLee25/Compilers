@@ -36,15 +36,21 @@ void createIDtoIDAssignment(char * id1, char * id2, char scope[50]) {
     fclose(IRcode);
 }
 
-void createIntDefinition(char id[50],char scope[50]) {
+void createIntDefinition(char id[50], char scope[50]) {
     // e.g int x;
-    
+    printf(BPINK "\ncreateIntDefintion:  id = %s" RESET, id);
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id, scope);
+    printf("\nITEMID = %d", itemID);
 
-    fprintf(IRcode, "T%d = %s\n", itemID, id);
+    char str[50];
+    strcpy(str, id);
+    printf(BPINK "\nTEST:  str = %s" RESET, str);
+
+    fprintf(IRcode, "T%d = %s\n", itemID, str);
     fclose(IRcode);
+    printf(BLUE "\nIR CODE CREATED.\n" RESET);
 }
 
 void createFloatDefinition(char id[50], char scope[50]) {
@@ -69,7 +75,7 @@ void createCharDefinition(char id[50],char scope[50]) {
     fclose(IRcode);
 }
 
-void createIntAssignment(char id[50], char num[50],char scope[50]){
+void createIntAssignment(char id[50], char num[50], char scope[50]){
     // e.g. x = 5;
   
     IRcode = fopen("IRcode.ir", "a");
@@ -80,7 +86,7 @@ void createIntAssignment(char id[50], char num[50],char scope[50]){
     fclose(IRcode);
 }
 
-void createFloatAssignment(char id[50], char num[50],char scope[50]){
+void createFloatAssignment(char id[50], char num[50], char scope[50]){
     // e.g. f = 5;
   
     IRcode = fopen("IRcode.ir", "a");
