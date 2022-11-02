@@ -209,9 +209,7 @@ void showSymTable(){
 
 		int index = i;
 		int size = getSymbolTableSize(index);
-		printf(BOLD "\n\n--------------------------------");
-		printf(BORANGE "%s" RESET, symbolTableScopes[i]);
-		printf(BOLD "------------------------------------\n" RESET);
+		printf(BOLD "\n\n--------------------------------%s------------------------------------\n" RESET,symbolTableScopes[i]);
 		printf(BOLD "itemID    itemName    itemKind    itemType    itemScope    isUsed    value\n" RESET);
 		printf(BOLD "----------------------------------------------------------------------------\n" RESET);
 		
