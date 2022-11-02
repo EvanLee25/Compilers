@@ -111,7 +111,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr Math Operator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList ParamDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr Math Operator ArrDecl
 
 %start Program
 
@@ -169,7 +169,7 @@ FuncDecl: VOID ID LPAREN {
 								symTabAccess(); addSymbolTable($2,"VOID"); 
 								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope);} 
 	
-							ParamDecl RPAREN Block {
+							ParamDeclList RPAREN Block {
 								//showSymTable();
 								printf("\nFUNCTION DECLARATION FOUND.\n");
 								//addItem("testing","FUNC","VOID",$2,0);
@@ -181,7 +181,7 @@ FuncDecl: VOID ID LPAREN {
 								addSymbolTable($2,"INT");
 								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
 						 
-						 ParamDecl RPAREN Block {
+						 ParamDeclList RPAREN Block {
 								//showSymTable();
 								printf("\nFUNCTION DECLARATION FOUND.\n");
 
@@ -193,7 +193,7 @@ FuncDecl: VOID ID LPAREN {
 								addSymbolTable($2,"CHAR");
 								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
 						 
-						 ParamDecl RPAREN Block {
+						 ParamDeclList RPAREN Block {
 								//showSymTable();
 								printf("\nFUNCTION DECLARATION FOUND.\n");
 
@@ -205,7 +205,7 @@ FuncDecl: VOID ID LPAREN {
 								addSymbolTable($2,"FLOAT");
 								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
 								
-						 ParamDecl RPAREN Block {
+						 ParamDeclList RPAREN Block {
 								//showSymTable();
 								printf("\nFUNCTION DECLARATION FOUND.\n");
 
@@ -214,8 +214,30 @@ FuncDecl: VOID ID LPAREN {
 
 }
 
-ParamDecl: COMMA {//$$ = $1;
-}
+ParamDeclList: ParamDecl COMMA ParamDeclList {
+
+					$1->left = $2;
+					$$ = $1;
+
+				} | ParamDecl {
+
+					$$ = $1;
+
+				}
+
+ParamDecl:		| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PARA","INT",scope,0);
+
+				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PARA","FLT",scope,0);
+
+				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PARA","CHR",scope,0);
+
+				}
 
 Block: LBRACKET BlockDeclList RBRACKET {
 	// ast

@@ -134,8 +134,6 @@ void multiply(int i) {
     printf(BGREEN "%d * %d = %d\n" RESET, numArray[i], numArray[i+1], total);
     printf(GRAY "Replaced %d * %d with the total: %d", numArray[i], numArray[i+1], total);
 
-
-    // remove the two numbers from the array
     // remove first number
     for (int j = i; j < numCounter - 1; j++)
         numArray[j] = numArray[j+1];
