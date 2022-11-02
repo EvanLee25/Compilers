@@ -78,7 +78,7 @@ void initializeSymbolTable(){
 
 void addSymbolTable(char scope[MAX_NAME_LENGTH],char itemType[MAX_NAME_LENGTH]){
 	strcpy(symbolTableScopes[numOfSymbolTables], scope); //scope name added
-	addItem(scope,"FUNC",itemType,"G",0);
+	addItem(scope,"FNC",itemType,"G",0);
 	numOfSymbolTables++; //Add a symbol table
 }
 

@@ -174,7 +174,7 @@ FuncDecl: VOID ID LPAREN {
 								printf("\nFUNCTION DECLARATION FOUND.\n");
 								//addItem("testing","FUNC","VOID",$2,0);
 								// ast
-								$$ = AST_assignment("FUNC",$1,$2);
+								$$ = AST_assignment("FNC",$1,$2);
 						
 						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET);
 								symTabAccess();
