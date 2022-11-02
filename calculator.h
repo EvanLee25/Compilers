@@ -346,8 +346,8 @@ int calculate() {
     int k;
 
     // print num and op counters
-    printf(RED "\nnumCounter: %d\n" RESET, numCounter);
-    printf(RED "opCounter: %d\n" RESET, opCounter);
+    printf(BPINK "\nnumCounter: %d\n" RESET, numCounter);
+    printf(BPINK "opCounter: %d\n" RESET, opCounter);
     
     // print out the calculation
     printf("\n");
@@ -410,9 +410,9 @@ int calculate() {
         temp = numArray[numCounter-1];
         printf(BCYAN "TOTAL = %d\n\n" RESET, temp); // debug 
 
-        printf(GREEN "Calculation Completed, Total = " RESET);
+        printf(BPINK "Calculation Completed, Total = " RESET);
         printf(BOLD "%d" RESET, temp);
-        printf(GREEN ".\n" RESET);
+        printf(BPINK ".\n" RESET);
 
         return temp;
 
@@ -431,7 +431,7 @@ int calc() {
         sum = sum + numArray[i];
     }
 
-    printf(GREEN "Calculation Completed, Total = " RESET);
+    printf(BORANGE "Calculation Completed, Total = " RESET);
     printf(BOLD "%d" RESET, sum);
     printf(GRAY ".\n" RESET);
 
@@ -449,7 +449,7 @@ void wipeArrays() {
     for (int i = 0; i < opCounter; i++) {
         opArray[i] = ' ';
     }
-    printf(GREEN "Number Array & Operator Array Wiped.\n" RESET);
+    printf(BPINK "Number Array & Operator Array Wiped.\n" RESET);
 
     numCounter = 0;
     opCounter = 0;

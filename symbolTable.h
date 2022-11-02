@@ -14,6 +14,7 @@
 #define BPINK	"\x1b[1;95m"
 #define BLUE    "\x1b[34m"
 #define BBLUE   "\x1b[1;94m"
+#define CYAN	"\x1b[96m"
 #define BCYAN	"\x1b[1;96m"
 #define BYELLOW "\x1b[1;103m"
 #define GRAY	"\x1b[90m"
@@ -42,13 +43,13 @@ int symbolTableSizes[MAX_SYMBOL_TABLES] = {0}; //set all sizes to 0
 int numOfSymbolTables = 0;
 
 void symTabAccess(void) {
-	printf(GREEN "::::> Symbol Table accessed.\n" RESET);
+	printf(BGREEN "Symbol Table accessed.\n" RESET);
 }
 
 int getSymbolTableIndex(char scope[MAX_NAME_LENGTH]){
 	for(int i = 0; i < numOfSymbolTables; i++){
-		printf("\nSYMBOL SCOPE: %s\n",symbolTableScopes[i]);
-		printf("\nSCOPE: %s\n",scope);
+		//printf("\nSYMBOL SCOPE: %s\n",symbolTableScopes[i]);
+		//printf("\nSCOPE: %s\n",scope);
 
 		if (!strcmp(symbolTableScopes[i], scope)) {
 			return i;
@@ -126,7 +127,7 @@ void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8],
 				strcpy(symTabItems[i][new].scope, scope);
 				symTabItems[i][new].isUsed = isUsed;
 				strcpy(symTabItems[i][new].value, "NULL");
-				printf(GREEN "::::> Item added to the Symbol Table.\n" RESET);
+				printf(BGREEN "Item added to the Symbol Table.\n" RESET);
 				symbolTableSizes[i]++;
 			}
 		}
@@ -192,13 +193,11 @@ void updateValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], ch
 }
 
 void updateArrayValue(char itemName[MAX_NAME_LENGTH], int arrayIndex ,char scope[MAX_NAME_LENGTH], char type[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]){
-	printf(scope);
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 
 	char arrIndexName[MAX_NAME_LENGTH]; //foo[0] for lookup
 	sprintf(arrIndexName, "%s[%d]", itemName, arrayIndex);
-	printf(arrIndexName);	
 
 	for(int i=0; i<size; i++){//look for variable in symbol table
 		//returns 0 if true/same
@@ -211,14 +210,14 @@ void updateArrayValue(char itemName[MAX_NAME_LENGTH], int arrayIndex ,char scope
 			strcpy(symTabItems[index][i].value, value); // update value in sym table
 		}
 	}
-	printf(BBLUE "\nFINISHED UPDATING ARRAY VALUE\n"RESET);
+	printf(BGREEN "Updated Array Index Value.\n"RESET);
 }
 
 int getItemID(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 	//printf(BPINK "\nSCOPE = %s" RESET, scope);
-	printf(BPINK "\ngetItemID:  itemID = %s" RESET, itemName);
+	//printf(BPINK "\ngetItemID:  itemID = %s" RESET, itemName);
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
 		
@@ -281,7 +280,7 @@ int found(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
 			return 1; // found the ID in the table
 		}
 	}
-	printf(BGREEN "::::> CHECK PASSED: Variable name is not already used.\n" RESET);
+	printf(BGREEN "CHECK PASSED: Variable name is not already used.\n" RESET);
 	return 0;
 }
 
@@ -297,12 +296,12 @@ int initialized(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
 
 		if(str1 == 0 && str2 == 0){
 			if (str3 != 0) {
-				printf(BGREEN "\n::::> CHECK PASSED: Variable '%s' is assigned to a value.\n\n" RESET, itemName);
+				printf(BGREEN "CHECK PASSED: Variable '%s' is assigned to a value.\n" RESET, itemName);
 				return 1; // found the ID in the table
 			}
 		}
 	}
-	printf(RED "::::> CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" RESET, itemName);
+	printf(RED "CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" RESET, itemName);
 	exit(0);
 	return 0;
 }
@@ -314,11 +313,11 @@ int compareTypes(char itemName1[50], char itemName2[50], char scope[MAX_NAME_LEN
 	
 	int typeMatch = strcmp(idType1, idType2);
 	if(typeMatch == 0){
-		printf(BGREEN "::::> CHECK PASSED: Types are the same: %s = %s\n\n" RESET, idType1, idType2);
+		printf(BGREEN "CHECK PASSED: Types are the same: %s = %s\n" RESET, idType1, idType2);
 		return 1; // types are matching
 	}
 	else {
-		printf(RED "::::> CHECK FAILED: Types are not the same: %s = %s\n\n" RESET, idType1, idType2);
+		printf(RED "CHECK FAILED: Types are not the same: %s = %s\n\n" RESET, idType1, idType2);
 		exit(0); // types are not matching
 		return 0;
 	}
@@ -345,11 +344,11 @@ int compareKinds(char itemName1[50], char itemName2[50], char scope[MAX_NAME_LEN
 	
 	int kindMatch = strcmp(idKind1, idKind2);
 	if(kindMatch == 0){
-		printf(BGREEN "::::> CHECK PASSED: Kinds are the same: %s = %s\n\n" RESET, idKind1, idKind2);
+		printf(BGREEN "CHECK PASSED: Kinds are the same: %s = %s\n" RESET, idKind1, idKind2);
 		return 1; // kinds are matching
 	}
 	else {
-		printf(RED "::::> CHECK FAILED: Kinds are not the same: %s = %s\n\n" RESET, idKind1, idKind2);
+		printf(RED "CHECK FAILED: Kinds are not the same: %s = %s\n\n" RESET, idKind1, idKind2);
 		exit(0); // kinds are not matching
 		return 0;
 	}

@@ -11,6 +11,7 @@ void initIRcodeFile(){
     IRcode = fopen("IRcode.ir", "w");
     fprintf(IRcode, "#### IR Code ####\n\n");
     fclose(IRcode);
+    printf(BLUE "IR Code Initialized.\n" RESET);
 }
 
 void createBinaryOperation(char op[1], const char* id1, const char* id2){
@@ -18,6 +19,7 @@ void createBinaryOperation(char op[1], const char* id1, const char* id2){
     IRcode = fopen("IRcode.ir", "a");
     fprintf(IRcode, "T1 = %s %s %s", id1, op, id2);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createIDtoIDAssignment(char * id1, char * id2, char scope[50]) {
@@ -34,23 +36,21 @@ void createIDtoIDAssignment(char * id1, char * id2, char scope[50]) {
     //fprintf(IRcode, "T%d = %s\n", itemID2, id2);
     fprintf(IRcode, "T%d = T%d\n", itemID1, itemID2);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createIntDefinition(char id[50], char scope[50]) {
     // e.g int x;
-    printf(BPINK "\ncreateIntDefintion:  id = %s" RESET, id);
     IRcode = fopen("IRcode.ir", "a");
     int itemID;
     itemID = getItemID(id, scope);
-    printf("\nITEMID = %d", itemID);
 
     char str[50];
     strcpy(str, id);
-    printf(BPINK "\nTEST:  str = %s" RESET, str);
 
     fprintf(IRcode, "T%d = %s\n", itemID, str);
     fclose(IRcode);
-    printf(BLUE "\nIR CODE CREATED.\n" RESET);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createFloatDefinition(char id[50], char scope[50]) {
@@ -62,6 +62,7 @@ void createFloatDefinition(char id[50], char scope[50]) {
 
     fprintf(IRcode, "T%d = %s\n", itemID, id);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createCharDefinition(char id[50],char scope[50]) {
@@ -73,6 +74,7 @@ void createCharDefinition(char id[50],char scope[50]) {
 
     fprintf(IRcode, "T%d = %s\n", itemID, id);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createIntAssignment(char id[50], char num[50], char scope[50]){
@@ -84,6 +86,7 @@ void createIntAssignment(char id[50], char num[50], char scope[50]){
 
     fprintf(IRcode, "T%d = %s\n", itemID, num);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createFloatAssignment(char id[50], char num[50], char scope[50]){
@@ -95,6 +98,7 @@ void createFloatAssignment(char id[50], char num[50], char scope[50]){
 
     fprintf(IRcode, "T%d = %s\n", itemID, num);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createCharAssignment(char id[50], char chr[50], char scope[50]){
@@ -106,6 +110,7 @@ void createCharAssignment(char id[50], char chr[50], char scope[50]){
 
     fprintf(IRcode, "T%d = '%s'\n", itemID, chr);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }
 
 void createWriteId(char id[50], char scope[50]){
@@ -117,4 +122,5 @@ void createWriteId(char id[50], char scope[50]){
 
     fprintf (IRcode, "output T%d\n", itemID);
     fclose(IRcode);
+    printf(BLUE "IR Code Created.\n" RESET);
 }

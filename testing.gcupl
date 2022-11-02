@@ -1,21 +1,42 @@
+int aNumber;
+float secondNumber;
+char someLetter;
+char message[50];
 
-int foo[9];
-int x;
-int z;
-char a;
-float y;
-y = 9.8;
-a = 'a';
-foo[0] = 4 + 4;
-foo[1] = 12;
-foo[2] = 5;
-x = 15;
-z = 22;
-write x;
+float average(float a, float b, float c){
+    float avg;
+    /*avg = (a + b + c)/3.0;*/
+    /*return avg;*/
+}
+
+int displayMessage(){
+    message[0] = 'I';
+    message[1] = ' ';
+    message[2] = 'c';
+    message[3] = 'a';
+    message[4] = 'n';
+    message[5] = ' ';
+    message[6] = 'p';
+    message[7] = 'r';
+    message[8] = 'i';
+    message[9] = 'n';
+    message[10] = 't';
+    message[11] = ':';
+
+    /*return(0);*/
+}
+
+/*justAverage = average(12.5, 13.7, 25.8);*/
+/*aNumber = displayMessage();*/
+/*write justAverage;*/
 write ~nl;
-write y;
+
+/*justAverage = justAverage * (justAverage + 2.0);*/
+/*justAverage = average(justAverage, 0.0, 0.0);*/
+/*aNumber = displayMessage();*/
 write ~nl;
-write a;
 
-
-
+/*aNumber = displayMessage();*/
+/*aNumber = aNumber / (aNumber + aNumber * aNumber);*/
+/*write aNumber;*/
+write ~nl;

@@ -19,7 +19,7 @@ void initAssemblyFile(){
     fprintf(MIPScode, ".globl main\n");
     fprintf(MIPScode, ".data\n\n");
     fclose(MIPScode);
-
+    printf(CYAN "MIPS Initialized.\n\n\n" RESET);
 }
 
 void appendFiles(char source[50], char destination[50]) {
@@ -48,7 +48,7 @@ void appendFiles(char source[50], char destination[50]) {
         c = fgetc(fp1);
     }
 
-    printf("\nContent in %s appended to %s", source, destination);
+    printf(BCYAN "  Content in %s appended to %s" RESET, source, destination);
     fclose(fp1);
     fclose(fp2);
 
@@ -87,6 +87,7 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
 
     }
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 }
 
 void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
@@ -115,6 +116,7 @@ void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
     //fprintf(tempMIPS, "\nlw $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -136,6 +138,7 @@ void createMIPSFloatAssignment (char id[50], char num[50], char scope[50]){
     //fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -156,6 +159,7 @@ void createMIPSCharAssignment (char id[50], char chr[50], char scope[50]) {
     //fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 }
 
 void createMIPSIntDeclaration(char id[50], char scope[50]) {
@@ -169,6 +173,7 @@ void createMIPSIntDeclaration(char id[50], char scope[50]) {
     fprintf(tempMIPS, "li $t%d, %s\n", itemID, id);
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -185,6 +190,7 @@ void createMIPSWriteInt(char id[50], char scope[50]){
     fprintf(tempMIPS, "syscall         # system call to print integer\n");
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -201,6 +207,7 @@ void createMIPSWriteFloat(char id[50], char scope[50]){
     fprintf(tempMIPS, "syscall           # system call to print float\n");
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -217,6 +224,7 @@ void createMIPSWriteChar(char id[50], char scope[50]){
     fprintf(tempMIPS, "syscall         # system call to print char\n");
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -229,6 +237,7 @@ void makeMIPSNewLine() {
     fprintf(tempMIPS, "syscall           # syscall to print new line\n");
 
     fclose(tempMIPS);
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
@@ -242,4 +251,6 @@ void createEndOfAssemblyCode(){
     fprintf(tempMIPS, "syscall         # system call (terminate)\n");
     fprintf(tempMIPS, ".end main\n");
     fclose(tempMIPS);
+    printf(BCYAN "  MIPS End Created.\n" RESET);
+
 }

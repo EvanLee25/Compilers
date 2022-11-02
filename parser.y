@@ -164,53 +164,99 @@ Decl:	FuncDecl {
 };
 
 
-FuncDecl: VOID ID LPAREN {
-								printf(GREEN "Function declared \n" RESET); 
+FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initialization \n\n" RESET); 
 								symTabAccess(); addSymbolTable($2,"VOID"); 
-								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope);} 
+								strcpy(scope,$2); 
+								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope)
+
+								// ir code
+								printf(BLUE "IR Code" RESET);
+								printf(RED " NOT " RESET);
+								printf(BLUE "Created.\n" RESET);
+
+								// mips
+								printf(CYAN "   MIPS" RESET);
+								printf(RED " NOT " RESET);
+								printf(CYAN "Created.\n\n\n" RESET);
+
+								} 
 	
 							ParamDeclList RPAREN Block {
 								//showSymTable();
-								printf("\nFUNCTION DECLARATION FOUND.\n");
 								//addItem("testing","FUNC","VOID",$2,0);
 								// ast
 								$$ = AST_assignment("FNC",$1,$2);
 						
-						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET);
+						} | INT ID LPAREN {printf(GRAY "RECOGNIZED RULE: Integer Function Initialization \n\n" RESET);
 								symTabAccess();
 								addSymbolTable($2,"INT");
-								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
+								strcpy(scope,$2); 
+								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope);
+
+								// ir code
+								printf(BLUE "IR Code" RESET);
+								printf(RED " NOT " RESET);
+								printf(BLUE "Created.\n" RESET);
+
+								// mips
+								printf(CYAN "   MIPS" RESET);
+								printf(RED " NOT " RESET);
+								printf(CYAN "Created.\n\n\n" RESET);
+
+								} 
 						 
 						 ParamDeclList RPAREN Block {
 								//showSymTable();
-								printf("\nFUNCTION DECLARATION FOUND.\n");
 
 								// ast
-								//$$ = $1;
+								$$ = AST_assignment("FNC",$1,$2);
 						
-						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET);
+						} | CHAR ID LPAREN {printf(GRAY "RECOGNIZED RULE: Char Function Initialization \n\n" RESET);
 								symTabAccess();
-								addSymbolTable($2,"CHAR");
-								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
+								addSymbolTable($2,"CHR");
+								strcpy(scope,$2); 
+								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope); 
+
+								// ir code
+								printf(BLUE "IR Code" RESET);
+								printf(RED " NOT " RESET);
+								printf(BLUE "Created.\n" RESET);
+
+								// mips
+								printf(CYAN "   MIPS" RESET);
+								printf(RED " NOT " RESET);
+								printf(CYAN "Created.\n\n\n" RESET);
+
+								} 
 						 
 						 ParamDeclList RPAREN Block {
 								//showSymTable();
-								printf("\nFUNCTION DECLARATION FOUND.\n");
-
 								// ast
-								//$$ = $1;
+								$$ = AST_assignment("FNC",$1,$2);
 						
-						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET);
+						} | FLOAT ID LPAREN {printf(GRAY "RECOGNIZED RULE: Float Function Initialization \n\n" RESET);
 								symTabAccess();
-								addSymbolTable($2,"FLOAT");
-								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
+								addSymbolTable($2,"FLT");
+								strcpy(scope,$2); 
+								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope); 
+
+								// ir code
+								printf(BLUE "IR Code" RESET);
+								printf(RED " NOT " RESET);
+								printf(BLUE "Created.\n" RESET);
+
+								// mips
+								printf(CYAN "   MIPS" RESET);
+								printf(RED " NOT " RESET);
+								printf(CYAN "Created.\n\n\n" RESET);
+
+								} 
 								
 						 ParamDeclList RPAREN Block {
 								//showSymTable();
-								printf("\nFUNCTION DECLARATION FOUND.\n");
 
 								// ast
-								//$$ = $1;	
+								$$ = AST_assignment("FNC",$1,$2);	
 
 }
 
@@ -229,11 +275,21 @@ ParamDecl:		| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initializ
 
 					addItem($2,"PARA","INT",scope,0);
 
-				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Float Parameter Initialization \n\n" RESET);
 
 					addItem($2,"PARA","FLT",scope,0);
 
-				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+					// ir code
+					printf(BLUE "IR Code" RESET);
+					printf(RED " NOT " RESET);
+					printf(BLUE "Created.\n" RESET);
+
+					// mips
+					printf(CYAN "   MIPS" RESET);
+					printf(RED " NOT " RESET);
+					printf(CYAN "Created.\n\n\n" RESET);
+
+				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Char Parameter Initialization \n\n" RESET);
 
 					addItem($2,"PARA","CHR",scope,0);
 
@@ -298,6 +354,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
 							//createMIPSIntDeclaration($2);
+							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
 							
 							// code optimization
 								// N/A
@@ -361,6 +418,9 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 							// ir code
 							createCharDefinition($2, scope);
+
+							// mips
+							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
 							
 							// code optimization
 								// N/A
@@ -431,6 +491,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
 							//createMIPSIntDeclaration($2);
+							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
 							
 							// code optimization
 								// N/A
@@ -572,7 +633,7 @@ Expr:	SEMICOLON {
 			isUsed($3, scope);
 
 
-	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement\n\n" RESET); 
+	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement\n" RESET); 
 
 		// semantic checks
 			// is the id initialized as a value?
@@ -616,6 +677,15 @@ Expr:	SEMICOLON {
 
 	} | WRITE NEWLINECHAR SEMICOLON { printf(GRAY "RECOGNIZED RULE: Print New Line\n\n" RESET); 
 
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, "NEWLINE");
+
+			// symbol table
+			printf(BGREEN "Symbol Table Not Needed.\n" RESET);
+
+			// ir code
+			printf(BLUE "IR Code Not Needed.\n" RESET);
+			// mips
 			makeMIPSNewLine();
 
 
@@ -643,7 +713,6 @@ Expr:	SEMICOLON {
 			// ir code
 			char temp[50];
 			strcpy(temp, addBrackets($1, $3));
-			printf(BORANGE "\n\n%s\n\n" RESET, temp);
 			createIntAssignment(temp, $6, scope);
 
 			// mips code
@@ -671,7 +740,6 @@ Expr:	SEMICOLON {
 			// ir code
 			char temp[50];
 			strcpy(temp, addBrackets($1, $3));
-			printf(BORANGE "\n\n%s\n\n" RESET, temp);
 			createIntAssignment(temp, total, scope);
 
 			// mips code
@@ -696,7 +764,6 @@ Expr:	SEMICOLON {
 			// ir code
 			char temp[50];
 			strcpy(temp, addBrackets($1, $3));
-			printf(BORANGE "\n\n%s\n\n" RESET, temp);
 			createIntAssignment(temp, str, scope);
 
 			// mips code
@@ -845,11 +912,10 @@ ArrDecl:
 								char temp[50];
 								char temp2[50];
 								sprintf(temp, "%d", i);
-								printf("\ntemp = %s", temp);
 								strcpy(temp2, addBrackets($2,temp));
-								printf("\ntemp2 = %s", temp2);
 								createIntDefinition(temp2, scope);
 							}
+							printf("\n\n");
 
 
 			} | CHAR ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization With Range\n\n" RESET);
@@ -889,11 +955,10 @@ ArrDecl:
 								char temp[50];
 								char temp2[50];
 								sprintf(temp, "%d", i);
-								printf("\ntemp = %s", temp);
 								strcpy(temp2, addBrackets($2,temp));
-								printf("\ntemp2 = %s", temp2);
 								createIntDefinition(temp2, scope);
 							}
+							printf("\n\n");
 
 }; 
 
