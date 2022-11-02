@@ -12,7 +12,6 @@
 #include "assembly.h"
 #include "calculator.h"
 #include "ctype.h"
-#include "arrayTable.h"
 
 
 extern int yylex();
@@ -112,7 +111,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDecl Block StmtList Expr IDEQExpr Math Operator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr Math Operator ArrDecl
 
 %start Program
 
@@ -164,46 +163,90 @@ Decl:	FuncDecl {
 
 };
 
-FuncDecl: VOID ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"VOID"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope);} ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
-							addItem("testing","FUNC","VOID",$2,0);
-							// ast
-							$$ = AST_assignment("FUNC",$1,$2);
-						
-						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"INT"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
 
-							// ast
-							//$$ = $1;
+FuncDecl: VOID ID LPAREN {
+								printf(GREEN "Function declared \n" RESET); 
+								symTabAccess(); addSymbolTable($2,"VOID"); 
+								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope);} 
+	
+							ParamDecl RPAREN Block {
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
+								//addItem("testing","FUNC","VOID",$2,0);
+								// ast
+								$$ = AST_assignment("FUNC",$1,$2);
 						
-						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"CHAR"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
+						} | INT ID LPAREN {printf(GREEN "Function declared \n" RESET);
+								symTabAccess();
+								addSymbolTable($2,"INT");
+								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
+						 
+						 ParamDecl RPAREN Block {
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
 
-							// ast
-							//$$ = $1;
+								// ast
+								//$$ = $1;
 						
-						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET); symTabAccess(); addSymbolTable($2,"FLOAT"); strcpy(scope,$2); printf(":::::::::SCOPE = %s:::::::",scope); } ParamDecl RPAREN Block {
-							//showSymTable();
-							printf("\nFUNCTION DECLARATION FOUND.\n");
+						} | CHAR ID LPAREN {printf(GREEN "Function declared \n" RESET);
+								symTabAccess();
+								addSymbolTable($2,"CHAR");
+								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
+						 
+						 ParamDecl RPAREN Block {
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
 
-							// ast
-							//$$ = $1;	
-							
-						}
+								// ast
+								//$$ = $1;
+						
+						} | FLOAT ID LPAREN {printf(GREEN "Function declared \n" RESET);
+								symTabAccess();
+								addSymbolTable($2,"FLOAT");
+								strcpy(scope,$2); printf("\n:::::::::SCOPE = %s:::::::\n",scope); } 
+								
+						 ParamDecl RPAREN Block {
+								//showSymTable();
+								printf("\nFUNCTION DECLARATION FOUND.\n");
+
+								// ast
+								//$$ = $1;	
+
+}
 
 ParamDecl: COMMA {//$$ = $1;
 }
 
-Block: LBRACKET RBRACKET {
+Block: LBRACKET BlockDeclList RBRACKET {
 	// ast
 	//$$ = $1;
 	
 	// reset scope back to global after function is over
 	strcpy(scope,"G");
 }
+
+
+BlockDeclList: BlockDecl BlockDeclList {
+		// ast
+		$1->left = $2;
+		$$ = $1;
+
+}
+			| BlockDecl {
+			// ast
+			$$ = $1;
+			}
+
+BlockDecl: VarDecl {
+		   // ast
+		   $$ = $1;
+
+		} | StmtList {
+		  // ast
+		  $$ = $1;
+
+};
+
 
 StmtList:	| Expr StmtList {$1->left = $2; $$ = $1;}
 			| Expr {$$ = $1;}
@@ -459,50 +502,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 								ID	  NUMBER
 						*/
 
-				
-
-				// ARRAY DECLARATIONS ----------------------------------------------------------------------
-
-				} | INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
-
-							// semantic checks
-								// is the array already declared?
-								symTabAccess();
-								if (found($2,$2) == 1) {
-									printf(RED "\nERROR: Array '%s' already declared.\n" RESET,$2);
-									exit(0); // variable already declared
-								}
-
-							// symbol table
-							//addItem($2, "ARR", "INT", scope, 0);
-							//updateValue($2, scope, $4);
-
-							// array table
-							addArray($2, "ARR", "INT", $4, scope);
-							//initArray($2, $4);
-							//addIndex(0, "15");
-							//showArrTable();
-
-							// ast
-							$$ = AST_assignment(" ARR",$1,$2);
-
-
-			} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Array Index\n\n" RESET);
-
-							// convert index to integer
-							int index = atoi($3);
-
-							// remove apostrophes from charliteral
-							char* str = removeApostrophes($6);
-
-							// array table
-							modifyIndex(index, str);
-
-							// ast
-							$$ = AST_assignment($1,$3,str);
-
-
-} 
+				} | ArrDecl {};
 ;
 
 
@@ -612,8 +612,8 @@ Expr:	SEMICOLON {
 			// convert index to integer
 			int index = atoi($3);
 
-			// array table
-			modifyIndex(index, $6);
+			//symbol table value update
+			updateArrayValue($1, index, scope, "INT", $6);
 
 			// ast
 			$$ = AST_assignment($1,$3,$6);
@@ -624,15 +624,12 @@ Expr:	SEMICOLON {
 			// turn the integer returned from calculate() into a string
 			char total[50];
 			sprintf(total, "%d", calculate());
-
-			// wipe the arrays
-			wipeArrays();
 	
 			// convert index to integer
 			int index = atoi($3);
 
 			// array table
-			modifyIndex(index, total);
+			updateArrayValue($1, index, scope, "INT", total); //TODO DOES NOT RESOLVE FLOATS
 
 			// ast
 			$$ = AST_assignment($1,$3,total);
@@ -647,7 +644,7 @@ Expr:	SEMICOLON {
 			char* str = removeApostrophes($6);
 
 			// array table
-			modifyIndex(index, str);
+			updateArrayValue($1, index, scope, "CHR", str);
 
 			// ast
 			$$ = AST_assignment($1,$3,str);
@@ -747,32 +744,33 @@ Operator: PLUS_OP {}
 		| MULT_OP {}
 		| DIV_OP {}
 
-ArrDecl:	INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
+// ARRAY DECLARATIONS ----------------------------------------------------------------------
+ArrDecl:	
+			INT ID LBRACE RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization Without Range\n\n" RESET);
+				//int foo[]; //We should only have arrays be declared with range imo.
 
+
+
+			} | CHAR ID LBRACE RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization Without Range\n\n" RESET);
+				//char foo[]; //We should only have arrays be declared with range imo.
+
+			
+
+			} | INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
+				//int foo[4];
 							// semantic checks
 								// is the array already declared?
 								symTabAccess();
-								if (found($2,$2) == 1) {
+								if (found($2,scope) == 1) {
 									printf(RED "\nERROR: Array '%s' already declared.\n" RESET,$2);
 									exit(0); // variable already declared
 								}
 
-							// symbol table
-							addItem($2, "ARR", "INT", scope, 0);
-							updateValue($2, scope, $4);
 
-							// array table
-							
-							initArray($2, $4);
-							//addIndex(0, "15");
-							//showArrTable();
+							addArray($2, "ARR", "INT", $4, scope);
 
 							// ast
-							$$ = AST_assignment(" ARR",$1,$2);
-
-
-			} | INT ID LBRACE RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization Without Range\n\n" RESET);
-
+							$$ = AST_assignment("ARR",$1,$2);
 
 
 			} | CHAR ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization With Range\n\n" RESET);
@@ -780,27 +778,19 @@ ArrDecl:	INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: I
 							// semantic checks
 								// is the array already declared?
 								symTabAccess();
-								if (found($2,$2) == 1) {
+								if (found($2,scope) == 1) {
 									printf(RED "\nERROR: Array '%s' already declared.\n" RESET,$2);
 									exit(0); // variable already declared
 								}
 
-							// symbol table
-							addItem($2, "ARR", "CHR", $2, 0);
-							updateValue($2, $2, $4);
-
-							// array table							
-							initArray($2, $4);
+							//symboltable
+							addArray($2, "ARR", "CHR", $4, scope);
 
 							// ast
-							$$ = AST_assignment(" ARR",$1,$2);
-							
-							
-			} | CHAR ID LBRACE RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization Without Range\n\n" RESET);
+							$$ = AST_assignment("ARR",$1,$2);
 
 
-
-			}
+}; 
 
 
 %%

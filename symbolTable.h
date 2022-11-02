@@ -39,10 +39,7 @@ struct Entry
 struct Entry symTabItems[MAX_SYMBOL_TABLES][MAX_SYMBOL_ENTRIES]; //symTabItems[50 symbol tables max][100 items in each symbol table]
 char symbolTableScopes[MAX_AMOUNT_SCOPES][MAX_NAME_LENGTH]; //array of strings-> symbolTableScopes[50 different scopes][scope names can be 30 char long]
 int symbolTableSizes[MAX_SYMBOL_TABLES] = {0}; //set all sizes to 0
-
-//int symTabIndex = 0; wont work anymore due to multiple symbol tables. Instead use getSymbolTableSize(). getSymbolTableSize(0) ->global symboltable
 int numOfSymbolTables = 0;
-int SYMTAB_SIZE = 20;
 
 void symTabAccess(void) {
 	printf(GREEN "::::> Symbol Table accessed.\n" RESET);
@@ -56,9 +53,10 @@ int getSymbolTableIndex(char scope[MAX_NAME_LENGTH]){
 		if (!strcmp(symbolTableScopes[i], scope)) {
 			return i;
 		}
-		printf(RED "\nINDEX DOES NOT EXIST. ERROR IN SYMBOL TABLE: getSymbolTableIndex\n" RESET);
-		return -1;
 	}
+
+	printf(RED "\nINDEX DOES NOT EXIST. ERROR IN SYMBOL TABLE: getSymbolTableIndex\n" RESET);
+	return -1;
 	
 }
 
@@ -82,11 +80,6 @@ void addSymbolTable(char scope[MAX_NAME_LENGTH],char itemType[MAX_NAME_LENGTH]){
 	strcpy(symbolTableScopes[numOfSymbolTables], scope); //scope name added
 	addItem(scope,"FUNC",itemType,"G",0);
 	numOfSymbolTables++; //Add a symbol table
-	/*
-	for (int i = 0; i < numOfSymbolTables; i++){
-		printf("\n%s\n",symbolTableScopes[i]);
-	}
-	*/
 }
 
 void addArray(char name[MAX_NAME_LENGTH], char itemKind[MAX_NAME_LENGTH], char itemType[MAX_NAME_LENGTH], char arrayRange[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
@@ -109,7 +102,6 @@ void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8],
 			int str1 = strcmp(symbolTableScopes[i], scope);
 			if (str1 == 0){
 				int new = getSymbolTableSize(i);
-				// what about scope? should you add scope to this function?
 				symTabItems[i][new].itemID = new;
 				strcpy(symTabItems[i][new].itemName, itemName);
 				strcpy(symTabItems[i][new].itemKind, itemKind);
@@ -117,26 +109,21 @@ void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8],
 				strcpy(symTabItems[i][new].scope, scope);
 				symTabItems[i][new].isUsed = isUsed;
 				strcpy(symTabItems[i][new].value, "NULL");
-				//symTabIndex++;
 				printf(GREEN "::::> Item added to the Symbol Table.\n" RESET);
 				symbolTableSizes[i]++;
-				//showSymTable();
 			}
 		}
 	
 }
 
 char* getVariableType(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
-	//char *name = "int";
-	//return name;
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+
 		if( str1 == 0 && str2 == 0){
 			return symTabItems[index][i].itemType;
 		}
@@ -150,9 +137,7 @@ void updateValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], ch
 
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		
 		// get variable type
 		char* type = getVariableType(itemName, scope);
@@ -169,6 +154,28 @@ void updateValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], ch
 
 }
 
+void updateArrayValue(char itemName[MAX_NAME_LENGTH], int arrayIndex ,char scope[MAX_NAME_LENGTH], char type[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]){
+	printf(scope);
+	int index = getSymbolTableIndex(scope);
+	int size = getSymbolTableSize(index);
+
+	char arrIndexName[MAX_NAME_LENGTH]; //foo[0] for lookup
+	sprintf(arrIndexName, "%s[%d]", itemName, arrayIndex);
+	printf(arrIndexName);	
+
+	for(int i=0; i<size; i++){//look for variable in symbol table
+		//returns 0 if true/same
+		int str1 = strcmp(symTabItems[index][i].itemName, arrIndexName);  //check for same variable name
+		int str2 = strcmp(symTabItems[index][i].scope, scope);  //check for same scope
+		int str3 = strcmp(symTabItems[index][i].itemType, type); //check for same typing
+
+		if( str1 == 0 && str2 == 0 && str3 == 0 ) {
+			
+			strcpy(symTabItems[index][i].value, value); // update value in sym table
+		}
+	}
+	printf(BBLUE "\nFINISHED UPDATING ARRAY VALUE\n"RESET);
+}
 
 int getItemID(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 	int index = getSymbolTableIndex(scope);
@@ -176,7 +183,6 @@ int getItemID(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		
 		if( str1 == 0 ) {
 			return symTabItems[index][i].itemID;
@@ -191,9 +197,7 @@ char* getValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 	int size = getSymbolTableSize(index);
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		if( str1 == 0 && str2 == 0){
 			return symTabItems[index][i].value;
 		}
@@ -204,17 +208,11 @@ char* getValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 void showSymTable(){
 	
 	for (int i = 0; i < numOfSymbolTables; i++){
-
-		int cmpr = strcmp(symbolTableScopes[i],"NULL"); //0 if NULL
-
 		int index = i;
 		int size = getSymbolTableSize(index);
 		printf(BOLD "\n\n--------------------------------%s------------------------------------\n" RESET,symbolTableScopes[i]);
 		printf(BOLD "itemID    itemName    itemKind    itemType    itemScope    isUsed    value\n" RESET);
 		printf(BOLD "----------------------------------------------------------------------------\n" RESET);
-		
-		//printf("\nINDEX = %i\n", index);
-		//printf("\nSIZE = %i\n", size);
 
 		for (int j=0; j<size; j++){
 			printf(BOLD "%3d " RESET, symTabItems[index][j].itemID);
@@ -234,20 +232,14 @@ void showSymTable(){
 }
 
 int found(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
-	// Lookup an identifier in the symbol table
-	// what about scope?
-	// return TRUE or FALSE
-	// Later on, you may want to return additional information
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 	
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope,scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+
 		if( str1 == 0 && str2 == 0){
-			//printf("::::> Syntax Error: Variable '%s' already declared.\n\n", itemName);
 			return 1; // found the ID in the table
 		}
 	}
@@ -256,19 +248,13 @@ int found(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
 }
 
 int initialized(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
-	// Lookup an identifier in the symbol table
-	// what about scope?
-	// return TRUE or FALSE
-	// Later on, you may want to return additional information
 	char val[50];
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 	
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope,scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		int str3 = strcmp(symTabItems[index][i].value, "NULL");
 
 		if(str1 == 0 && str2 == 0){
@@ -301,15 +287,12 @@ int compareTypes(char itemName1[50], char itemName2[50], char scope[MAX_NAME_LEN
 }
 
 char* getVariableKind(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
-	//char *name = "int";
-	//return name;
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+
 		if( str1 == 0 && str2 == 0){
 			return symTabItems[index][i].itemKind;
 		}
@@ -341,9 +324,7 @@ int redundantValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], 
 	int size = getSymbolTableSize(index);
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
 		int str3 = strcmp(symTabItems[index][i].value, value);
 
 		if( str1 == 0 && str2 == 0 && str3 == 0){
@@ -358,9 +339,8 @@ void isUsed(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
 	int size = getSymbolTableSize(index);
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		//printf("\n\n---------> str1=%d: COMPARED: %s vs %s\n\n", str1, symTabItems[i].itemName, itemName);
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
-		//printf("\n\n---------> str2=%d: COMPARED %s vs %s\n\n", str2, symTabItems[i].itemName, itemName);
+
 		if( str1 == 0 && str2 == 0) {
 			symTabItems[index][i].isUsed = 1; // update value in sym table
 		}
