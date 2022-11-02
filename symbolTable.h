@@ -76,6 +76,25 @@ void initializeSymbolTable(){
 
 }
 
+void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8], char scope[MAX_NAME_LENGTH], int isUsed){
+		for (int i = 0; i<numOfSymbolTables;i++){ //iterate through all scopes
+			int str1 = strcmp(symbolTableScopes[i], scope);
+			if (str1 == 0){
+				int new = getSymbolTableSize(i);
+				symTabItems[i][new].itemID = new;
+				strcpy(symTabItems[i][new].itemName, itemName);
+				strcpy(symTabItems[i][new].itemKind, itemKind);
+				strcpy(symTabItems[i][new].itemType, itemType);
+				strcpy(symTabItems[i][new].scope, scope);
+				symTabItems[i][new].isUsed = isUsed;
+				strcpy(symTabItems[i][new].value, "NULL");
+				printf(GREEN "::::> Item added to the Symbol Table.\n" RESET);
+				symbolTableSizes[i]++;
+			}
+		}
+	
+}
+
 void addSymbolTable(char scope[MAX_NAME_LENGTH],char itemType[MAX_NAME_LENGTH]){
 	strcpy(symbolTableScopes[numOfSymbolTables], scope); //scope name added
 	addItem(scope,"FUNC",itemType,"G",0);
@@ -94,26 +113,6 @@ void addArray(char name[MAX_NAME_LENGTH], char itemKind[MAX_NAME_LENGTH], char i
 		sprintf(arrIndex, "%s[%d]", name, i - size);
 		addItem(arrIndex, itemKind, itemType, scope, 0);
 	}
-}
-
-
-void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8], char scope[MAX_NAME_LENGTH], int isUsed){
-		for (int i = 0; i<numOfSymbolTables;i++){ //iterate through all scopes
-			int str1 = strcmp(symbolTableScopes[i], scope);
-			if (str1 == 0){
-				int new = getSymbolTableSize(i);
-				symTabItems[i][new].itemID = new;
-				strcpy(symTabItems[i][new].itemName, itemName);
-				strcpy(symTabItems[i][new].itemKind, itemKind);
-				strcpy(symTabItems[i][new].itemType, itemType);
-				strcpy(symTabItems[i][new].scope, scope);
-				symTabItems[i][new].isUsed = isUsed;
-				strcpy(symTabItems[i][new].value, "NULL");
-				printf(GREEN "::::> Item added to the Symbol Table.\n" RESET);
-				symbolTableSizes[i]++;
-			}
-		}
-	
 }
 
 char* getVariableType(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
