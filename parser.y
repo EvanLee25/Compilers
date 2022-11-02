@@ -778,6 +778,8 @@ IDEQExpr: ID EQ Math {
 	// ast
 	// TODO: EVAN
 
+	system("python3 calculate.py");
+
 	// semantic checks
 		// inside Math
 
@@ -809,8 +811,9 @@ IDEQExpr: ID EQ Math {
 
 Math: 		NUMBER Operator Math {
 
-				addToNumArray($1);
 				addToOpArray($2);
+				addToNumArray($1);
+			//	addToOpArray($2);
 
 			} | ID Operator Math {
 
@@ -825,8 +828,9 @@ Math: 		NUMBER Operator Math {
 					}
 
 				// add to number array
-				addToNumArray(getValue($1, scope));
 				addToOpArray($2);
+				addToNumArray(getValue($1, scope));
+				//addToOpArray($2);
 
 				// code optimization
 					// mark the id as used

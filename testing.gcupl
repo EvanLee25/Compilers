@@ -2,6 +2,7 @@ int aNumber;
 float secondNumber;
 char someLetter;
 char message[50];
+int x;
 
 float average(float a, float b, float c){
     float avg;
@@ -20,7 +21,7 @@ int displayMessage(){
     message[7] = 'r';
     message[8] = 'i';
     message[9] = 'n';
-    message[10] = 't';
+    message[10] = 't'; 
     message[11] = ':';
 
     /*return(0);*/

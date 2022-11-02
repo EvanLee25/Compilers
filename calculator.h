@@ -51,6 +51,13 @@ void addToNumArray(char input[50]) {
     //printf("\n%d\n", numArray[counter]); // debug
     numCounter++;
 
+    // creating file pointer to work with files
+    FILE *file;
+    // opening file in writing mode
+    file = fopen("calc.input", "a");
+    fprintf(file, "%d",temp);
+    fclose(file);
+
 }
 
 void addToOpArray(char input[50]) {
@@ -59,6 +66,13 @@ void addToOpArray(char input[50]) {
     opCounter++;
     strcat(opArray, input);
     //printf("\n\n%s\n\n", input);
+
+    // creating file pointer to work with files
+    FILE *file;
+    // opening file in writing mode
+    file = fopen("calc.input", "a");
+    fprintf(file, "%s", input);
+    fclose(file);
 
 }
 
