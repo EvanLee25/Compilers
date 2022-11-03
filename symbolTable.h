@@ -77,19 +77,6 @@ void initializeSymbolTable(){
 
 }
 
-char* addBrackets(char str[50], char num[50]) {
-	char arrBrackets[50];
-	char str1[50];
-	strcpy(arrBrackets, "[");
-	strcat(arrBrackets, num);
-	strcat(arrBrackets, "]");
-	//printf(BPINK "\n\n%s\n\n" RESET, arrBrackets);
-	strcpy(str1, str);
-	strcat(str1, arrBrackets);
-	//printf(BPINK "\n\n%s\n\n" RESET, str1);
-	return str1;
-}
-
 void removeChar(char * str, char charToRemove){
     int i, j;
     int len = strlen(str);

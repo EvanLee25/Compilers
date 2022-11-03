@@ -711,8 +711,8 @@ Expr:	SEMICOLON {
 			$$ = AST_assignment($1,$3,$6);
 
 			// ir code
-			char temp[50];
-			strcpy(temp, addBrackets($1, $3));
+			char temp[50];	
+			sprintf(temp,"%s[%d]",$1,$3);
 			createIntAssignment(temp, $6, scope);
 
 			// mips code
@@ -738,8 +738,8 @@ Expr:	SEMICOLON {
 			$$ = AST_assignment($1,$3,total);
 
 			// ir code
-			char temp[50];
-			strcpy(temp, addBrackets($1, $3));
+			char temp[50];	
+			sprintf(temp,"%s[%d]",$1,$3);
 			createIntAssignment(temp, total, scope);
 
 			// mips code
@@ -762,8 +762,8 @@ Expr:	SEMICOLON {
 			$$ = AST_assignment($1,$3,str);
 
 			// ir code
-			char temp[50];
-			strcpy(temp, addBrackets($1, $3));
+			char temp[50];	
+			sprintf(temp,"%s[%d]",$1,$3);
 			createIntAssignment(temp, str, scope);
 
 			// mips code
@@ -894,10 +894,10 @@ ArrDecl:
 
 								// is the array already declared in this scope?			
 								// add "[0]" to the ID
-								char str1[50];
-								strcpy(str1, addBrackets($2, "0"));
+								char temp[50];	
+								sprintf(temp,"%s[0]",$2);
 
-								if (found(str1, scope) == 1) {
+								if (found(temp, scope) == 1) {
 									printf(RED "\nERROR: Array '%s' already declared in this scope.\n" RESET,$2);
 									showSymTable(); // show symbol table
 									exit(0); // array already declared
@@ -913,11 +913,9 @@ ArrDecl:
 							int range = atoi($4);
 							//printf("\n%d\n", range);
 							for (int i = 0; i < range; i++) {
-								char temp[50];
-								char temp2[50];
-								sprintf(temp, "%d", i);
-								strcpy(temp2, addBrackets($2,temp));
-								createIntDefinition(temp2, scope);
+								char temp[50];	
+								sprintf(temp,"%s[%d]",$2,i);
+								createIntDefinition(temp, scope);
 							}
 							printf("\n\n");
 
@@ -934,13 +932,13 @@ ArrDecl:
 									showSymTable(); // show symbol table
 									exit(0); // array already declared
 								}
-
 								// is the array already declared?
 								// add "[0]" to the ID
-								char str1[50];
-								strcpy(str1, addBrackets($2, "0"));
-
-								if (found(str1, scope) == 1) {
+								char temp[50];	
+								sprintf(temp,"%s[0]",$2);
+								
+								
+								if (found(temp, scope) == 1) {
 									printf(RED "\nERROR: Array '%s' already declared in this scope.\n" RESET,$2);
 									showSymTable();
 									exit(0); // variable already declared
@@ -956,11 +954,8 @@ ArrDecl:
 							int range = atoi($4);
 							//printf("\n%d\n", range);
 							for (int i = 0; i < range; i++) {
-								char temp[50];
-								char temp2[50];
-								sprintf(temp, "%d", i);
-								strcpy(temp2, addBrackets($2,temp));
-								createIntDefinition(temp2, scope);
+								sprintf(temp,"%s[%d]",$2,i);
+								createIntDefinition(temp, scope);
 							}
 							printf("\n\n");
 
