@@ -273,11 +273,7 @@ ParamDeclList: ParamDecl COMMA ParamDeclList {
 
 ParamDecl:		| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
 
-					addItem($2,"PARA","INT",scope,0);
-
-				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Float Parameter Initialization \n\n" RESET);
-
-					addItem($2,"PARA","FLT",scope,0);
+					addItem($2,"PAR","INT",scope,0);
 
 					// ir code
 					printf(BLUE "IR Code" RESET);
@@ -289,9 +285,36 @@ ParamDecl:		| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initializ
 					printf(RED " NOT " RESET);
 					printf(CYAN "Created.\n\n\n" RESET);
 
+
+				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Float Parameter Initialization \n\n" RESET);
+
+					addItem($2,"PAR","FLT",scope,0);
+
+					// ir code
+					printf(BLUE "IR Code" RESET);
+					printf(RED " NOT " RESET);
+					printf(BLUE "Created.\n" RESET);
+
+					// mips
+					printf(CYAN "   MIPS" RESET);
+					printf(RED " NOT " RESET);
+					printf(CYAN "Created.\n\n\n" RESET);
+
+
 				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Char Parameter Initialization \n\n" RESET);
 
-					addItem($2,"PARA","CHR",scope,0);
+					addItem($2,"PAR","CHR",scope,0);
+
+					// ir code
+					printf(BLUE "IR Code" RESET);
+					printf(RED " NOT " RESET);
+					printf(BLUE "Created.\n" RESET);
+
+					// mips
+					printf(CYAN "   MIPS" RESET);
+					printf(RED " NOT " RESET);
+					printf(CYAN "Created.\n\n\n" RESET);
+					
 
 				}
 
