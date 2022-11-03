@@ -712,7 +712,7 @@ Expr:	SEMICOLON {
 
 			// ir code
 			char temp[50];	
-			sprintf(temp,"%s[%d]",$1,$3);
+			sprintf(temp,"%s[%s]",$1,$3);
 			createIntAssignment(temp, $6, scope);
 
 			// mips code
@@ -739,7 +739,7 @@ Expr:	SEMICOLON {
 
 			// ir code
 			char temp[50];	
-			sprintf(temp,"%s[%d]",$1,$3);
+			sprintf(temp,"%s[%s]",$1,$3);
 			createIntAssignment(temp, total, scope);
 
 			// mips code
@@ -763,7 +763,7 @@ Expr:	SEMICOLON {
 
 			// ir code
 			char temp[50];	
-			sprintf(temp,"%s[%d]",$1,$3);
+			sprintf(temp,"%s[%s]",$1,$3);
 			createIntAssignment(temp, str, scope);
 
 			// mips code
