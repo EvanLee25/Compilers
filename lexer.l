@@ -110,6 +110,14 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
+"return"  {
+	words++; chars += strlen(yytext);
+	printf("%s : RETURN STATEMENT\n", yytext);
+    yylval.string = strdup(yytext);
+    return RETURN;
+     
+}
+
 
 "print"  {
 	words++; chars += strlen(yytext);

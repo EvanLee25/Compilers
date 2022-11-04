@@ -6,6 +6,7 @@
 
 FILE * MIPScode;
 FILE * tempMIPS;
+FILE * MIPSfuncs;
 
 void initAssemblyFile(){
          
@@ -19,6 +20,13 @@ void initAssemblyFile(){
     fprintf(MIPScode, ".globl main\n");
     fprintf(MIPScode, ".data\n\n");
     fclose(MIPScode);
+
+    MIPSfuncs = fopen("MIPSfuncs.asm", "w");
+    fprintf(tempMIPS, "\n\n# -----------------------\n");
+    fprintf(tempMIPS, "# function declarations\n");
+    fprintf(MIPSfuncs, "\n");
+    fclose(MIPScode);
+
     printf(CYAN "MIPS Initialized.\n\n\n" RESET);
 }
 
@@ -54,9 +62,71 @@ void appendFiles(char source[50], char destination[50]) {
 
 }
 
+void createMIPSFunction(char funcID[50]) {
+
+    MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+
+    fprintf(MIPSfuncs, "%s:\n", funcID); // function header (e.g. 'func:')
+
+    fclose(MIPSfuncs);
+
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+}
+
+void callMIPSFunction(char funcID[50]) {
+
+    tempMIPS = fopen("tempMIPS.asm", "a");
+
+    fprintf(tempMIPS, "\n\tjal %s       # goto function: %s\n", funcID, funcID);
+
+    fclose(tempMIPS);
+
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+}
+
+void createParameter(char para[50], char index[50]) {
+
+    MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+
+
+
+    fclose(MIPSfuncs);
+
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+}
+
+void endMIPSFunction() {
+
+    MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+
+    fprintf(MIPSfuncs, "\n\tjr $ra       # return to main\n\n");
+    fclose(MIPSfuncs);
+
+    printf(CYAN "MIPS Function Created.\n\n\n" RESET);
+
+}
+
+void createMIPSFloatFunctionCall(char id[50]) {
+
+    tempMIPS = fopen("tempMIPS.asm", "a");
+
+    fprintf(tempMIPS, "\n\tl.s $f0, G%s       # load the value of %s into $t0\n", id, id);
+    fprintf(tempMIPS, "\n\tli $v0, 2         # call code to print a float\n");
+    fprintf(tempMIPS, "\tmov.s $f12, $f0   # move the value of %s into $f12\n", id);
+    fprintf(tempMIPS, "\tsyscall           # system call to print float\n");
+    
+    fclose(tempMIPS);
+
+    printf(CYAN "MIPS Function Created.\n\n\n" RESET);
+
+}
+
 void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
     // e.g. x = y;
-
+/*
     tempMIPS = fopen("tempMIPS.asm", "a");
     int itemID1;
     int itemID2;
@@ -73,171 +143,200 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
 
     if (typeInt == 0) { // if not char
 
-        fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
-        fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
+        fprintf(tempMIPS, "\n\tli $t%d, %s       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
+        fprintf(tempMIPS, "\tmove $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
 
     } else if (typeChar == 0) { // if char
 
-        fprintf(tempMIPS, "\nli $t%d, '%s'       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
-        fprintf(tempMIPS, "move $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
+        fprintf(tempMIPS, "\n\tli $t%d, '%s'       # load the value of %s into $t%d\n", itemID1, itemValue1, id2, itemID1);
+        fprintf(tempMIPS, "\tmove $t%d, $t%d    # move the value of %s into %s\n", itemID2, itemID1, id2, id1); // TODO: i think rn this moves the second regidster to the first instead of copying
 
     } else if (typeFloat == 0) {
 
-        fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d, %s = %s\n", itemID1, id2, id2, itemID1, id1, id2);
+        fprintf(tempMIPS, "\n\tl.s $f%d, %s       # load the value of %s into $t%d, %s = %s\n", itemID1, id2, id2, itemID1, id1, id2);
 
     }
     fclose(tempMIPS);
     printf(CYAN "MIPS Created.\n\n\n" RESET);
+*/
+
 }
 
 void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
     // e.g. x = 5;
 
-    // tempMIPS = fopen("tempMIPS.asm", "a");
-    // int itemID;
-
-    // itemID = getItemID(id, scope);
-
-    // fprintf(tempMIPS, "\nli $t%d, %s       # load the value of %s into $t%d\n", itemID, num, id, itemID);
-
-    // fclose(tempMIPS);
-
-    MIPScode = fopen("MIPScode.asm", "a");
-
-    fprintf(MIPScode, "%s: .word %s\n", id, num);
-
-    fclose(MIPScode);
-
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
-
-    itemID = getItemID(id, scope);
-
-    //fprintf(tempMIPS, "\nlw $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
-
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        MIPScode = fopen("MIPScode.asm", "a");
+        fprintf(MIPScode, "\t%s%s: .word %s\n", scope, id, num);
+        fclose(MIPScode);
+        printf(CYAN "MIPS Created.\n\n\n" RESET); 
 
 }
 
 void createMIPSFloatAssignment (char id[50], char num[50], char scope[50]){
     // e.g. f = 5;
 
-    // SEPARATE FILE FOR f: .float 1.0 HERE
-    MIPScode = fopen("MIPScode.asm", "a");
-
-    fprintf(MIPScode, "%s: .float %s\n", id, num);
-
-    fclose(MIPScode);
-
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
-
-    itemID = getItemID(id, scope);
-
-    //fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
-
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        MIPScode = fopen("MIPScode.asm", "a");
+        fprintf(MIPScode, "\t%s%s: .float %s\n", scope, id, num);
+        fclose(MIPScode);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
 void createMIPSCharAssignment (char id[50], char chr[50], char scope[50]) {
     // e.g. x = 5;
 
-    MIPScode = fopen("MIPScode.asm", "a");
-
-    fprintf(MIPScode, "%s: .asciiz \"%s\"\n", id, chr);
-
-    fclose(MIPScode);
-
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
-
-    itemID = getItemID(id, scope);
-
-    //fprintf(tempMIPS, "\nl.s $f%d, %s       # load the value of %s into $t%d\n", itemID, id, id, itemID);
-
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
-}
-
-void createMIPSIntDeclaration(char id[50], char scope[50]) {
-    // e.g. int x;
-
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
-
-    itemID = getItemID(id, scope);
-
-    fprintf(tempMIPS, "li $t%d, %s\n", itemID, id);
-
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        MIPScode = fopen("MIPScode.asm", "a");
+        fprintf(MIPScode, "\t%s%s: .asciiz \"%s\"\n", scope, id, chr);
+        fclose(MIPScode);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
 
 }
 
 void createMIPSWriteInt(char id[50], char scope[50]){
+
+    int str;
+    str = strcmp(scope, "G");
+
+    if (str == 0) {
     
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
+        tempMIPS = fopen("tempMIPS.asm", "a");
+        int itemID;
 
-    itemID = getItemID(id, scope);
+        itemID = getItemID(id, scope);
 
-    fprintf(tempMIPS, "\nlw $t0, %s       # load the value of %s into $t0\n", id, id);
-    fprintf(tempMIPS, "\nli $v0, 1       # call code to print an integer\n");
-    fprintf(tempMIPS, "move $a0, $t0   # move the value of %s into $a0\n", id);
-    fprintf(tempMIPS, "syscall         # system call to print integer\n");
+        fprintf(tempMIPS, "\n\tlw $t0, %s%s       # load the value of %s into $t0\n", scope, id, id);
+        fprintf(tempMIPS, "\n\tli $v0, 1       # call code to print an integer\n");
+        fprintf(tempMIPS, "\tmove $a0, $t0   # move the value of %s into $a0\n", id);
+        fprintf(tempMIPS, "\tsyscall         # system call to print integer\n");
 
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        fclose(tempMIPS);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    } else {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        int itemID;
+
+        itemID = getItemID(id, scope);
+
+        fprintf(MIPSfuncs, "\n\tlw $t0, %s%s       # load the value of %s into $t0\n", scope, id, id);
+        fprintf(MIPSfuncs, "\n\tli $v0, 1       # call code to print an integer\n");
+        fprintf(MIPSfuncs, "\tmove $a0, $t0   # move the value of %s into $a0\n", id);
+        fprintf(MIPSfuncs, "\tsyscall         # system call to print integer\n");
+
+        fclose(MIPSfuncs);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    }
 
 }
 
 void createMIPSWriteFloat(char id[50], char scope[50]){
+
+    int str;
+    str = strcmp(scope, "G");
+
+    if (str == 0) {
     
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
+        tempMIPS = fopen("tempMIPS.asm", "a");
+        int itemID;
 
-    itemID = getItemID(id, scope);
+        itemID = getItemID(id, scope);
 
-    fprintf(tempMIPS, "\nl.s $f0, %s       # load the value of %s into $t0\n", id, id);
-    fprintf(tempMIPS, "\nli $v0, 2         # call code to print a float\n");
-    fprintf(tempMIPS, "mov.s $f12, $f0   # move the value of %s into $f12\n", id);
-    fprintf(tempMIPS, "syscall           # system call to print float\n");
+        fprintf(tempMIPS, "\n\tl.s $f0, %s%s       # load the value of %s into $t0\n", scope, id, id);
+        fprintf(tempMIPS, "\n\tli $v0, 2         # call code to print a float\n");
+        fprintf(tempMIPS, "\tmov.s $f12, $f0   # move the value of %s into $f12\n", id);
+        fprintf(tempMIPS, "\tsyscall           # system call to print float\n");
 
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        fclose(tempMIPS);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    } else {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        int itemID;
+
+        itemID = getItemID(id, scope);
+
+        fprintf(MIPSfuncs, "\n\tl.s $f0, %s%s       # load the value of %s into $t0\n", scope, id, id);
+        fprintf(MIPSfuncs, "\n\tli $v0, 2         # call code to print a float\n");
+        fprintf(MIPSfuncs, "\tmov.s $f12, $f0   # move the value of %s into $f12\n", id);
+        fprintf(MIPSfuncs, "\tsyscall           # system call to print float\n");
+
+        fclose(MIPSfuncs);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    }
 
 }
 
 void createMIPSWriteChar(char id[50], char scope[50]){
+
+    int str;
+    str = strcmp(scope, "G");
+
+    if (str == 0) {
     
-    tempMIPS = fopen("tempMIPS.asm", "a");
-    int itemID;
+        tempMIPS = fopen("tempMIPS.asm", "a");
+        int itemID;
 
-    itemID = getItemID(id, scope);
+        itemID = getItemID(id, scope);
 
-    fprintf(tempMIPS, "\nlw $t0, %s       # load the value of %s into $t%d\n", id, id, itemID);
-    fprintf(tempMIPS, "\nli $v0, 11      # call code to print a single char\n");
-    fprintf(tempMIPS, "move $a0, $t0   # move the value of %s into $a0\n", id);
-    fprintf(tempMIPS, "syscall         # system call to print char\n");
+        fprintf(tempMIPS, "\n\tlw $t0, %s%s       # load the value of %s into $t%d\n", scope, id, id, itemID);
+        fprintf(tempMIPS, "\n\tli $v0, 11      # call code to print a single char\n");
+        fprintf(tempMIPS, "\tmove $a0, $t0   # move the value of %s into $a0\n", id);
+        fprintf(tempMIPS, "\tsyscall         # system call to print char\n");
 
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        fclose(tempMIPS);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    } else {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        int itemID;
+
+        itemID = getItemID(id, scope);
+
+        fprintf(MIPSfuncs, "\n\tlw $t0, %s%s       # load the value of %s into $t%d\n", scope, id, id, itemID);
+        fprintf(MIPSfuncs, "\n\tli $v0, 11      # call code to print a single char\n");
+        fprintf(MIPSfuncs, "\tmove $a0, $t0   # move the value of %s into $a0\n", id);
+        fprintf(MIPSfuncs, "\tsyscall         # system call to print char\n");
+
+        fclose(MIPSfuncs);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    }
 
 }
 
-void makeMIPSNewLine() {
+void makeMIPSNewLine(char scope[50]) {
 
-    tempMIPS = fopen("tempMIPS.asm", "a");
+    int str;
+    str = strcmp(scope, "G");
 
-    fprintf(tempMIPS, "\naddi $a0, $0 0xA  # new line\n");
-    fprintf(tempMIPS, "addi $v0, $0 0xB  # new line\n");
-    fprintf(tempMIPS, "syscall           # syscall to print new line\n");
+    if (str == 0) {
 
-    fclose(tempMIPS);
-    printf(CYAN "MIPS Created.\n\n\n" RESET);
+        tempMIPS = fopen("tempMIPS.asm", "a");
+
+        fprintf(tempMIPS, "\n\taddi $a0, $0 0xA  # new line\n");
+        fprintf(tempMIPS, "\taddi $v0, $0 0xB  # new line\n");
+        fprintf(tempMIPS, "\tsyscall           # syscall to print new line\n");
+
+        fclose(tempMIPS);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    } else {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+
+        fprintf(MIPSfuncs, "\n\taddi $a0, $0 0xA  # new line\n");
+        fprintf(MIPSfuncs, "\taddi $v0, $0 0xB  # new line\n");
+        fprintf(MIPSfuncs, "\tsyscall           # syscall to print new line\n");
+
+        fclose(MIPSfuncs);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    }
 
 }
 
@@ -245,11 +344,11 @@ void createEndOfAssemblyCode(){
 
     tempMIPS = fopen("tempMIPS.asm", "a");
 
-    fprintf(tempMIPS, "\n# -----------------------\n");
-    fprintf(tempMIPS, "#  done, terminate program.\n\n");
-    fprintf(tempMIPS, "li $v0, 10      # call code to terminate program\n");
-    fprintf(tempMIPS, "syscall         # system call (terminate)\n");
-    fprintf(tempMIPS, ".end main\n");
+    fprintf(tempMIPS, "\n\t# -----------------------\n");
+    fprintf(tempMIPS, "\t#  done, terminate program.\n\n");
+    fprintf(tempMIPS, "\tli $v0, 10      # call code to terminate program\n");
+    fprintf(tempMIPS, "\tsyscall         # system call (terminate)\n");
+    fprintf(tempMIPS, "\t.end main\n");
     fclose(tempMIPS);
     printf(BCYAN "  MIPS End Created.\n" RESET);
 

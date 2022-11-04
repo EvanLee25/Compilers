@@ -179,6 +179,14 @@ void updateValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], ch
 
 }
 
+void updateParameter(int indx, char scope[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH], int count) {
+	int index = getSymbolTableIndex(scope);
+	int size = getSymbolTableSize(index);
+
+	strcpy(symTabItems[index][indx].value, value); // update value in sym table
+
+}
+
 void updateArrayValue(char itemName[MAX_NAME_LENGTH], int arrayIndex ,char scope[MAX_NAME_LENGTH], char type[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]){
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
