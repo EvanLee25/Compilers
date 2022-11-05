@@ -795,7 +795,7 @@ Expr:	SEMICOLON {
 			isUsed($3, scope);
 
 
-	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement\n" RESET); 
+	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET); 
 
 		// semantic checks
 			// is the id initialized as a value?
@@ -830,6 +830,62 @@ Expr:	SEMICOLON {
 				createMIPSWriteChar($2, scope);
 			} else if (isFloat == 0) {
 				createMIPSWriteFloat($2, scope);
+			}
+
+		// code optimization
+			// mark the id as used
+			isUsed($2, scope);
+
+		/*
+					Expr
+			  WRITE     getValue(ID)
+		*/
+
+	} |	WRITE ID LBRACE NUMBER RBRACE SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Array Element)\n" RESET); 
+
+		// concatenate the array in this format: "$2[$4]"
+		char elementID[50];
+		strcpy(elementID, $2);
+		strcat(elementID, "[");
+		strcat(elementID, $4);
+		strcat(elementID, "]");
+
+		// semantic checks
+			// is the id initialized as a value?
+			if (scope == "G") {
+				initialized(elementID, scope);
+			} else {
+				printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
+			}
+
+		// symbol table
+			// N/A
+
+		// ast
+		$$ = AST_BinaryExpression("Expr", $1, getValue(elementID, scope));
+
+		// ir code
+		createWriteId(elementID, scope);
+
+		// mips code
+			// get the type of the variable
+			char* type = getVariableType(elementID, scope);
+
+			// determine if its int or char
+			int isInt = strcmp(type, "INT");
+			int isChar = strcmp(type, "CHR");
+			int isFloat = strcmp(type, "FLT");
+
+			// run correct mips function according to type
+			if (isInt == 0) { // if the variable is an integer
+				removeBraces(elementID);
+				createMIPSWriteInt(elementID, scope);
+			} else if (isChar == 0) { // if the variable is a char
+				removeBraces(elementID);
+				createMIPSWriteChar(elementID, scope);
+			} else if (isFloat == 0) {
+				removeBraces(elementID);
+				createMIPSWriteFloat(elementID, scope);
 			}
 
 		// code optimization
@@ -908,8 +964,30 @@ Expr:	SEMICOLON {
 
 			// mips code
 			// remove braces for mips
-			removeBraces(temp);
-			createMIPSIntAssignment(temp, $6, scope);
+			if (strcmp(scope, "G") != 0) { // if scope is in function
+
+				if (found(temp, scope) == 1) { // if the variable is found in the function's sym table
+
+					removeBraces(temp);
+					createMIPSIntAssignment(temp, $6, scope);
+
+				} else if (found(temp, "G") == 1) { // if the variable is found in the global scope
+
+					removeBraces(temp);
+					createMIPSIntAssignment(temp, $6, "G");
+
+				} else { // variable not found
+
+					showSymTable(); // show symbol table
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					exit(0); // exit program
+
+				}
+
+			} else { // if scope is global
+				removeBraces(temp);
+				createMIPSIntAssignment(temp, $6, scope);
+			}
 
 
 	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
@@ -956,8 +1034,30 @@ Expr:	SEMICOLON {
 			createIntAssignment(temp, total, scope);
 
 			// mips code
-			removeBraces(temp);
-			createMIPSIntAssignment(temp, total, scope);
+			if (strcmp(scope, "G") != 0) { // if scope is in function
+
+				if (found(temp, scope) == 1) { // if the variable is found in the function's sym table
+
+					removeBraces(temp);
+					createMIPSIntAssignment(temp, total, scope);
+
+				} else if (found(temp, "G") == 1) { // if the variable is found in the global scope
+
+					removeBraces(temp);
+					createMIPSIntAssignment(temp, total, "G");
+
+				} else { // variable not found
+
+					showSymTable(); // show symbol table
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					exit(0); // exit program
+
+				}
+
+			} else { // if scope is global
+				removeBraces(temp);
+				createMIPSIntAssignment(temp, total, scope);
+			}
 
 	
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Char Array Index\n\n" RESET);
@@ -1002,7 +1102,31 @@ Expr:	SEMICOLON {
 			createIntAssignment(temp, str, scope);
 
 			// mips code
-			createMIPSCharAssignment(temp, str, scope);
+			if (strcmp(scope, "G") != 0) { // if scope is in function
+
+				if (found(temp, scope) == 1) { // if the variable is found in the function's sym table
+
+					removeBraces(temp);
+					createMIPSCharAssignment(temp, str, scope);
+
+				} else if (found(temp, "G") == 1) { // if the variable is found in the global scope
+
+					removeBraces(temp);
+					createMIPSCharAssignment(temp, str, "G");
+
+				} else { // variable not found
+
+					showSymTable(); // show symbol table
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					exit(0); // exit program
+
+				}
+
+			} else { // if scope is global
+				removeBraces(temp);
+				createMIPSCharAssignment(temp, str, scope);
+			}
+			
 
 
 	} | ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: Call Function\n\n" RESET);
@@ -1027,7 +1151,7 @@ Expr:	SEMICOLON {
 				char result[50];
 				sprintf(itemID, "%d", i);
 				sprintf(itemName, "%s", getNameByID(itemID, scope));
-				strcpy(result, "PARAM");
+				strcpy(result, "");
 				strcat(result, itemName);
 
 				char type[50];
@@ -1081,13 +1205,17 @@ Expr:	SEMICOLON {
 		// mips
 		char str[50];
 		strcpy(str, getVariableType($2, scope));
+
+		char str1[50];
+		strcpy(str1, "G");
+		strcat(str1, scope);
 		
 		if (strcmp(str, "INT") == 0) {
-			createMIPSIntAssignment("RETURN", getValue($2, scope), scope);
+			createMIPSIntAssignment("", getValue($2, scope), str1);
 		} else if (strcmp(str, "FLT") == 0) {
-			createMIPSFloatAssignment("RETURN", getValue($2, scope), scope);
+			createMIPSFloatAssignment("", getValue($2, scope), str1);
 		} else if (strcmp(str, "CHR") == 0) {
-			createMIPSCharAssignment("RETURN", getValue($2, scope), scope);
+			createMIPSCharAssignment("", getValue($2, scope), str1);
 		}
 
 
@@ -1103,7 +1231,13 @@ Expr:	SEMICOLON {
 		printf(BLUE "Created.\n" RESET);
 
 		// mips
-		createMIPSIntAssignment("RETURN", $2, scope);
+		// create scope so that it has G and then the function scope, since
+		// we are accessing the global variable that is called the function name
+		char str[50];
+		strcpy(str, "G");
+		strcat(str, scope);
+
+		createMIPSIntAssignment("", $2, str);
 
 
 	} | RETURN FLOAT_NUM SEMICOLON {
@@ -1118,7 +1252,13 @@ Expr:	SEMICOLON {
 		printf(BLUE "Created.\n" RESET);
 
 		// mips
-		createMIPSFloatAssignment("RETURN", $2, scope);
+		// create scope so that it has G and then the function scope, since
+		// we are accessing the global variable that is called the function name
+		char str[50];
+		strcpy(str, "G");
+		strcat(str, scope);
+
+		createMIPSFloatAssignment("", $2, str);
 
 
 	} | RETURN CHARLITERAL SEMICOLON {
@@ -1133,7 +1273,10 @@ Expr:	SEMICOLON {
 		printf(BLUE "Created.\n" RESET);
 
 		// mips
-		createMIPSCharAssignment("RETURN", $2, scope);
+		char str[50];
+		strcpy(str, "G");
+		strcat(str, scope);
+		createMIPSCharAssignment("", $2, str);
 
 
 }

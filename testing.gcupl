@@ -4,11 +4,12 @@ char someLetter;
 char message[15];
 
 float average(float a, float b, float c){
-    float avg;
-    avg = 1.2;
-    write avg;
-    /*avg = (a + b + c)/3.0;*/
-    return avg;
+    write a;
+    write ~nl;
+    write b;
+    write ~nl;
+    write c;
+    return 5.0;
 }
 
 int dispMessage(int x, int y){
@@ -29,29 +30,4 @@ int dispMessage(int x, int y){
     return 5;
 }
 
-int test(int k, int j) {
-
-    write k;
-
-}
-
-
-/*justAverage = average(12.5, 13.7, 25.8);*/
-/*aNumber = dispMessage();*/
-dispMessage(3, 6);
-average(9.1, 3.3, 4.5);
-/*write justAverage;*/
-write ~nl;
-
-/*justAverage = justAverage (justAverage + 2.0);*/
-/*justAverage = average(justAverage, 0.0, 0.0);*/
-/*aNumber = dispMessage();*/
-write ~nl;
-
-write average;
-test(1,2);
-
-/*aNumber = dispMessage();*/
-/*aNumber = aNumber / (aNumber + aNumber * aNumber);*/
-/*write aNumber;*/
-write ~nl;
+average(1.0,2.0,3.0);
