@@ -187,6 +187,24 @@ void updateParameter(int indx, char scope[MAX_NAME_LENGTH], char value[MAX_NAME_
 
 }
 
+char* getNameByID(char id[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
+
+	int itemID = atoi(id);
+	int index = getSymbolTableIndex(scope);
+	int size = getSymbolTableSize(index);
+
+	for(int i=0; i<size; i++) {
+		//printf(BPINK "\nHERE\n" RESET);
+		int str2 = strcmp(symTabItems[index][i].scope, scope); 
+		
+		if (symTabItems[index][i].itemID == itemID && str2 == 0) {
+			return symTabItems[index][i].itemName;
+		}
+	}
+	return NULL;
+
+}
+
 void updateArrayValue(char itemName[MAX_NAME_LENGTH], int arrayIndex ,char scope[MAX_NAME_LENGTH], char type[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]){
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);

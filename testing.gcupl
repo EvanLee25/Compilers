@@ -29,6 +29,13 @@ int dispMessage(int x, int y){
     return 5;
 }
 
+int test(int k, int j) {
+
+    write k;
+
+}
+
+
 /*justAverage = average(12.5, 13.7, 25.8);*/
 /*aNumber = dispMessage();*/
 dispMessage(3, 6);
@@ -40,6 +47,9 @@ write ~nl;
 /*justAverage = average(justAverage, 0.0, 0.0);*/
 /*aNumber = dispMessage();*/
 write ~nl;
+
+write average;
+test(1,2);
 
 /*aNumber = dispMessage();*/
 /*aNumber = aNumber / (aNumber + aNumber * aNumber);*/

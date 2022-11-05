@@ -799,7 +799,11 @@ Expr:	SEMICOLON {
 
 		// semantic checks
 			// is the id initialized as a value?
-			initialized($2, scope);
+			if (scope == "G") {
+				initialized($2, scope);
+			} else {
+				printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
+			}
 
 		// symbol table
 			// N/A
@@ -1011,11 +1015,37 @@ Expr:	SEMICOLON {
 
 			for (int i = 0; i < argCounter; i++) {
 				updateParameter(i, scope, args[i], argCounter);
+
 				printf(BGREEN "Parameter Accepted.\n" RESET);
+
 				printf(BLUE "IR Code" RESET);
 				printf(RED " NOT " RESET);
 				printf(BLUE "Created.\n" RESET);
-				createMIPSIntAssignment("PARAM", args[i], scope);
+
+				char itemName[50];
+				char itemID[50];
+				char result[50];
+				sprintf(itemID, "%d", i);
+				sprintf(itemName, "%s", getNameByID(itemID, scope));
+				strcpy(result, "PARAM");
+				strcat(result, itemName);
+
+				char type[50];
+				sprintf(type, "%s", getVariableType(itemName, scope));
+
+				int isInt, isFloat, isChar;
+				
+				isInt = strcmp(type, "INT");
+				isFloat = strcmp(type, "FLT");
+				isChar = strcmp(type, "CHR");
+
+				if (isInt == 0) {
+					createMIPSIntAssignment(result, args[i], scope);
+				} else if (isFloat == 0) {
+					createMIPSFloatAssignment(result, args[i], scope);
+				} else if (isChar == 0) {
+					createMIPSCharAssignment(result, args[i], scope);
+				}
 			}
 			argCounter = 0;
 
