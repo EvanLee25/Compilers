@@ -4,6 +4,44 @@
 #include <string.h>
 #include <unistd.h>
 
+void addToNumArray(char input[50]) {
+    // creating file pointer to work with files
+    FILE *file;
+    // opening file in writing mode
+    file = fopen("calc.input", "a");
+    fprintf(file, "%s",input);
+    fclose(file);
+
+}
+
+void addToOpArray(char input[50]) {
+    // creating file pointer to work with files
+    FILE *file;
+    // opening file in writing mode
+    file = fopen("calc.input", "a");
+    fprintf(file, "%s", input);
+    fclose(file);
+}
+
+void readEvalOutput(char *result){
+    // creating file pointer to work with files
+    FILE *file;
+    // opening file in writing mode
+    file = fopen("calc.output", "r");
+    fscanf(file,"%s",result);
+    fclose(file);
+}
+
+void clearCalcInput(){
+    FILE *file;
+    file = fopen("calc.input", "w");
+    fclose(file);
+}
+
+
+
+
+/*
 int numArray[50];
 char opArray[50];
 int numCounter;
@@ -73,7 +111,21 @@ void addToOpArray(char input[50]) {
     file = fopen("calc.input", "a");
     fprintf(file, "%s", input);
     fclose(file);
+}
 
+void readEvalOutput(char *result){
+    // creating file pointer to work with files
+    FILE *file;
+    // opening file in writing mode
+    file = fopen("calc.output", "r");
+    fscanf(file,"%s",result);
+    fclose(file);
+}
+
+void clearCalcInput(){
+    FILE *file;
+    file = fopen("calc.input", "w");
+    fclose(file);
 }
 
 void divide(int i) {
@@ -469,3 +521,4 @@ void wipeArrays() {
     opCounter = 0;
 
 }
+*/

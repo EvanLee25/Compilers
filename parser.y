@@ -745,29 +745,29 @@ Expr:	SEMICOLON {
 
 
 	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
-
-			// turn the integer returned from calculate() into a string
-			char total[50];
-			sprintf(total, "%d", calculate());
-			wipeArrays();
-	
+			
+			system("python3 calculate.py");
+			char result[100];
+			readEvalOutput(&result);
+			clearCalcInput();
+			printf(RED"\nResult from evaluation ==> %s \n"RESET,result);
 			// convert index to integer
 			int index = atoi($3);
 
 			// array table
-			updateArrayValue($1, index, scope, "INT", total); //TODO DOES NOT RESOLVE FLOATS
+			updateArrayValue($1, index, scope, "INT", result); //TODO DOES NOT RESOLVE FLOATS
 
 			// ast
-			$$ = AST_assignment($1,$3,total);
+			$$ = AST_assignment($1,$3,result);
 
 			// ir code
 			char temp[50];	
 			sprintf(temp,"%s[%s]",$1,$3);
-			createIntAssignment(temp, total, scope);
+			createIntAssignment(temp, result, scope);
 
 			// mips code
 			removeBraces(temp);
-			createMIPSIntAssignment(temp, total, scope);
+			createMIPSIntAssignment(temp, result, scope);
 
 	
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Array Index\n\n" RESET);
@@ -800,31 +800,31 @@ IDEQExpr: ID EQ Math {
 
 	// ast
 	// TODO: EVAN
-
+	
 	system("python3 calculate.py");
+	
+	char result[100];
+	readEvalOutput(&result);
+	clearCalcInput();
+	printf(RED"\nResult from evaluation ==> %s \n"RESET,result);
 
 	// semantic checks
 		// inside Math
 
 	// calculations: code optimization
 		// turn the integer returned from calculate() into a string
-		char total[50];
-		sprintf(total, "%d", calculate());
-
-		// wipe the arrays
-		wipeArrays();
 
 	// symbol table
-	updateValue($1, scope, total);
+	updateValue($1, scope, result);
 		
 	// ast
-	$$ = AST_BinaryExpression("=", $1, total);
+	$$ = AST_BinaryExpression("=", $1, result);
 
 	// ir code
-	createIntAssignment($1, total, scope);
+	createIntAssignment($1, result, scope);
 
 	// mips code
-	createMIPSIntAssignment($1, total, scope);
+	createMIPSIntAssignment($1, result, scope);
 
 	// code optimization
 		// mark the id as used
