@@ -22,7 +22,7 @@
 #define RESET   "\x1b[0m"
 
 #define MAX_SYMBOL_TABLES 50
-#define MAX_SYMBOL_ENTRIES 100
+#define MAX_SYMBOL_ENTRIES 150
 #define MAX_AMOUNT_SCOPES 50
 #define MAX_NAME_LENGTH 50
 
@@ -145,6 +145,7 @@ char* getVariableType(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
 
+	//search through scoped table first
 	for(int i=0; i<size; i++){
 		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
 		int str2 = strcmp(symTabItems[index][i].scope, scope); 
@@ -157,23 +158,52 @@ char* getVariableType(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH
 }
 
 void updateValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]) {
+    int index = getSymbolTableIndex(scope);
+    int size = getSymbolTableSize(index);
+
+    for(int i=0; i<size; i++){
+        int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
+        int str2 = strcmp(symTabItems[index][i].scope, scope); 
+
+        if( str1 == 0 && str2 == 0 ) {
+            strcpy(symTabItems[index][i].value, value); // update value in sym table
+        }
+    }
+
+}
+
+void updateValue2(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]) {
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);
-
-	for(int i=0; i<size; i++){
-		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-		int str2 = strcmp(symTabItems[index][i].scope, scope); 
+	
+	if(strcmp(scope,"G") == 1){ //If scope is not global do below
 		
-		// get variable type
-		char* type = getVariableType(itemName, scope);
+		for(int i=0; i<size; i++){
+			int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
+			if( str1 == 0 ) {
+				strcpy(symTabItems[index][i].value, value); // update value in sym table
+				return;
+			}	
+		} 
 
-		// determine if its int or char
-		int isInt = strcmp(type, "INT");
-		int isChar = strcmp(type, "CHR");
-		int isFloat = strcmp(type, "FLT");
+		size = getSymbolTableSize(0); //get global scope size
+		for(int i=0; i<size; i++){
+			int str1 = strcmp(symTabItems[0][i].itemName, itemName); 
+		
+			if( str1 == 0 ) {
+				strcpy(symTabItems[0][i].value, value); // update value in sym table
+				return;
+			}
+		} 
+	}
+	
 
-		if( str1 == 0 && str2 == 0 ) {
-			strcpy(symTabItems[index][i].value, value); // update value in sym table
+	else {
+		for(int i=0; i<size; i++){
+			int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
+			if( str1 == 0 ) {
+				strcpy(symTabItems[index][i].value, value); // update value in sym table
+			}
 		}
 	}
 
