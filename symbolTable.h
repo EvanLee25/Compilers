@@ -124,7 +124,7 @@ void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8],
 void addSymbolTable(char scope[MAX_NAME_LENGTH],char itemType[MAX_NAME_LENGTH]){
 	strcpy(symbolTableScopes[numOfSymbolTables], scope); //scope name added
 	addItem(scope,"FNC",itemType,"G",0);
-	numOfSymbolTables++; //Add a symbol table
+	numOfSymbolTables++; // Add a symbol table
 }
 
 void addArray(char name[MAX_NAME_LENGTH], char itemKind[MAX_NAME_LENGTH], char itemType[MAX_NAME_LENGTH], char arrayRange[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
@@ -161,16 +161,17 @@ void updateValue(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], ch
     int index = getSymbolTableIndex(scope);
     int size = getSymbolTableSize(index);
 
-    for(int i=0; i<size; i++){
-        int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
-        int str2 = strcmp(symTabItems[index][i].scope, scope); 
+	for(int i=0; i<size; i++){
+		int str1 = strcmp(symTabItems[index][i].itemName, itemName); 
+		int str2 = strcmp(symTabItems[index][i].scope, scope); 
 
-        if( str1 == 0 && str2 == 0 ) {
-            strcpy(symTabItems[index][i].value, value); // update value in sym table
-        }
-    }
+		if( str1 == 0 && str2 == 0 ) {
+			strcpy(symTabItems[index][i].value, value); // update value in sym table
+		}
+	}
 
 }
+
 
 void updateValue2(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH]) {
 	int index = getSymbolTableIndex(scope);
@@ -206,6 +207,34 @@ void updateValue2(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], c
 			}
 		}
 	}
+
+}
+
+
+
+void updateParameter(int indx, char scope[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH], int count) {
+	int index = getSymbolTableIndex(scope);
+	int size = getSymbolTableSize(index);
+
+	strcpy(symTabItems[index][indx].value, value); // update value in sym table
+
+}
+
+char* getNameByID(char id[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]) {
+
+	int itemID = atoi(id);
+	int index = getSymbolTableIndex(scope);
+	int size = getSymbolTableSize(index);
+
+	for(int i=0; i<size; i++) {
+		//printf(BPINK "\nHERE\n" RESET);
+		int str2 = strcmp(symTabItems[index][i].scope, scope); 
+		
+		if (symTabItems[index][i].itemID == itemID && str2 == 0) {
+			return symTabItems[index][i].itemName;
+		}
+	}
+	return NULL;
 
 }
 
