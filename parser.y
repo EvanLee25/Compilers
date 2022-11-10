@@ -627,7 +627,6 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							createFloatDefinition($2, scope);
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
-							//createMIPSIntDeclaration($2);
 							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
 							
 							// code optimization
@@ -793,6 +792,11 @@ Expr:	SEMICOLON {
 			// mark the two id's as used
 			isUsed($1, scope);
 			isUsed($3, scope);
+
+	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = FUNCTION\n" RESET); 
+
+		// symbol table
+		updateValue($1, scope, getValue($3, scope));
 
 
 	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET); 
@@ -1114,9 +1118,6 @@ Expr:	SEMICOLON {
 			// set scope to function
 			strcpy(scope, $1);
 
-			// TODO: get the name of a parameter for it to be passed into createMIPSAssignment instead of "para", also determine
-			// the type of the parameter in this for loop
-
 			for (int i = 0; i < argCounter; i++) {
 				updateParameter(i, scope, args[i], argCounter);
 
@@ -1144,9 +1145,11 @@ Expr:	SEMICOLON {
 				isChar = strcmp(type, "CHR");
 
 				if (isInt == 0) {
-					createMIPSIntAssignment(result, args[i], scope);
+					createIntParameter(args[i], i+1, scope);
+					//createMIPSIntAssignment(result, args[i], scope);
 				} else if (isFloat == 0) {
-					createMIPSFloatAssignment(result, args[i], scope);
+					createFloatParameter(args[i], i+1, scope);
+					//createMIPSFloatAssignment(result, args[i], scope);
 				} else if (isChar == 0) {
 					createMIPSCharAssignment(result, args[i], scope);
 				}
@@ -1258,7 +1261,6 @@ Expr:	SEMICOLON {
 		strcat(str, scope);
 		createMIPSCharAssignment("", $2, str);
 
-
 }
 
 
@@ -1316,7 +1318,8 @@ IDEQExpr: ID EQ Math {
 
 }
 
-Math: 		NUMBER Operator Math {
+Math: 		
+			NUMBER Operator Math {
 
 				addToOpArray($2);
 				addToNumArray($1);
