@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
-void addToNumArray(char input[50]) {
+void addToInputCalc(char input[100]) {
     // creating file pointer to work with files
     FILE *file;
     // opening file in writing mode
@@ -12,15 +12,6 @@ void addToNumArray(char input[50]) {
     fprintf(file, "%s",input);
     fclose(file);
 
-}
-
-void addToOpArray(char input[50]) {
-    // creating file pointer to work with files
-    FILE *file;
-    // opening file in writing mode
-    file = fopen("calc.input", "a");
-    fprintf(file, "%s", input);
-    fclose(file);
 }
 
 void readEvalOutput(char *result){
