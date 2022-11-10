@@ -3,7 +3,7 @@ float secNumber;
 char someLetter;
 char message[15];
 float x;
-x = 4.5*2 + (5*2)^2 - 2.2;
+x = (4.5*2 + (5*2)^2 - 2.2));
 
 float average(float a, float b, float c){
     write a;

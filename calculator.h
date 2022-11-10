@@ -20,6 +20,9 @@ void readEvalOutput(char *result){
     // opening file in writing mode
     file = fopen("calc.output", "r");
     fscanf(file,"%s",result);
+    if (strcmp(result,"ERROR") == 0){
+        exit(0);
+    }
     fclose(file);
 }
 
