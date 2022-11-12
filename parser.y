@@ -13,7 +13,6 @@
 #include "calculator.h"
 #include "ctype.h"
 
-
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
@@ -28,7 +27,6 @@ char **argptr = args;
 char scope[50] = "G";
 
 %}
-
 
 %union {
 	int number;
@@ -115,7 +113,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr Math Operator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator ArrDecl
 
 %start Program
 
@@ -141,6 +139,7 @@ Program: DeclList { //printf("\nProgram -> DeclList \n");
 		printf("\n\n #######################" RESET);
 		printf(BPINK " MIPS GENERATED " RESET);
 		printf("####################### \n\n" RESET);
+
 };
 
 DeclList:   Decl DeclList {
@@ -1173,6 +1172,8 @@ Expr:	SEMICOLON {
 			// mips
 			callMIPSFunction($1);
 
+			//YYACCEPT;
+
 
 	} | RETURN ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (ID)\n\n" RESET);
 
@@ -1267,11 +1268,11 @@ Expr:	SEMICOLON {
 
 
 
-IDEQExpr: ID EQ Math {
+IDEQExpr: ID EQ MathStmt {
 
 	// ast
 	// TODO: EVAN
-	
+
 	system("python3 calculate.py");
 	
 	char result[100];
@@ -1318,59 +1319,24 @@ IDEQExpr: ID EQ Math {
 
 }
 
-Math: 		
-			NUMBER Operator Math {
-
-				addToOpArray($2);
-				addToNumArray($1);
-			//	addToOpArray($2);
-
-			} | ID Operator Math {
-
-				// semantic checks
-					// does the id have a value?
-					initialized($1, scope);
-
-					// is the id a char?
-					if (isChar($1,scope) == 1) {
-						printf(RED "ERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
-						exit(0);
-					}
-
-				// add to number array
-				addToOpArray($2);
-				addToNumArray(getValue($1, scope));
-				//addToOpArray($2);
-
-				// code optimization
-					// mark the id as used
-					isUsed($1, scope);
-			
-			} | NUMBER {
- 
-				// add to number array
-				addToNumArray($1);
-
-			} | ID {
-
-				// semantic checks
-					// does the id have a value?
-					initialized($1, scope);
-
-					// is the id a char?
-					if (isChar($1,scope) == 1) {
-						printf(RED "\nERROR: Cannot do operations on '%s' to an int variable, type mismatch.\n\n" RESET, $1);
-						exit(0);
-					}
-
-				// add to number array
-				addToNumArray(getValue($1, scope));
-
-				// code optimization
-					// mark the id as used
-					isUsed($1, scope);
+MathStmt: Math MathStmt {
 
 }
+
+		| Math{
+
+}
+
+
+Math: LPAREN {addToInputCalc($1);}
+		| RPAREN {addToInputCalc($1);}
+		| ID {addToInputCalc($1);} 
+		| NUMBER {addToInputCalc($1);}
+		| FLOAT_NUM {addToInputCalc($1);}
+		| EXPONENT {addToInputCalc("**");}
+		| Operator {addToInputCalc($1);}
+
+
 
 Operator: PLUS_OP {}	
 		| SUB_OP {}
@@ -1476,15 +1442,14 @@ ArrDecl:
 
 int main(int argc, char**argv)
 {
-/*
+
 	#ifdef YYDEBUG
 		yydebug = 1;
 	#endif
-*/
+
 	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
-
+	clearCalcInput();
 	initializeSymbolTable();
-
 
 	// initialize ir code file
 	initIRcodeFile();
@@ -1500,6 +1465,7 @@ int main(int argc, char**argv)
 	  }
 	}
 	yyparse();
+	
 
 	printf("\n\n #######################" RESET);
 	printf(BOLD " COMPILER ENDED " RESET);
