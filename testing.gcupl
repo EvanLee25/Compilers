@@ -1,7 +1,5 @@
 int x;
 x = 4+2/(3^6);
-
-
 char arr[15];
 
 int testFunc(int x, int y) {
@@ -15,6 +13,10 @@ int testFunc(int x, int y) {
     arr[1] = 's';
     arr[2] = 'a';
     arr[3] = 'c';
+    arr[5] = 'h';
+    arr[6] = 'e';
+    arr[7] = 'l';
+    arr[8] = 'p';
     return 0;
 
 }
