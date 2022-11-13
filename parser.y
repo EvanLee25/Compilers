@@ -441,7 +441,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							createIntDefinition($2, scope);
 
 							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
-							//createMIPSIntDeclaration($2);
+							createMIPSIntDecl($2,scope);
 							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
 							
 							// code optimization
@@ -1300,19 +1300,35 @@ IDEQExpr: ID EQ MathStmt {
 	} else { // if scope is global
 		updateValue($1, scope, result); // update value normally
 	}
-		
+
 	// ast
 	$$ = AST_BinaryExpression("=", $1, result);
 
-	// ir code
-	createIntAssignment($1, result, scope);
+	
+	char type[50];
 
-	// mips code
-	createMIPSIntAssignment($1, result, scope);
+	strcpy(type,getVariableType($1,scope));
 
+	if (strcmp(type,"INT") == 0){
+		// ir code
+		createIntAssignment($1, result, scope);
+
+		// mips code
+		createMIPSIntAssignment($1, result, scope);
+	}
+
+	else if(strcmp(type,"FLT") == 0){
+		// ir code
+		createFloatAssignment($1, result, scope);
+
+		// mips code
+		createMIPSFloatAssignment($1, result, scope);
+	}
+
+	
 	// code optimization
-		// mark the id as used
-		isUsed($1, scope);
+	// mark the id as used
+	isUsed($1, scope);
 
 }
 

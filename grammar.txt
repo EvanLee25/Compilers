@@ -9,26 +9,55 @@ Decl -----> FuncDecl
 
 FuncDecl -----> Type ID LPAREN ParamDecl RPAREN Block
 
-ParamDecl -----> ???
+ParamDeclList -----> ParamDecl COMMA ParamDeclList
+                    | ParamDecl
 
-Block -----> ???
+ParamDecl ----->
+                    | INT ID
+                    | FLOAT ID
+                    | CHAR ID
 
-Type -----> ???
+Block -----> LBRACKET BlockDeclList RBRACKET
 
-StmtList -----> Expr 
-              | Expr StmtList
+BlockDeclList -----> BlockDecl BlockDeclList
+                    | BlockDecl
+
+BlockDecl -----> VarDecl
+                | StmtList
+
+StmtList -----> | Expr StmtList
+                | Expr 
 
 VarDecl -----> INT ID;
              | ID EQ NUMBER;
              | CHAR ID;
              | ID EQ CHARLITERAL;
+             | ...
 
 Expr -----> SEMICOLON
           | ID EQ ID;
           | WRITE ID;
           | IDEQExpr;
+          | ArrDecl
+          | ...
 
-IDEQExpr -----> ID EQ AddExpr
+IDEQExpr -----> ID EQ MathStmt
+
+MathStmt -----> Math MathStmt
+                | Math
+
+Math -----> LPAREN
+            | RPAREN
+            | ID
+            | NUMBER
+            | FLOAT_NUM
+            | EXPONENT
+            | Operator
+
+Operator -----> PLUS_OP
+                | SUB_OP
+                | MULT_OP
+                | DIV_OP
 
 AddExpr -----> NUMBER PLUS_OP AddExpr
              | ID PLUS_OP AddExpr

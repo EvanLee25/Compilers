@@ -1,35 +1,35 @@
-int aNumber;
-float secNumber;
-char someLetter;
-char message[15];
-float x;
-x = (4.5*2 + (5*2)^2 - 2.2));
+int x;
+x = 4+2/(3^6);
 
-float average(float a, float b, float c){
-    write a;
+
+char arr[15];
+
+int testFunc(int x, int y) {
+
+    x = 6;
+    write x;
     write ~nl;
-    write b;
+    write y;
     write ~nl;
-    write c;
-    return 5.0;
+    arr[0] = 'i';
+    arr[1] = 's';
+    arr[2] = 'a';
+    arr[3] = 'c';
+    return 0;
+
 }
 
-int dispMessage(int x, int y){
+float floatFunc(float h, float g, float k) {
 
-    message[0] = 'I';
-    message[1] = ' ';
-    message[2] = 'c';
-    message[3] = 'a';
-    message[4] = 'n';
-    message[5] = ' ';
-    message[6] = 'p';
-    message[7] = 'r';
-    message[8] = 'i';
-    message[9] = 'n';
-    message[10] = 't'; 
-    message[11] = ':';
-  
-    return 5;
+    float f;
+    f = 10.5;
+    write f;
+    write ~nl;
+    return 0.0;
+
 }
 
-average(1.0,2.0,3.0);
+testFunc(0,1);
+floatFunc(1.1,2.2,3.3);
+floatFunc(1.0,2.0,3.0);
+testFunc(2,3);
