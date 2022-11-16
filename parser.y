@@ -23,6 +23,8 @@ char operator;
 int argCounter = 0;
 char *args[50];
 char **argptr = args;
+int pass = 0;
+
 //initialize scope and symbol table
 char scope[50] = "G";
 
@@ -113,13 +115,13 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList IfStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator ArrDecl
 
 %start Program
 
 %%
 
-Program: DeclList { //printf("\nProgram -> DeclList \n");
+Program: Condition { //printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
 
@@ -165,6 +167,10 @@ Decl:	FuncDecl {
 	} | StmtList {
 		// ast
 		$$ = $1;
+
+	} | Condition {
+		$$ = $1;
+	
 
 };
 
@@ -1342,6 +1348,9 @@ Operator: PLUS_OP {}
 		| SUB_OP {}
 		| MULT_OP {}
 		| DIV_OP {}
+		| DOUBLE_EQ {}
+		| LT {}
+		| GT {}
 
 // ARRAY DECLARATIONS ----------------------------------------------------------------------
 ArrDecl:	
@@ -1413,7 +1422,6 @@ ArrDecl:
 								char temp[50];	
 								sprintf(temp,"%s[0]",$2);
 								
-								
 								if (found(temp, scope) == 1) {
 									printf(RED "\nERROR: Array '%s' already declared in this scope.\n" RESET,$2);
 									showSymTable();
@@ -1437,15 +1445,58 @@ ArrDecl:
 
 }; 
 
+IfStmt:	IF LPAREN Condition RPAREN {printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
+								 
+							
+						 
+						 } LBRACE Block RBRACE { printf(BGREEN "\n\n" RESET);
+
+							if (pass = 1) {
+								
+							}
+
+						 } 
+
+
+Condition: NUMBER Operator NUMBER {
+
+				int temp1, temp2;
+				temp1 = atoi($1);
+				temp2 = atoi($3);
+
+				if (!strcmp($2, "==")) {
+					if (temp1 == temp2) {
+						printf(BPINK "PASSED" RESET);
+					}
+				} 
+				else if (!strcmp($2, "<")) {
+					if (temp1 < temp2) {
+						printf(BPINK "PASSED" RESET);
+					}
+				}
+
+}
+
+ConditionVar:	NUMBER {
+
+			} | ID {
+				
+			} | FLOAT_NUM {
+				
+			} | CHARLITERAL {
+
+			}
 
 %%
 
 int main(int argc, char**argv)
 {
 
+	/*
 	#ifdef YYDEBUG
 		yydebug = 1;
 	#endif
+	*/
 
 	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
 	clearCalcInput();
