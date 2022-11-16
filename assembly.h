@@ -177,12 +177,27 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
 
 }
 
+void createMIPSIntDecl(char id[50], char scope[50]){
+        // e.g. x = 5;
+
+        MIPScode = fopen("MIPScode.asm", "a");
+        fprintf(MIPScode, "\t%s%s: .word 0\n", scope, id);
+        fclose(MIPScode);
+        printf(CYAN "MIPS Created.\n\n\n" RESET); 
+}
+
+
+
+
+
 void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
     // e.g. x = 5;
 
-        MIPScode = fopen("MIPScode.asm", "a");
-        fprintf(MIPScode, "\t%s%s: .word 0\n", scope, id, num);
-        fclose(MIPScode);
+        tempMIPS = fopen("tempMIPS.asm", "a");
+        fprintf(tempMIPS, "\tla $a0, %s     #store value in $a0\n",num);
+        fprintf(tempMIPS, "\tla $t0, %s%s   #load variable address into $t0\n",scope,id);
+        fprintf(tempMIPS, "\tsw $a0, 0($t0)  #Move value from $a0 into .word variable\n\n");
+        fclose(tempMIPS);
         printf(CYAN "MIPS Created.\n\n\n" RESET); 
 
 }
