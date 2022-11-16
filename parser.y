@@ -115,7 +115,7 @@ AST for function decl:
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList IfStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList IfStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator CompOperator ArrDecl
 
 %start Program
 
@@ -1364,9 +1364,13 @@ Operator: PLUS_OP {}
 		| SUB_OP {}
 		| MULT_OP {}
 		| DIV_OP {}
-		| DOUBLE_EQ {}
-		| LT {}
-		| GT {}
+
+CompOperator: DOUBLE_EQ {}
+			| LT {}
+			| GT {}
+			| LT_EQ {}
+			| GT_EQ {}
+			| NOT_EQ {}
 
 // ARRAY DECLARATIONS ----------------------------------------------------------------------
 ArrDecl:	
@@ -1474,22 +1478,16 @@ IfStmt:	IF LPAREN Condition RPAREN {printf(GRAY "RECOGNIZED RULE: If Statement I
 						 } 
 
 
-Condition: NUMBER Operator NUMBER {
+Condition: NUMBER CompOperator NUMBER {
 
 				int temp1, temp2;
 				temp1 = atoi($1);
 				temp2 = atoi($3);
 
-				if (!strcmp($2, "==")) {
-					if (temp1 == temp2) {
-						printf(BPINK "PASSED" RESET);
-					}
-				} 
-				else if (!strcmp($2, "<")) {
-					if (temp1 < temp2) {
-						printf(BPINK "PASSED" RESET);
-					}
+				if (compareIntOp($2, temp1, temp2)) {
+					pass = 1;
 				}
+				printf(BORANGE "PASS = %d" RESET, pass);
 
 }
 

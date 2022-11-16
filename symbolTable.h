@@ -450,6 +450,112 @@ char* removeApostrophes(char str[50]) {
 
 }
 
+int compareIntOp(char str[50], int temp1, int temp2) {
+	if (!strcmp(str, "==")) {
+		if (temp1 == temp2) {
+			printf(BPINK "Condition: %d == %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d == %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	} 
+	else if (!strcmp(str, "<")) {
+		if (temp1 < temp2) {
+			printf(BPINK "Condition: %d < %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d < %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, ">")) {
+		if (temp1 > temp2) {
+			printf(BPINK "Condition: %d > %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d > %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, "<=")) {
+		if (temp1 <= temp2) {
+			printf(BPINK "Condition: %d <= %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d <= %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, ">=")) {
+		if (temp1 >= temp2) {
+			printf(BPINK "Condition: %d >= %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d >= %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, "!=")) {
+		if (temp1 != temp2) {
+			printf(BPINK "Condition: %d != %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d != %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	return 0;
+}
+
+int compareFloatOp(char str[50], float temp1, float temp2) {
+	if (!strcmp(str, "==")) {
+		if (temp1 == temp2) {
+			printf(BPINK "Condition: %d == %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d == %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	} 
+	else if (!strcmp(str, "<")) {
+		if (temp1 < temp2) {
+			printf(BPINK "Condition: %d < %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d < %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, ">")) {
+		if (temp1 > temp2) {
+			printf(BPINK "Condition: %d > %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d > %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, "<=")) {
+		if (temp1 <= temp2) {
+			printf(BPINK "Condition: %d <= %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d <= %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, ">=")) {
+		if (temp1 >= temp2) {
+			printf(BPINK "Condition: %d >= %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d >= %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	else if (!strcmp(str, "!=")) {
+		if (temp1 != temp2) {
+			printf(BPINK "Condition: %d != %d passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %d != %d NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	return 0;
+}
+
+
+
 /*
 //go through symbol table and look for isUsed = 0.
 //then 
