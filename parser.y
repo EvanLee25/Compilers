@@ -1489,7 +1489,21 @@ Condition: NUMBER CompOperator NUMBER {
 				}
 				printf(BORANGE "PASS = %d" RESET, pass);
 
-}
+		} | ID Operator ID {
+
+
+
+		} | FLOAT_NUM Operator FLOAT_NUM {
+
+
+
+		} | CHARLITERAL Operator CHARLITERAL {
+
+
+
+		}
+
+
 
 ConditionVar:	NUMBER {
 
