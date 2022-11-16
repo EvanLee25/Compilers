@@ -1491,7 +1491,21 @@ Condition: NUMBER Operator NUMBER {
 					}
 				}
 
-}
+		} | ID Operator ID {
+
+
+
+		} | FLOAT_NUM Operator FLOAT_NUM {
+
+
+
+		} | CHARLITERAL Operator CHARLITERAL {
+
+
+
+		}
+
+
 
 ConditionVar:	NUMBER {
 
