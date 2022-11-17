@@ -1,1 +1,25 @@
-1 < 4
+char x;
+char y;
+float j;
+float k;
+char pass1;
+char pass2;
+x = 'a';
+y = 'b';
+j = 0.1;
+k = 0.2;
+
+
+if (x != y) {
+    pass1 = 'y';
+    write x;
+} else {
+    pass1 = 'n';
+    write y;
+}
+
+if (j >= k) {
+    pass2 = 'y';
+} else {
+    pass2 = 'n';
+}

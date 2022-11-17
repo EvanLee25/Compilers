@@ -505,50 +505,90 @@ int compareIntOp(char str[50], int temp1, int temp2) {
 int compareFloatOp(char str[50], float temp1, float temp2) {
 	if (!strcmp(str, "==")) {
 		if (temp1 == temp2) {
-			printf(BPINK "Condition: %d == %d passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f == %f passed.\n" RESET, temp1, temp2);
 			return 1;
 		} else {
-			printf(BPINK "Condition: %d == %d NOT passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f == %f NOT passed.\n" RESET, temp1, temp2);
 		}
 	} 
 	else if (!strcmp(str, "<")) {
 		if (temp1 < temp2) {
-			printf(BPINK "Condition: %d < %d passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f < %f passed.\n" RESET, temp1, temp2);
 			return 1;
 		} else {
-			printf(BPINK "Condition: %d < %d NOT passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f < %f NOT passed.\n" RESET, temp1, temp2);
 		}
 	}
 	else if (!strcmp(str, ">")) {
 		if (temp1 > temp2) {
-			printf(BPINK "Condition: %d > %d passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f > %f passed.\n" RESET, temp1, temp2);
 			return 1;
 		} else {
-			printf(BPINK "Condition: %d > %d NOT passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f > %f NOT passed.\n" RESET, temp1, temp2);
 		}
 	}
 	else if (!strcmp(str, "<=")) {
 		if (temp1 <= temp2) {
-			printf(BPINK "Condition: %d <= %d passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f <= %f passed.\n" RESET, temp1, temp2);
 			return 1;
 		} else {
-			printf(BPINK "Condition: %d <= %d NOT passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f <= %f NOT passed.\n" RESET, temp1, temp2);
 		}
 	}
 	else if (!strcmp(str, ">=")) {
 		if (temp1 >= temp2) {
-			printf(BPINK "Condition: %d >= %d passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f >= %f passed.\n" RESET, temp1, temp2);
 			return 1;
 		} else {
-			printf(BPINK "Condition: %d >= %d NOT passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f >= %f NOT passed.\n" RESET, temp1, temp2);
 		}
 	}
 	else if (!strcmp(str, "!=")) {
 		if (temp1 != temp2) {
-			printf(BPINK "Condition: %d != %d passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f != %f passed.\n" RESET, temp1, temp2);
 			return 1;
 		} else {
-			printf(BPINK "Condition: %d != %d NOT passed.\n" RESET, temp1, temp2);
+			printf(BPINK "Condition: %f != %f NOT passed.\n" RESET, temp1, temp2);
+		}
+	}
+	return 0;
+}
+
+int compareCharOp(char str[50], char temp1[50], float temp2[50]) {
+	if (!strcmp(str, "==")) {
+		if (!strcmp(temp1, temp2)) {
+			printf(BPINK "Condition: %s == %s passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %s == %s NOT passed.\n" RESET, temp1, temp2);
+		}
+	} 
+	else if (!strcmp(str, "<")) {
+		printf(RED "\nERROR: Cannot do < on variables of type character." RESET);
+		showSymTable();
+		exit(0);
+	}
+	else if (!strcmp(str, ">")) {
+		printf(RED "\nERROR: Cannot do > on variables of type character." RESET);
+		showSymTable();
+		exit(0);
+	}
+	else if (!strcmp(str, "<=")) {
+		printf(RED "\nERROR: Cannot do <= on variables of type character." RESET);
+		showSymTable();
+		exit(0);
+	}
+	else if (!strcmp(str, ">=")) {
+		printf(RED "\nERROR: Cannot do >= on variables of type character." RESET);
+		showSymTable();
+		exit(0);
+	}
+	else if (!strcmp(str, "!=")) {
+		if (strcmp(temp1, temp2)) {
+			printf(BPINK "Condition: %s != %s passed.\n" RESET, temp1, temp2);
+			return 1;
+		} else {
+			printf(BPINK "Condition: %s != %s NOT passed.\n" RESET, temp1, temp2);
 		}
 	}
 	return 0;

@@ -80,7 +80,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 
 "if"  {
 	words++; chars += strlen(yytext);
-	printf("%s : IF STATEMENT\n", yytext);
+	printf("%s : IF\n", yytext);
     yylval.string = strdup(yytext);
     return IF;
      
@@ -88,7 +88,7 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 
 "else"  {
 	words++; chars += strlen(yytext);
-	printf("%s : ELSE STATEMENT\n", yytext);
+	printf("%s : ELSE\n", yytext);
     yylval.string = strdup(yytext);
     return ELSE;
      

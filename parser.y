@@ -24,6 +24,7 @@ int argCounter = 0;
 char *args[50];
 char **argptr = args;
 int pass = 0;
+int current = 0;
 
 //initialize scope and symbol table
 char scope[50] = "G";
@@ -121,7 +122,7 @@ AST for function decl:
 
 %%
 
-Program: Condition { //printf("\nProgram -> DeclList \n");
+Program: DeclList { //printf("\nProgram -> DeclList \n");
 		// ast
 		$$ = $1;
 
@@ -168,7 +169,7 @@ Decl:	FuncDecl {
 		// ast
 		$$ = $1;
 
-	} | Condition {
+	} | IfStmt {
 		$$ = $1;
 	
 
@@ -414,6 +415,10 @@ BlockDecl: VarDecl {
 		  // ast
 		  $$ = $1;
 
+		} | IfStmt {
+			// ast
+			$$ = $1;
+
 };
 
 
@@ -426,6 +431,7 @@ StmtList:	| Expr StmtList {$1->left = $2; $$ = $1;}
 
 VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Declaration\n\n" RESET);		
 
+						if (current == pass) {
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -456,9 +462,11 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 										VarDecl
 									INT        ID
 							*/
+						}
 				
 			} |	ID EQ NUMBER SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
-							
+
+						if (current == pass) {
 							// semantic checks
 								// is the variable already declared
 								symTabAccess();
@@ -518,9 +526,11 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID    NUMBER
 							*/
+						}
 
 			} |	CHAR ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Char Variable Declaration \n\n" RESET);
 
+						if (current == pass) {
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -546,10 +556,12 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							/*
 									VarDecl
 								CHAR	   ID
-							*/					
+							*/	
+						}				
 			
 			} |	ID EQ CHARLITERAL SEMICOLON	  { printf(GRAY "RECOGNIZED RULE: Char Variable Initialization \n\n" RESET);		
 
+						if (current == pass) {
 							// remove apostrophes from charliteral
 							char* str = removeApostrophes($3);
 
@@ -611,9 +623,11 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID	   CHARLITERAL
 							*/
+						}
 
 			} | FLOAT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Float Variable Declaration\n\n" RESET);		
 
+						if (current == pass) {
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -641,8 +655,11 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 										VarDecl
 									INT        ID
 							*/
+						}
+
 				} |	ID EQ FLOAT_NUM SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
 							
+						if (current == pass) {
 							// semantic checks
 								// is the variable already declared
 								symTabAccess();
@@ -702,47 +719,51 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID    NUMBER
 							*/
+						}
 
 				} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
-					// semantic checks
-						// are both variables already declared?
-						symTabAccess();
-						printf("\n");
-						if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
-							printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3);
-							exit(0); // variable already declared
-						}
+					if (current == pass) {
+						// semantic checks
+							// are both variables already declared?
+							symTabAccess();
+							printf("\n");
+							if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
+								printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3);
+								exit(0); // variable already declared
+							}
 
-						// does the second id have a value?
-						initialized($3, scope);
+							// does the second id have a value?
+							initialized($3, scope);
 
-						// are the id's both variables?
-						compareKinds($1, $3, scope);
+							// are the id's both variables?
+							compareKinds($1, $3, scope);
 
-						// are the types of the id's the same
-						compareTypes($1, $3, scope);
+							// are the types of the id's the same
+							compareTypes($1, $3, scope);
 
-					// symbol table
-					updateValue($1, scope, getValue($3, scope));
+						// symbol table
+						updateValue($1, scope, getValue($3, scope));
 
-					// ast
-					$$ = AST_BinaryExpression("=",$1,$3);
+						// ast
+						$$ = AST_BinaryExpression("=",$1,$3);
 
-					// ir code
-					createIDtoIDAssignment($1, $3, scope);
+						// ir code
+						createIDtoIDAssignment($1, $3, scope);
 
-					// mips code
-					createMIPSIDtoIDAssignment($1, $3, scope);
+						// mips code
+						createMIPSIDtoIDAssignment($1, $3, scope);
 
-					// code optimization
-						// mark the two id's as used
-						isUsed($1, scope);
-						isUsed($3, scope);
+						// code optimization
+							// mark the two id's as used
+							isUsed($1, scope);
+							isUsed($3, scope);
+					}
 
 
 				} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
 
+					if (current == pass) {
 						// ast
 						$$ = $1;
 
@@ -750,6 +771,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID	  NUMBER
 						*/
+					}
 
 				} | ArrDecl {};
 ;
@@ -763,151 +785,160 @@ Expr:	SEMICOLON {
 
 	} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
-		// semantic checks
-			// are both variables already declared?
-			symTabAccess();
-			printf("\n");
-			if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
-				printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3);
-				exit(0); // variable already declared
-			}
+		if (current == pass) {
+			// semantic checks
+				// are both variables already declared?
+				symTabAccess();
+				printf("\n");
+				if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
+					printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3);
+					exit(0); // variable already declared
+				}
 
-			// does the second id have a value?
-			initialized($3, scope);
+				// does the second id have a value?
+				initialized($3, scope);
 
-			// are the id's both variables?
-			compareKinds($1, $3, scope);
+				// are the id's both variables?
+				compareKinds($1, $3, scope);
 
-			// are the types of the id's the same
-			compareTypes($1, $3, scope);
+				// are the types of the id's the same
+				compareTypes($1, $3, scope);
 
-		// symbol table
-		updateValue($1, scope, getValue($3, scope));
+			// symbol table
+			updateValue($1, scope, getValue($3, scope));
 
-		// ast
-		$$ = AST_BinaryExpression("=",$1,$3);
+			// ast
+			$$ = AST_BinaryExpression("=",$1,$3);
 
-		// ir code
-		createIDtoIDAssignment($1, $3, scope);
+			// ir code
+			createIDtoIDAssignment($1, $3, scope);
 
-		// mips code
-		createMIPSIDtoIDAssignment($1, $3, scope);
+			// mips code
+			createMIPSIDtoIDAssignment($1, $3, scope);
 
-		// code optimization
-			// mark the two id's as used
-			isUsed($1, scope);
-			isUsed($3, scope);
+			// code optimization
+				// mark the two id's as used
+				isUsed($1, scope);
+				isUsed($3, scope);
+		}
 
 	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = FUNCTION\n" RESET); 
 
-		// symbol table
-		updateValue($1, scope, getValue($3, scope));
+		if (current == pass) {
+			// symbol table
+			updateValue($1, scope, getValue($3, scope));
+		}
 
 
 	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET); 
 
-		// semantic checks
-			// is the id initialized as a value?
-			if (scope == "G") {
-				initialized($2, scope);
-			} else {
-				printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
-			}
+		if (current == pass) {
+			// semantic checks
+				// is the id initialized as a value?
+				if (scope == "G") {
+					initialized($2, scope);
+				} else {
+					printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
+				}
 
-		// symbol table
-			// N/A
+			// symbol table
+				// N/A
 
-		// ast
-		$$ = AST_BinaryExpression("Expr", $1, getValue($2, scope));
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, getValue($2, scope));
 
-		// ir code
-		createWriteId($2, scope);
+			// ir code
+			createWriteId($2, scope);
 
-		// mips code
-			// get the type of the variable
-			char* type = getVariableType($2, scope);
+			// mips code
+				// get the type of the variable
+				char* type = getVariableType($2, scope);
 
-			// determine if its int or char
-			int isInt = strcmp(type, "INT");
-			int isChar = strcmp(type, "CHR");
-			int isFloat = strcmp(type, "FLT");
+				// determine if its int or char
+				int isInt = strcmp(type, "INT");
+				int isChar = strcmp(type, "CHR");
+				int isFloat = strcmp(type, "FLT");
 
-			// run correct mips function according to type
-			if (isInt == 0) { // if the variable is an integer
-				createMIPSWriteInt($2, scope);
-			} else if (isChar == 0) { // if the variable is a char
-				createMIPSWriteChar($2, scope);
-			} else if (isFloat == 0) {
-				createMIPSWriteFloat($2, scope);
-			}
+				// run correct mips function according to type
+				if (isInt == 0) { // if the variable is an integer
+					createMIPSWriteInt($2, scope);
+				} else if (isChar == 0) { // if the variable is a char
+					createMIPSWriteChar($2, scope);
+				} else if (isFloat == 0) {
+					createMIPSWriteFloat($2, scope);
+				}
 
-		// code optimization
-			// mark the id as used
-			isUsed($2, scope);
+			// code optimization
+				// mark the id as used
+				isUsed($2, scope);
 
-		/*
-					Expr
-			  WRITE     getValue(ID)
-		*/
+			/*
+						Expr
+				WRITE     getValue(ID)
+			*/
+		}
 
 	} |	WRITE ID LBRACE NUMBER RBRACE SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Array Element)\n" RESET); 
 
-		// concatenate the array in this format: "$2[$4]"
-		char elementID[50];
-		strcpy(elementID, $2);
-		strcat(elementID, "[");
-		strcat(elementID, $4);
-		strcat(elementID, "]");
+		if (current == pass) {
+			// concatenate the array in this format: "$2[$4]"
+			char elementID[50];
+			strcpy(elementID, $2);
+			strcat(elementID, "[");
+			strcat(elementID, $4);
+			strcat(elementID, "]");
 
-		// semantic checks
-			// is the id initialized as a value?
-			if (scope == "G") {
-				initialized(elementID, scope);
-			} else {
-				printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
-			}
+			// semantic checks
+				// is the id initialized as a value?
+				if (scope == "G") {
+					initialized(elementID, scope);
+				} else {
+					printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
+				}
 
-		// symbol table
-			// N/A
+			// symbol table
+				// N/A
 
-		// ast
-		$$ = AST_BinaryExpression("Expr", $1, getValue(elementID, scope));
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, getValue(elementID, scope));
 
-		// ir code
-		createWriteId(elementID, scope);
+			// ir code
+			createWriteId(elementID, scope);
 
-		// mips code
-			// get the type of the variable
-			char* type = getVariableType(elementID, scope);
+			// mips code
+				// get the type of the variable
+				char* type = getVariableType(elementID, scope);
 
-			// determine if its int or char
-			int isInt = strcmp(type, "INT");
-			int isChar = strcmp(type, "CHR");
-			int isFloat = strcmp(type, "FLT");
+				// determine if its int or char
+				int isInt = strcmp(type, "INT");
+				int isChar = strcmp(type, "CHR");
+				int isFloat = strcmp(type, "FLT");
 
-			// run correct mips function according to type
-			if (isInt == 0) { // if the variable is an integer
-				removeBraces(elementID);
-				createMIPSWriteInt(elementID, scope);
-			} else if (isChar == 0) { // if the variable is a char
-				removeBraces(elementID);
-				createMIPSWriteChar(elementID, scope);
-			} else if (isFloat == 0) {
-				removeBraces(elementID);
-				createMIPSWriteFloat(elementID, scope);
-			}
+				// run correct mips function according to type
+				if (isInt == 0) { // if the variable is an integer
+					removeBraces(elementID);
+					createMIPSWriteInt(elementID, scope);
+				} else if (isChar == 0) { // if the variable is a char
+					removeBraces(elementID);
+					createMIPSWriteChar(elementID, scope);
+				} else if (isFloat == 0) {
+					removeBraces(elementID);
+					createMIPSWriteFloat(elementID, scope);
+				}
 
-		// code optimization
-			// mark the id as used
-			isUsed($2, scope);
+			// code optimization
+				// mark the id as used
+				isUsed($2, scope);
 
-		/*
-					Expr
-			  WRITE     getValue(ID)
-		*/
+			/*
+						Expr
+				WRITE     getValue(ID)
+			*/
+		}
 
 	} | WRITE NEWLINECHAR SEMICOLON { printf(GRAY "RECOGNIZED RULE: Print New Line\n\n" RESET); 
 
+		if (current == pass) {
 			// ast
 			$$ = AST_BinaryExpression("Expr", $1, "NEWLINE");
 
@@ -918,20 +949,23 @@ Expr:	SEMICOLON {
 			printf(BLUE "IR Code Not Needed.\n" RESET);
 			// mips
 			makeMIPSNewLine(scope);
-
+		}
 
 	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Math Statement\n\n" RESET); 
 
-		// ast
-		$$ = $1;
+		if (current == pass) {
+			// ast
+			$$ = $1;
 
-		/*
-					=
-				ID	  NUMBER
-		*/
+			/*
+						=
+					ID	  NUMBER
+			*/\
+		}
 
 	} | ID LBRACE NUMBER RBRACE EQ NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Integer Array Index\n\n" RESET);
 
+		if (current == pass) {
 			// add backets to id
 			char temp[50];	
 			sprintf(temp,"%s[%s]",$1,$3);
@@ -997,10 +1031,12 @@ Expr:	SEMICOLON {
 				removeBraces(temp);
 				createMIPSIntAssignment(temp, $6, scope);
 			}
+		}
 
 
 	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
 
+		if (current == pass) {
 			system("python3 calculate.py");
 	
 			char result[100];
@@ -1047,10 +1083,11 @@ Expr:	SEMICOLON {
 				removeBraces(temp);
 				createMIPSIntAssignment(temp, result, scope);
 			}
-
+		}
 	
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Char Array Index\n\n" RESET);
 
+		if (current == pass) {
 			// add brackets to id for sym table searches
 			char temp[50];	
 			sprintf(temp,"%s[%s]",$1,$3);
@@ -1115,11 +1152,11 @@ Expr:	SEMICOLON {
 				removeBraces(temp);
 				createMIPSCharAssignment(temp, str, scope);
 			}
-			
-
+		}
 
 	} | ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: Call Function\n\n" RESET);
 
+		if (current == pass) {
 			// set scope to function
 			strcpy(scope, $1);
 
@@ -1177,96 +1214,99 @@ Expr:	SEMICOLON {
 
 			// mips
 			callMIPSFunction($1);
-
-			//YYACCEPT;
-
+		}
 
 	} | RETURN ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (ID)\n\n" RESET);
 
-		// symbol table
-		updateValue(scope, "G", getValue($2, scope));
-		printf(BGREEN "Updated ID Return Value of Function.\n" RESET);
+		if (current == pass) {
+			// symbol table
+			updateValue(scope, "G", getValue($2, scope));
+			printf(BGREEN "Updated ID Return Value of Function.\n" RESET);
 
-		// ir code
-		printf(BLUE "IR Code" RESET);
-		printf(RED " NOT " RESET);
-		printf(BLUE "Created.\n" RESET);
+			// ir code
+			printf(BLUE "IR Code" RESET);
+			printf(RED " NOT " RESET);
+			printf(BLUE "Created.\n" RESET);
 
-		// mips
-		char str[50];
-		strcpy(str, getVariableType($2, scope));
+			// mips
+			char str[50];
+			strcpy(str, getVariableType($2, scope));
 
-		char str1[50];
-		strcpy(str1, "G");
-		strcat(str1, scope);
-		
-		if (strcmp(str, "INT") == 0) {
-			createMIPSIntAssignment("", getValue($2, scope), str1);
-		} else if (strcmp(str, "FLT") == 0) {
-			createMIPSFloatAssignment("", getValue($2, scope), str1);
-		} else if (strcmp(str, "CHR") == 0) {
-			createMIPSCharAssignment("", getValue($2, scope), str1);
+			char str1[50];
+			strcpy(str1, "G");
+			strcat(str1, scope);
+			
+			if (strcmp(str, "INT") == 0) {
+				createMIPSIntAssignment("", getValue($2, scope), str1);
+			} else if (strcmp(str, "FLT") == 0) {
+				createMIPSFloatAssignment("", getValue($2, scope), str1);
+			} else if (strcmp(str, "CHR") == 0) {
+				createMIPSCharAssignment("", getValue($2, scope), str1);
+			}
 		}
-
 
 	} | RETURN NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (Int Number)\n\n" RESET);
 
-		// symbol table
-		updateValue(scope, "G", $2);
-		printf(BGREEN "Updated Integer Return Value of Function.\n" RESET);
+		if (current == pass) {
+			// symbol table
+			updateValue(scope, "G", $2);
+			printf(BGREEN "Updated Integer Return Value of Function.\n" RESET);
 
-		// ir code
-		printf(BLUE "IR Code" RESET);
-		printf(RED " NOT " RESET);
-		printf(BLUE "Created.\n" RESET);
+			// ir code
+			printf(BLUE "IR Code" RESET);
+			printf(RED " NOT " RESET);
+			printf(BLUE "Created.\n" RESET);
 
-		// mips
-		// create scope so that it has G and then the function scope, since
-		// we are accessing the global variable that is called the function name
-		char str[50];
-		strcpy(str, "G");
-		strcat(str, scope);
+			// mips
+			// create scope so that it has G and then the function scope, since
+			// we are accessing the global variable that is called the function name
+			char str[50];
+			strcpy(str, "G");
+			strcat(str, scope);
 
-		createMIPSIntAssignment("", $2, str);
-
+			createMIPSIntAssignment("", $2, str);
+		}
 
 	} | RETURN FLOAT_NUM SEMICOLON {
 
-		// symbol table
-		updateValue(scope, "G", $2);
-		printf(BGREEN "Updated Float Return Value of Function.\n" RESET);
+		if (current == pass) {
+			// symbol table
+			updateValue(scope, "G", $2);
+			printf(BGREEN "Updated Float Return Value of Function.\n" RESET);
 
-		// ir code
-		printf(BLUE "IR Code" RESET);
-		printf(RED " NOT " RESET);
-		printf(BLUE "Created.\n" RESET);
+			// ir code
+			printf(BLUE "IR Code" RESET);
+			printf(RED " NOT " RESET);
+			printf(BLUE "Created.\n" RESET);
 
-		// mips
-		// create scope so that it has G and then the function scope, since
-		// we are accessing the global variable that is called the function name
-		char str[50];
-		strcpy(str, "G");
-		strcat(str, scope);
+			// mips
+			// create scope so that it has G and then the function scope, since
+			// we are accessing the global variable that is called the function name
+			char str[50];
+			strcpy(str, "G");
+			strcat(str, scope);
 
-		createMIPSFloatAssignment("", $2, str);
-
+			createMIPSFloatAssignment("", $2, str);
+		}
 
 	} | RETURN CHARLITERAL SEMICOLON {
 
-		// symbol table
-		updateValue(scope, "G", $2);
-		printf(BGREEN "Updated Char Return Value of Function.\n" RESET);
+		if (current == pass) {
+			// symbol table
+			updateValue(scope, "G", $2);
+			printf(BGREEN "Updated Char Return Value of Function.\n" RESET);
 
-		// ir code
-		printf(BLUE "IR Code" RESET);
-		printf(RED " NOT " RESET);
-		printf(BLUE "Created.\n" RESET);
+			// ir code
+			printf(BLUE "IR Code" RESET);
+			printf(RED " NOT " RESET);
+			printf(BLUE "Created.\n" RESET);
 
-		// mips
-		char str[50];
-		strcpy(str, "G");
-		strcat(str, scope);
-		createMIPSCharAssignment("", $2, str);
+			// mips
+			char str[50];
+			strcpy(str, "G");
+			strcat(str, scope);
+			createMIPSCharAssignment("", $2, str);
+		}
 
 }
 
@@ -1345,7 +1385,7 @@ MathStmt: Math MathStmt {
 
 }
 
-		| Math{
+		| Math {
 
 }
 
@@ -1387,6 +1427,7 @@ ArrDecl:
 			} | INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
 				// e.g. int foo[4];
 
+						if (current == pass) {
 							// semantic checks
 							symTabAccess();
 
@@ -1423,11 +1464,12 @@ ArrDecl:
 								createIntDefinition(temp, scope);
 							}
 							printf("\n\n");
-
+						}
 
 			} | CHAR ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization With Range\n\n" RESET);
 				// e.g. char foo[5];
 	
+						if (current == pass) {
 							// semantic checks
 							symTabAccess();
 
@@ -1462,20 +1504,35 @@ ArrDecl:
 								createIntDefinition(temp, scope);
 							}
 							printf("\n\n");
+						}
 
 }; 
 
-IfStmt:	IF LPAREN Condition RPAREN {printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
+IfStmt:	IF LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
 								 
-							
+						current = 1;
 						 
-						 } LBRACE Block RBRACE { printf(BGREEN "\n\n" RESET);
+						 } Block { printf(GRAY "\nRECOGNIZED RULE: If Statement Block\n\n" RESET);
 
-							if (pass = 1) {
+							if (pass == 1) {
 								
+								printf(BORANGE "INSIDE IF STATEMENT\n" RESET);
+
 							}
 
-						 } 
+							current = 0;
+
+						 } ELSE Block { printf(GRAY "\nRECOGNIZED RULE: Else Statement Block\n\n" RESET);
+
+							if (pass == 0) {
+								
+								printf(BORANGE "INSIDE ELSE STATEMENT\n" RESET);
+
+							}
+							pass = 0; // reset the pass variable
+							current = 0; // reset the current variable
+
+						 }
 
 
 Condition: NUMBER CompOperator NUMBER {
@@ -1487,19 +1544,106 @@ Condition: NUMBER CompOperator NUMBER {
 				if (compareIntOp($2, temp1, temp2)) {
 					pass = 1;
 				}
-				printf(BORANGE "PASS = %d" RESET, pass);
 
-		} | ID Operator ID {
+		} | ID CompOperator ID {
+
+				char type1[50];
+				char type2[50];
+				strcpy(type1, getVariableType($1, scope));
+				strcpy(type2, getVariableType($3, scope));
+				//printf(BORANGE "type1: %s\ntype2: %s\n" RESET, type1, type2);
+
+				// semantic checks
+				// are the types the same?
+				int check;
+				check = strcmp(type1, type2);
+
+				if (!check) { // if the types are the same
+					printf(BGREEN "\nID types are the same.\n" RESET);
+				} else {
+					printf(RED "\nERROR: Trying to compare two ID's that are not of the same type.\n" RESET);
+					showSymTable();
+					exit(0);
+				}
+
+				// are the variables intitalized as a value?
+				check = strcmp(getValue($1, scope), "NULL");
+
+				if (!check) { // if first ID is NULL
+					printf(RED "\nERROR: ID '%s' is not assigned to a value.\n" RESET, $1);
+					showSymTable();
+					exit(0);
+				}
+
+				check = strcmp(getValue($3, scope), "NULL");
+
+				if (!check) { // if second ID is NULL
+					printf(RED "\nERROR: ID '%s' is not assigned to a value.\n" RESET, $3);
+					showSymTable();
+					exit(0);
+				}
+
+				// go further based on type of id's
+				int typeInt, typeFloat, typeChar;
+				typeInt = strcmp(type1, "INT");
+				typeFloat = strcmp(type1, "FLT");
+				typeChar = strcmp(type1, "CHR");
+
+				if (!typeInt) { // if type is integer
+					int temp1, temp2;
+					temp1 = atoi(getValue($1, scope));
+					temp2 = atoi(getValue($3, scope));
+					//printf(BORANGE "temp1: %d\ntemp2: %d\n" RESET, temp1, temp2);
+
+					if (compareIntOp($2, temp1, temp2)) {
+						pass = 1;
+					}
+				}
+				else if (!typeFloat) { // if type is float
+					float temp1, temp2;
+					temp1 = atof(getValue($1, scope));
+					temp2 = atof(getValue($3, scope));
+					//printf(BORANGE "temp1: %f\ntemp2: %f\n" RESET, temp1, temp2);
+
+					if (compareFloatOp($2, temp1, temp2)) {
+						pass = 1;
+					}
+				}
+				else if (!typeChar) { // if type is char
+					char temp1[50], temp2[50];
+					strcpy(temp1, getValue($1, scope));
+					strcpy(temp2, getValue($3, scope));
+					//printf(BORANGE "temp1: %s\ntemp2: %s\n" RESET, temp1, temp2);
+
+					if (compareCharOp($2, temp1, temp2)) {
+						pass = 1;
+					}
+				}
 
 
+		
 
-		} | FLOAT_NUM Operator FLOAT_NUM {
+		} | FLOAT_NUM CompOperator FLOAT_NUM {
 
+				float temp1, temp2;
+				temp1 = atof($1);
+				temp2 = atof($3);
+				//printf(BORANGE "temp1: %f\ntemp2: %f\n" RESET, temp1, temp2);
 
+				if (compareFloatOp($2, temp1, temp2)) {
+					pass = 1;
+				}
 
-		} | CHARLITERAL Operator CHARLITERAL {
+		} | CHARLITERAL CompOperator CHARLITERAL {
 
+				char temp1[50], temp2[50];
+				strcpy(temp1, $1);
+				strcpy(temp2, $3);
+				//printf(BORANGE "temp1: %s\ntemp2: %s\n" RESET, temp1, temp2);
 
+				if (compareCharOp($2, temp1, temp2)) {
+					pass = 1;
+				}
 
 		}
 
