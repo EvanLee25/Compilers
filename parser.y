@@ -25,6 +25,7 @@ char *args[50];
 char **argptr = args;
 int pass = 0;
 int current = 0;
+int whileCurrent = 0;
 
 //initialize scope and symbol table
 char scope[50] = "G";
@@ -85,38 +86,11 @@ char scope[50] = "G";
 %token <string> ID
 %token <string> NUMBER
 
-/* For order of operations:
-%left PLUS_OP
-%left MINUS
-%left MULTIPLY
-%left DIVIDE
-%right EXPONENT
-
-Binop: '+' | '-' ... | '^'
-*/
-
-/* For function decl:
-FunDecl: Type ID Leftparen ParamDecl Rightparen Block
-
-Mid rule action:
-FunDecl: Type ID {printf("Function declared \n"); SymbtabAdd($1,$2,"G");} Leftparen ParamDecl Rightparen Block
-
-note: return type must match to variable returned
-	  for mid action rule, it will currently not work since it will take Type ID as a function before we even know.
-	  possible solution, add a keyword to our language to identify function intentionality such as:
-	  function int getNum(){return 1;}
-
-AST for function decl:
-
-
-*/
-
-
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList IfStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator CompOperator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList WhileStmt IfStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator CompOperator ArrDecl
 
 %start Program
 
@@ -169,10 +143,13 @@ Decl:	FuncDecl {
 		// ast
 		$$ = $1;
 
-	} | IfStmt {
+	} | WhileStmt {
+		//ast
 		$$ = $1;
 	
-
+	} |	IfStmt {
+		$$ = $1;
+	
 };
 
 
@@ -415,6 +392,10 @@ BlockDecl: VarDecl {
 		  // ast
 		  $$ = $1;
 
+		} | WhileStmt {
+			//ast
+			$$ = $1;
+		
 		} | IfStmt {
 			// ast
 			$$ = $1;
@@ -1508,6 +1489,20 @@ ArrDecl:
 
 }; 
 
+WhileStmt:	WHILE LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
+						 
+						 } Block { printf(GRAY "\nRECOGNIZED RULE: While Statement Block\n\n" RESET);
+
+							if (whileCurrent == 1) {
+								
+								//printf(BORANGE "INSIDE IF STATEMENT\n" RESET);
+
+							}
+
+							//current = 0;
+
+}
+
 IfStmt:	IF LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
 								 
 						current = 1;
@@ -1516,7 +1511,7 @@ IfStmt:	IF LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement 
 
 							if (pass == 1) {
 								
-								printf(BORANGE "INSIDE IF STATEMENT\n" RESET);
+								printf(BORANGE "DONE WITH IF STATEMENT\n" RESET);
 
 							}
 
@@ -1526,7 +1521,7 @@ IfStmt:	IF LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement 
 
 							if (pass == 0) {
 								
-								printf(BORANGE "INSIDE ELSE STATEMENT\n" RESET);
+								printf(BORANGE "DONE WITH ELSE STATEMENT\n" RESET);
 
 							}
 							pass = 0; // reset the pass variable
@@ -1543,6 +1538,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 				if (compareIntOp($2, temp1, temp2)) {
 					pass = 1;
+					whileCurrent = 1;
 				}
 
 		} | ID CompOperator ID {
@@ -1597,6 +1593,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 					if (compareIntOp($2, temp1, temp2)) {
 						pass = 1;
+						whileCurrent = 1;
 					}
 				}
 				else if (!typeFloat) { // if type is float
@@ -1607,6 +1604,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 					if (compareFloatOp($2, temp1, temp2)) {
 						pass = 1;
+						whileCurrent = 1;
 					}
 				}
 				else if (!typeChar) { // if type is char
@@ -1617,6 +1615,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 					if (compareCharOp($2, temp1, temp2)) {
 						pass = 1;
+						whileCurrent = 1;
 					}
 				}
 
@@ -1632,6 +1631,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 				if (compareFloatOp($2, temp1, temp2)) {
 					pass = 1;
+					whileCurrent = 1;
 				}
 
 		} | CHARLITERAL CompOperator CHARLITERAL {
@@ -1643,6 +1643,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 				if (compareCharOp($2, temp1, temp2)) {
 					pass = 1;
+					whileCurrent = 1;
 				}
 
 		}

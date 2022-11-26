@@ -6,7 +6,7 @@ char pass1;
 char pass2;
 x = 'a';
 y = 'b';
-j = 0.1;
+j = 0.1 + 0.4 + 0.55;
 k = 0.2;
 
 
@@ -22,4 +22,9 @@ if (j >= k) {
     pass2 = 'y';
 } else {
     pass2 = 'n';
+}
+
+while (j >= k) {
+    pass1 = 'w';
+    write pass1;
 }
