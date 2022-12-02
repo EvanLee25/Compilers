@@ -29,5 +29,10 @@ while (j >= k) {
 }
 
 while (1 == 1){
-    pass1 = 'a';
+    if (j >k){
+        pass1 = 'x';
+    }
+    else{
+        pass1 = 'z';
+    }
 }
