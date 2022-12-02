@@ -26,7 +26,7 @@ NEWLINE [\n\r]
 DELIM   [ \t]
 WS      {DELIM}+
 LETTER  [_a-zA-Z]
-DIGIT   [0-9]
+DIGIT   [-]?[0-9]
 ID      {LETTER}({LETTER}|{DIGIT})*
 NUMBER  {DIGIT}+
 FLOAT_NUM [0-9]+["."][0-9]+

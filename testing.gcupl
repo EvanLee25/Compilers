@@ -6,7 +6,13 @@ char pass1;
 char pass2;
 x = 'a';
 y = 'b';
-j = 0.1 + 0.4 + 0.55;
+
+int test;
+int testresult;
+test = ----3;
+
+
+j = 0.1 + 0.4 - 0.55;
 k = 0.2;
 
 if (x != y) {
@@ -28,7 +34,7 @@ while (j >= k) {
     write pass1;
 }
 
-while (1 == 1){
+while (1 == 2){
     if (j >k){
         pass1 = 'x';
     }
