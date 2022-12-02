@@ -23,9 +23,23 @@ char operator;
 int argCounter = 0;
 char *args[50];
 char **argptr = args;
-int pass = 0;
-int current = 0;
-int whileCurrent = 0;
+
+#define IN_ELSE_BLOCK 0
+#define IN_IF_BLOCK 1
+
+#define RUN_ELSE_BLOCK 0
+#define RUN_IF_BLOCK 1
+
+#define UPDATE_IF_ELSE 0
+#define UPDATE_WHILE 1
+
+
+int runIfElseBlock = 0; // 1 - run if block;  0 - run else block;
+int ifElseCurrentBlock = 0; // 1 - in if statment; 0 - in else statement;
+
+int runWhileBlock = 0; // 1 - run while block;  0 - exit while loop
+
+int inElseOrWhile = 0; //boolean flag to determin if runIfElseBlock or runWhileBlock should be updated
 
 //initialize scope and symbol table
 char scope[50] = "G";
@@ -412,7 +426,7 @@ StmtList:	| Expr StmtList {$1->left = $2; $$ = $1;}
 
 VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Declaration\n\n" RESET);		
 
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -447,7 +461,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 				
 			} |	ID EQ NUMBER SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
 
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 								// is the variable already declared
 								symTabAccess();
@@ -511,7 +525,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 			} |	CHAR ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Char Variable Declaration \n\n" RESET);
 
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -542,7 +556,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 			
 			} |	ID EQ CHARLITERAL SEMICOLON	  { printf(GRAY "RECOGNIZED RULE: Char Variable Initialization \n\n" RESET);		
 
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// remove apostrophes from charliteral
 							char* str = removeApostrophes($3);
 
@@ -608,7 +622,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 			} | FLOAT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Float Variable Declaration\n\n" RESET);		
 
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess();
@@ -640,7 +654,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 				} |	ID EQ FLOAT_NUM SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
 							
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 								// is the variable already declared
 								symTabAccess();
@@ -704,7 +718,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 				} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
-					if (current == pass) {
+					if (ifElseCurrentBlock == runIfElseBlock) {
 						// semantic checks
 							// are both variables already declared?
 							symTabAccess();
@@ -744,7 +758,7 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 
 				} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
 
-					if (current == pass) {
+					if (ifElseCurrentBlock == runIfElseBlock) {
 						// ast
 						$$ = $1;
 
@@ -766,7 +780,7 @@ Expr:	SEMICOLON {
 
 	} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// semantic checks
 				// are both variables already declared?
 				symTabAccess();
@@ -805,7 +819,7 @@ Expr:	SEMICOLON {
 
 	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = FUNCTION\n" RESET); 
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// symbol table
 			updateValue($1, scope, getValue($3, scope));
 		}
@@ -813,7 +827,7 @@ Expr:	SEMICOLON {
 
 	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET); 
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// semantic checks
 				// is the id initialized as a value?
 				if (scope == "G") {
@@ -861,7 +875,7 @@ Expr:	SEMICOLON {
 
 	} |	WRITE ID LBRACE NUMBER RBRACE SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Array Element)\n" RESET); 
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// concatenate the array in this format: "$2[$4]"
 			char elementID[50];
 			strcpy(elementID, $2);
@@ -919,7 +933,7 @@ Expr:	SEMICOLON {
 
 	} | WRITE NEWLINECHAR SEMICOLON { printf(GRAY "RECOGNIZED RULE: Print New Line\n\n" RESET); 
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// ast
 			$$ = AST_BinaryExpression("Expr", $1, "NEWLINE");
 
@@ -934,7 +948,7 @@ Expr:	SEMICOLON {
 
 	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Math Statement\n\n" RESET); 
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// ast
 			$$ = $1;
 
@@ -946,7 +960,7 @@ Expr:	SEMICOLON {
 
 	} | ID LBRACE NUMBER RBRACE EQ NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Integer Array Index\n\n" RESET);
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// add backets to id
 			char temp[50];	
 			sprintf(temp,"%s[%s]",$1,$3);
@@ -1017,7 +1031,7 @@ Expr:	SEMICOLON {
 
 	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			system("python3 calculate.py");
 	
 			char result[100];
@@ -1068,7 +1082,7 @@ Expr:	SEMICOLON {
 	
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Char Array Index\n\n" RESET);
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// add brackets to id for sym table searches
 			char temp[50];	
 			sprintf(temp,"%s[%s]",$1,$3);
@@ -1137,7 +1151,7 @@ Expr:	SEMICOLON {
 
 	} | ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: Call Function\n\n" RESET);
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// set scope to function
 			strcpy(scope, $1);
 
@@ -1199,7 +1213,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (ID)\n\n" RESET);
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// symbol table
 			updateValue(scope, "G", getValue($2, scope));
 			printf(BGREEN "Updated ID Return Value of Function.\n" RESET);
@@ -1228,7 +1242,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (Int Number)\n\n" RESET);
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// symbol table
 			updateValue(scope, "G", $2);
 			printf(BGREEN "Updated Integer Return Value of Function.\n" RESET);
@@ -1250,7 +1264,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN FLOAT_NUM SEMICOLON {
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// symbol table
 			updateValue(scope, "G", $2);
 			printf(BGREEN "Updated Float Return Value of Function.\n" RESET);
@@ -1272,7 +1286,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN CHARLITERAL SEMICOLON {
 
-		if (current == pass) {
+		if (ifElseCurrentBlock == runIfElseBlock) {
 			// symbol table
 			updateValue(scope, "G", $2);
 			printf(BGREEN "Updated Char Return Value of Function.\n" RESET);
@@ -1408,7 +1422,7 @@ ArrDecl:
 			} | INT ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Array Initialization With Range\n\n" RESET);
 				// e.g. int foo[4];
 
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 							symTabAccess();
 
@@ -1450,7 +1464,7 @@ ArrDecl:
 			} | CHAR ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Char Array Initialization With Range\n\n" RESET);
 				// e.g. char foo[5];
 	
-						if (current == pass) {
+						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 							symTabAccess();
 
@@ -1489,43 +1503,40 @@ ArrDecl:
 
 }; 
 
-WhileStmt:	WHILE LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
+WhileStmt:	WHILE {inElseOrWhile = UPDATE_WHILE;} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
 						 
+						inElseOrWhile = 0; //reset before block since Condition has been run already		 
+
 						 } Block { printf(GRAY "\nRECOGNIZED RULE: While Statement Block\n\n" RESET);
-
-							if (whileCurrent == 1) {
-								
-								//printf(BORANGE "INSIDE IF STATEMENT\n" RESET);
-
-							}
 
 							//current = 0;
 
 }
 
-IfStmt:	IF LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
-								 
-						current = 1;
+IfStmt:	IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
+						
+						inElseOrWhile = 0; //reset before block since Condition has been run already		 
+						ifElseCurrentBlock = IN_IF_BLOCK;
 						 
 						 } Block { printf(GRAY "\nRECOGNIZED RULE: If Statement Block\n\n" RESET);
 
-							if (pass == 1) {
+							if (runIfElseBlock == RUN_IF_BLOCK) {
 								
 								printf(BORANGE "DONE WITH IF STATEMENT\n" RESET);
 
 							}
 
-							current = 0;
+							ifElseCurrentBlock = IN_ELSE_BLOCK;
 
 						 } ELSE Block { printf(GRAY "\nRECOGNIZED RULE: Else Statement Block\n\n" RESET);
 
-							if (pass == 0) {
+							if (runIfElseBlock == RUN_ELSE_BLOCK) {
 								
 								printf(BORANGE "DONE WITH ELSE STATEMENT\n" RESET);
 
 							}
-							pass = 0; // reset the pass variable
-							current = 0; // reset the current variable
+							runIfElseBlock = 0; // reset the pass variable
+							ifElseCurrentBlock = 0; // reset the current variable
 
 						 }
 
@@ -1536,9 +1547,14 @@ Condition: NUMBER CompOperator NUMBER {
 				temp1 = atoi($1);
 				temp2 = atoi($3);
 
-				if (compareIntOp($2, temp1, temp2)) {
-					pass = 1;
-					whileCurrent = 1;
+				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+				}
+				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+					if(strcmp($2,"==") == 0){
+						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+					}
+					runWhileBlock = 1;
 				}
 
 		} | ID CompOperator ID {
@@ -1591,9 +1607,14 @@ Condition: NUMBER CompOperator NUMBER {
 					temp2 = atoi(getValue($3, scope));
 					//printf(BORANGE "temp1: %d\ntemp2: %d\n" RESET, temp1, temp2);
 
-					if (compareIntOp($2, temp1, temp2)) {
-						pass = 1;
-						whileCurrent = 1;
+					if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+					}
+					if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+						if(strcmp($2,"==") == 0){
+							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+						}
+						runWhileBlock = 1;
 					}
 				}
 				else if (!typeFloat) { // if type is float
@@ -1602,9 +1623,14 @@ Condition: NUMBER CompOperator NUMBER {
 					temp2 = atof(getValue($3, scope));
 					//printf(BORANGE "temp1: %f\ntemp2: %f\n" RESET, temp1, temp2);
 
-					if (compareFloatOp($2, temp1, temp2)) {
-						pass = 1;
-						whileCurrent = 1;
+					if (compareFloatOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+					}
+					if (compareFloatOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+						if(strcmp($2,"==") == 0){
+							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+						}
+						runWhileBlock = 1;
 					}
 				}
 				else if (!typeChar) { // if type is char
@@ -1613,9 +1639,14 @@ Condition: NUMBER CompOperator NUMBER {
 					strcpy(temp2, getValue($3, scope));
 					//printf(BORANGE "temp1: %s\ntemp2: %s\n" RESET, temp1, temp2);
 
-					if (compareCharOp($2, temp1, temp2)) {
-						pass = 1;
-						whileCurrent = 1;
+					if (compareCharOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+					}
+					if (compareCharOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+						if(strcmp($2,"==") == 0){
+							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+						}
+						runWhileBlock = 1;
 					}
 				}
 
@@ -1629,9 +1660,14 @@ Condition: NUMBER CompOperator NUMBER {
 				temp2 = atof($3);
 				//printf(BORANGE "temp1: %f\ntemp2: %f\n" RESET, temp1, temp2);
 
-				if (compareFloatOp($2, temp1, temp2)) {
-					pass = 1;
-					whileCurrent = 1;
+				if (compareFloatOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+				}
+				if (compareFloatOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+					if(strcmp($2,"==") == 0){
+						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+					}
+					runWhileBlock = 1;
 				}
 
 		} | CHARLITERAL CompOperator CHARLITERAL {
@@ -1641,9 +1677,14 @@ Condition: NUMBER CompOperator NUMBER {
 				strcpy(temp2, $3);
 				//printf(BORANGE "temp1: %s\ntemp2: %s\n" RESET, temp1, temp2);
 
-				if (compareCharOp($2, temp1, temp2)) {
-					pass = 1;
-					whileCurrent = 1;
+				if (compareCharOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+				}
+				if (compareCharOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+					if(strcmp($2,"==") == 0){
+						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+					}
+					runWhileBlock = 1;
 				}
 
 		}
