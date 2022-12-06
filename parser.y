@@ -1513,12 +1513,12 @@ WhileStmt:	WHILE {inElseOrWhile = UPDATE_WHILE;} LPAREN Condition RPAREN { print
 
 }
 
-IfStmt:	IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If Statement Initialization \n\n" RESET);
+IfStmt: IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: If-Else Statement Initialization \n\n" RESET);
 						
 						inElseOrWhile = 0; //reset before block since Condition has been run already		 
 						ifElseCurrentBlock = IN_IF_BLOCK;
 						 
-						 } Block { printf(GRAY "\nRECOGNIZED RULE: If Statement Block\n\n" RESET);
+						 } Block { printf(GRAY "\nRECOGNIZED RULE: If-Else: IF Statement Block\n\n" RESET);
 
 							if (runIfElseBlock == RUN_IF_BLOCK) {
 								
@@ -1528,7 +1528,7 @@ IfStmt:	IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GR
 
 							ifElseCurrentBlock = IN_ELSE_BLOCK;
 
-						 } ELSE Block { printf(GRAY "\nRECOGNIZED RULE: Else Statement Block\n\n" RESET);
+						 } | ELSE Block { printf(GRAY "\nRECOGNIZED RULE: If-Else: ELSE Statement Block\n\n" RESET);
 
 							if (runIfElseBlock == RUN_ELSE_BLOCK) {
 								
@@ -1538,7 +1538,7 @@ IfStmt:	IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GR
 							runIfElseBlock = 0; // reset the pass variable
 							ifElseCurrentBlock = 0; // reset the current variable
 
-						 }
+}
 
 
 Condition: NUMBER CompOperator NUMBER {

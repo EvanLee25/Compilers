@@ -1,19 +1,9 @@
-char x;
-char y;
-float j;
-float k;
+int x;
+int y;
 char pass1;
 char pass2;
-x = 'a';
-y = 'b';
-
-int test;
-int testresult;
-test = ----3;
-
-
-j = 0.1 + 0.4 - 0.55;
-k = 0.2;
+x = 1;
+y = 2;
 
 if (x != y) {
     pass1 = 'y';
@@ -23,22 +13,6 @@ if (x != y) {
     write y;
 }
 
-if (j >= k) {
+if (x != y) {
     pass2 = 'y';
-} else {
-    pass2 = 'n';
-}
-
-while (j >= k) {
-    pass1 = 'w';
-    write pass1;
-}
-
-while (1 == 2){
-    if (j >k){
-        pass1 = 'x';
-    }
-    else{
-        pass1 = 'z';
-    }
 }
