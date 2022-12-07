@@ -873,7 +873,7 @@ Expr:	SEMICOLON {
 			*/
 		}
 
-	} |	WRITE STRINGLITERAL SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET);
+	} |	WRITE STRINGLITERAL SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Etc. String)\n" RESET);
 
 		if (ifElseCurrentBlock == runIfElseBlock) {
 			// semantic checks
@@ -889,7 +889,10 @@ Expr:	SEMICOLON {
 			// N/A
 
 			// mips code
-			//createMIPSWriteString($2);
+			char str[50];
+			strcpy(str, removeApostrophes($2));
+			defineMIPSTempString(str);
+			createMIPSWriteString($2, scope);
 
 			// code optimization
 				// mark the id as used
