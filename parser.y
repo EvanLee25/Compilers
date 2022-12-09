@@ -40,6 +40,7 @@ int ifElseCurrentBlock = 0; // 1 - in if statment; 0 - in else statement;
 int runWhileBlock = 0; // 1 - run while block;  0 - exit while loop
 
 int inElseOrWhile = 0; //boolean flag to determin if runIfElseBlock or runWhileBlock should be updated
+					   // 0 - if/else        1 - while
 
 //initialize scope and symbol table
 char scope[50] = "G";
@@ -104,7 +105,7 @@ char scope[50] = "G";
 //not needed if NUMBER is a string
 //%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
-%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList WhileStmt IfStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator CompOperator ArrDecl
+%type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList WhileStmt IfStmt ElseStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator CompOperator ArrDecl
 
 %start Program
 
@@ -1313,7 +1314,7 @@ IDEQExpr: ID EQ MathStmt {
 
 	// ast
 	// TODO: EVAN
-
+	showSymTable();
 	system("python3 calculate.py");
 	
 	char result[100];
@@ -1387,7 +1388,7 @@ MathStmt: Math MathStmt {
 
 Math: LPAREN {addToInputCalc($1);}
 		| RPAREN {addToInputCalc($1);}
-		| ID {addToInputCalc($1);} 
+		| ID {addToInputCalc(getValue($1,scope));} 
 		| NUMBER {addToInputCalc($1);}
 		| FLOAT_NUM {addToInputCalc($1);}
 		| EXPONENT {addToInputCalc("**");}
@@ -1528,7 +1529,7 @@ IfStmt: IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GR
 
 							ifElseCurrentBlock = IN_ELSE_BLOCK;
 
-						 } | ELSE Block { printf(GRAY "\nRECOGNIZED RULE: If-Else: ELSE Statement Block\n\n" RESET);
+						 } ElseStmt { printf(GRAY "\nRECOGNIZED RULE: If-Else: ELSE Statement Block\n\n" RESET);
 
 							if (runIfElseBlock == RUN_ELSE_BLOCK) {
 								
@@ -1540,6 +1541,7 @@ IfStmt: IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GR
 
 }
 
+ElseStmt: | ELSE Block
 
 Condition: NUMBER CompOperator NUMBER {
 
