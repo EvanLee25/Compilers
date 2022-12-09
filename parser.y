@@ -1512,7 +1512,7 @@ MathStmt: Math MathStmt {
 
 Math: LPAREN {addToInputCalc($1);}
 		| RPAREN {addToInputCalc($1);}
-		| ID {addToInputCalc(getValue($1,scope)); strcpy(num1, $1,scope));} 
+		| ID {addToInputCalc(getValue($1,scope)); strcpy(num1, $1);} 
 		| NUMBER {addToInputCalc($1); strcpy(num2, $1);}
 		| FLOAT_NUM {addToInputCalc($1);}
 		| EXPONENT {addToInputCalc("**");}
