@@ -1520,12 +1520,10 @@ Math: LPAREN {addToInputCalc($1);}
 
 
 
-Operator: PLUS_OP {op = '+';
-}	
-		| SUB_OP {op = '-';
-		}
-		| MULT_OP {}
-		| DIV_OP {}
+Operator: PLUS_OP {op = '+';}	
+		| SUB_OP {op = '-';}
+		| MULT_OP {op = '*';}
+		| DIV_OP {op = '/';}
 
 
 CompOperator: DOUBLE_EQ {}
@@ -1695,7 +1693,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
-					endMIPSWhile($1,$2,$3);
+					endMIPSWhile($1,$2,$3,scope);
 					runWhileBlock = 1;
 				}
 
@@ -1757,7 +1755,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
-						endMIPSWhile($1,$2,$3);
+						endMIPSWhile($1,$2,$3,scope);
 						runWhileBlock = 1;
 					}
 				}
@@ -1774,7 +1772,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
-						endMIPSWhile($1,$2,$3);
+						endMIPSWhile($1,$2,$3,scope);
 						runWhileBlock = 1;
 					}
 				}
@@ -1791,7 +1789,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
-						endMIPSWhile($1,$2,$3);
+						endMIPSWhile($1,$2,$3,scope);
 						runWhileBlock = 1;
 					}
 				}
@@ -1838,7 +1836,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
-					endMIPSWhile($1,$2,$3);
+					endMIPSWhile($1,$2,$3,scope);
 					runWhileBlock = 1;
 				}
 
@@ -1856,7 +1854,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
-					endMIPSWhile($1,$2,$3);
+					endMIPSWhile($1,$2,$3,scope);
 					runWhileBlock = 1;
 				}
 

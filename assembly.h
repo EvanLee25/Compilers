@@ -136,19 +136,23 @@ void addEndLoop(){
     printf(CYAN "MIPS Created.\n\n\n" RESET);
 }
 
-void endMIPSWhile(char val1[50], char condition[5], char val2[50]){
+void endMIPSWhile(char val1[50], char condition[5], char val2[50], char scope[50]){
 
     MIPSfuncs = fopen("MIPSfuncs.asm", "a");
     printf("\n\n\n\n\n\n\n\n\n\n\n\n");
     printf(condition);
 
+    // load temp registers
+    fprintf(MIPSfuncs, "\n\tlw $t0, %s%s", scope, val1);
+        fprintf(MIPSfuncs, "\n\tlw $t1, %s%s", scope, val2);
+
     if(strcmp(condition,"==") == 0){ //while ( _ == _ ){} is true
         //beq $t0, 10, endloop # if $t0 == 10, branch to endloop
-        fprintf(MIPSfuncs, "\n\tbeq %s, %s, endloop       # break loop if true \n\n",val1,val2);
+        fprintf(MIPSfuncs, "\n\tbeq $t0, $t1, endloop       # break loop if true \n\n", val1, val2);
     }
 
     else if(strcmp(condition,"!=") == 0){ //while ( _ < _ ){} is true
-        fprintf(MIPSfuncs, "\n\tbne %s, %s, endloop       # break loop if true \n\n",val1,val2);
+        fprintf(MIPSfuncs, "\n\tbne $t0, $t1, endloop       # break loop if true \n\n", val1, val2);
     }
 
     else if(strcmp(condition,"<") == 0){ //while ( _ < _ ){} is true
