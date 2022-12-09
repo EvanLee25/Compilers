@@ -7,6 +7,17 @@
 FILE * MIPScode;
 FILE * tempMIPS;
 FILE * MIPSfuncs;
+char MIPSspecifier[50];  // 0 = tempMIPS.asm
+                          // 1 = MIPScode.asm
+                          // 2 = MIPSfuns.asm
+
+void changeMIPSFile(int specifier){
+    switch (specifier){
+        case 0: sprintf(MIPSspecifier, "tempMIPS.asm"); break;
+        case 1: sprintf(MIPSspecifier, "MIPScode.asm"); break;
+        case 2: sprintf(MIPSspecifier, "MIPSfuncs.asm"); break;
+    }
+}
 
 void initAssemblyFile(){
          
@@ -113,6 +124,62 @@ void createFloatParameter(char val[50], int index, char scope[50]) {
 
 }
 
+void addEndLoop(){
+    MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+
+    fprintf(MIPSfuncs, "endloop:\n"); // function header (e.g. 'func:')
+    fprintf(MIPSfuncs, "\n\tjr $ra       # return to main\n\n");
+    fclose(MIPSfuncs);
+
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
+}
+
+void endMIPSWhile(char val1[50], char condition[5], char val2[50]){
+
+    MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+    printf("\n\n\n\n\n\n\n\n\n\n\n\n");
+    printf(condition);
+
+    if(strcmp(condition,"==") == 0){ //while ( _ == _ ){} is true
+        //beq $t0, 10, endloop # if $t0 == 10, branch to endloop
+        fprintf(MIPSfuncs, "\n\tbeq %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,"!=") == 0){ //while ( _ < _ ){} is true
+        fprintf(MIPSfuncs, "\n\tbne %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,"<") == 0){ //while ( _ < _ ){} is true
+        fprintf(MIPSfuncs, "\n\tblt %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,"<=") == 0){ //while ( _ > _ ){} is true
+        fprintf(MIPSfuncs, "\n\tble %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,">") == 0){ //while ( _ > _ ){} is true
+        fprintf(MIPSfuncs, "\n\tbgt %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,">=") == 0){ //while ( _ > _ ){} is true
+        fprintf(MIPSfuncs, "\n\tbge %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    
+    fclose(MIPSfuncs);
+
+    printf(CYAN "While Loop Created.\n\n\n" RESET);
+}
+
+void MIPSWhileJump(char whileLoopName[50]){
+    MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+
+    fprintf(MIPSfuncs, "\n\tj %s       # loop back\n\n", whileLoopName);
+    fclose(MIPSfuncs);
+
+    printf(CYAN "While Loop Created.\n\n\n" RESET);
+}
+
 void endMIPSFunction() {
 
     MIPSfuncs = fopen("MIPSfuncs.asm", "a");
@@ -193,7 +260,7 @@ void createMIPSIntDecl(char id[50], char scope[50]){
 void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
     // e.g. x = 5;
 
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         fprintf(tempMIPS, "\tla $a0, %s     #store value in $a0\n",num);
         fprintf(tempMIPS, "\tla $t0, %s%s   #load variable address into $t0\n",scope,id);
         fprintf(tempMIPS, "\tsw $a0, 0($t0)  #Move value from $a0 into .word variable\n\n");
@@ -205,7 +272,7 @@ void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
 void createMIPSFloatAssignment (char id[50], char num[50], char scope[50]){
     // e.g. f = 5.0;
 
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         //fprintf(tempMIPS, "\t\n", scope, id, num);
         fclose(tempMIPS);
         printf(CYAN "MIPS Created.\n\n\n" RESET);
@@ -229,7 +296,7 @@ void createMIPSWriteInt(char id[50], char scope[50]){
 
     if (str == 0) {
     
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         int itemID;
 
         itemID = getItemID(id, scope);
@@ -270,7 +337,7 @@ void createMIPSWriteFloat(char id[50], char scope[50]){
 
     if (str == 0) {
     
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         int itemID;
 
         itemID = getItemID(id, scope);
@@ -309,7 +376,7 @@ void createMIPSWriteChar(char id[50], char scope[50]){
 
     if (str == 0) {
     
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         int itemID;
 
         itemID = getItemID(id, scope);
@@ -348,7 +415,7 @@ void makeMIPSNewLine(char scope[50]) {
 
     if (str == 0) {
 
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
 
         fprintf(tempMIPS, "\n\taddi $a0, $0 0xA  # new line\n");
         fprintf(tempMIPS, "\taddi $v0, $0 0xB  # new line\n");

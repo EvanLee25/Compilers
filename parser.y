@@ -45,6 +45,13 @@ int inElseOrWhile = 0; //boolean flag to determin if runIfElseBlock or runWhileB
 //initialize scope and symbol table
 char scope[50] = "G";
 
+//while loop variables
+int numOfWhileLoops = 0;
+char whileName[50];
+#define TEMP_MIPS 0  //(default) Middle section, main:
+#define MIPS_CODE 1  //Top section, var decls
+#define MIPS_FUNC 2  //Bottom section for functions/while loops
+
 %}
 
 %union {
@@ -124,6 +131,7 @@ Program: DeclList { //printf("\nProgram -> DeclList \n");
 		printf("########################## \n\n" RESET);
 
 		// end mips code
+		addEndLoop();
 		createEndOfAssemblyCode();
 		appendFiles("tempMIPS.asm", "MIPScode.asm");
 		printf("\n");
@@ -1401,6 +1409,7 @@ Operator: PLUS_OP {}
 		| MULT_OP {}
 		| DIV_OP {}
 
+
 CompOperator: DOUBLE_EQ {}
 			| LT {}
 			| GT {}
@@ -1504,12 +1513,23 @@ ArrDecl:
 
 }; 
 
-WhileStmt:	WHILE {inElseOrWhile = UPDATE_WHILE;} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
+WhileStmt:	WHILE { inElseOrWhile = UPDATE_WHILE;
+					
+					sprintf(whileName, "whileLoop%d",numOfWhileLoops);
+					createMIPSFunction(whileName);  //create while loop function in MIPS
+					numOfWhileLoops ++;
+					changeMIPSFile(MIPS_FUNC); //add block code to while loop function 
+
+						} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
 						 
-						inElseOrWhile = 0; //reset before block since Condition has been run already		 
+							inElseOrWhile = 0; //reset before block since Condition has been run already
 
-						 } Block { printf(GRAY "\nRECOGNIZED RULE: While Statement Block\n\n" RESET);
 
+						 } Block { 
+							
+							printf(GRAY "\nRECOGNIZED RULE: While Statement Block\n\n" RESET);
+							MIPSWhileJump(whileName);
+							changeMIPSFile(TEMP_MIPS); //change MIPS file location back to default (main:)
 							//current = 0;
 
 }
@@ -1556,6 +1576,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
+					endMIPSWhile($1,$2,$3);
 					runWhileBlock = 1;
 				}
 
@@ -1616,6 +1637,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
+						endMIPSWhile($1,$2,$3);
 						runWhileBlock = 1;
 					}
 				}
@@ -1632,6 +1654,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
+						endMIPSWhile($1,$2,$3);
 						runWhileBlock = 1;
 					}
 				}
@@ -1648,6 +1671,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
+						endMIPSWhile($1,$2,$3);
 						runWhileBlock = 1;
 					}
 				}
@@ -1669,6 +1693,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
+					endMIPSWhile($1,$2,$3);
 					runWhileBlock = 1;
 				}
 
@@ -1686,6 +1711,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
+					endMIPSWhile($1,$2,$3);
 					runWhileBlock = 1;
 				}
 
@@ -1717,6 +1743,7 @@ int main(int argc, char**argv)
 	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
 	clearCalcInput();
 	initializeSymbolTable();
+	changeMIPSFile(TEMP_MIPS);
 
 	// initialize ir code file
 	initIRcodeFile();

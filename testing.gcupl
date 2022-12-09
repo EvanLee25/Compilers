@@ -16,3 +16,7 @@ if (x != y) {
 if (x != y) {
     pass2 = 'y';
 }
+
+while(x != y){
+    x = 2;
+}
