@@ -20,6 +20,9 @@ extern FILE* yyin;
 void yyerror(const char* s);
 char currentScope[50]; /* global or the name of the function */
 char operator;
+char op;
+char num1[50];
+char num2[50];
 int argCounter = 0;
 char *args[50];
 char **argptr = args;
@@ -372,7 +375,14 @@ ArgDecl:	| NUMBER {
 				argptr[argCounter] = $1;
 				argCounter++;
 				
-				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1);	
+				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1);
+
+			} | ID {
+
+				argptr[argCounter] = getValue($1, "G");
+				argCounter++;
+				
+				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, getValue($1, "G"));
 			 
 
 }
@@ -729,10 +739,10 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							}
 
 							// does the second id have a value?
-							initialized($3, scope);
+							//initialized($3, scope);
 
 							// are the id's both variables?
-							compareKinds($1, $3, scope);
+							//compareKinds($1, $3, scope);
 
 							// are the types of the id's the same
 							compareTypes($1, $3, scope);
@@ -817,11 +827,69 @@ Expr:	SEMICOLON {
 				isUsed($3, scope);
 		}
 
-	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = FUNCTION\n" RESET); 
+	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = Function\n" RESET); 
 
 		if (ifElseCurrentBlock == runIfElseBlock) {
+
 			// symbol table
 			updateValue($1, scope, getValue($3, scope));
+
+			// set scope to function
+			strcpy(scope, $3);
+
+			// mips
+			for (int i = 0; i < argCounter; i++) {
+				
+				updateParameter(i, scope, args[i], argCounter);
+
+				printf(BGREEN "Parameter Accepted.\n" RESET);
+
+				printf(BLUE "IR Code" RESET);
+				printf(RED " NOT " RESET);
+				printf(BLUE "Created.\n" RESET);
+
+				char itemName[50];
+				char itemID[50];
+				char result[50];
+				sprintf(itemID, "%d", i);
+				sprintf(itemName, "%s", getNameByID(itemID, scope));
+				strcpy(result, "");
+				strcat(result, itemName);
+
+				char type[50];
+				sprintf(type, "%s", getVariableType(itemName, scope));
+
+				int isInt, isFloat, isChar;
+				
+				isInt = strcmp(type, "INT");
+				isFloat = strcmp(type, "FLT");
+				isChar = strcmp(type, "CHR");
+
+				if (isInt == 0) {
+					createIntParameter(args[i], i+1, scope);
+					//createMIPSIntAssignment(result, args[i], scope);
+				} else if (isFloat == 0) {
+					createFloatParameter(args[i], i+1, scope);
+					//createMIPSFloatAssignment(result, args[i], scope);
+				} else if (isChar == 0) {
+					createMIPSCharAssignment(result, args[i], scope);
+				}
+				
+			}
+			argCounter = 0;
+
+			// set scope back to global
+			strcpy(scope, "G");
+
+			// symbol table
+			printf(BGREEN "Function Call & Parameters Accepted.\n" RESET);
+
+			// mips again
+			callMIPSFunction($3);
+
+			// update value to function return
+			setVariableToReturn($1, $3, scope);
+
 		}
 
 
@@ -1261,9 +1329,13 @@ Expr:	SEMICOLON {
 			char str1[50];
 			strcpy(str1, "G");
 			strcat(str1, scope);
+
+			char str2[50];
+			strcpy(str2, scope);
+			strcat(str2, "Return");
 			
 			if (strcmp(str, "INT") == 0) {
-				createMIPSIntAssignment("", getValue($2, scope), str1);
+				createMIPSReturnStatementNumber(str2, $2, getValue($2, scope), scope);
 			} else if (strcmp(str, "FLT") == 0) {
 				createMIPSFloatAssignment("", getValue($2, scope), str1);
 			} else if (strcmp(str, "CHR") == 0) {
@@ -1345,65 +1417,78 @@ IDEQExpr: ID EQ MathStmt {
 	// ast
 	// TODO: EVAN
 
-	system("python3 calculate.py");
-	
-	char result[100];
-	readEvalOutput(&result);
-	clearCalcInput();
-	printf(RED"\nResult from evaluation ==> %s \n"RESET,result);
+	if (scope == "G") { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
 
-	// semantic checks
-		// inside Math
+		system("python3 calculate.py");
+		
+		char result[100];
+		readEvalOutput(&result);
+		clearCalcInput();
+		printf(RED"\nResult from evaluation ==> %s \n"RESET,result);
 
-	// calculations: code optimization
-		// turn the integer returned from calculate() into a string
+		// semantic checks
+			// inside Math
 
-	// symbol table
+		// calculations: code optimization
+			// turn the integer returned from calculate() into a string
 
-	if (strcmp(scope, "G") != 0) { // if scope is in function
+		// symbol table
 
-		if (found($1, scope) == 1) { // if the variable is found in the function's sym table
+		if (strcmp(scope, "G") != 0) { // if scope is in function
 
-			updateValue($1, scope, result); // update value in function sym table
+			if (found($1, scope) == 1) { // if the variable is found in the function's sym table
 
-		} else if (found($1, "G") == 1) { // if the variable is found in the global scope
+				updateValue($1, scope, result); // update value in function sym table
 
-			updateValue($1, "G", result); // update value in global sym table
+			} else if (found($1, "G") == 1) { // if the variable is found in the global scope
 
+				updateValue($1, "G", result); // update value in global sym table
+
+			}
+
+		} else { // if scope is global
+			updateValue($1, scope, result); // update value normally
 		}
 
-	} else { // if scope is global
-		updateValue($1, scope, result); // update value normally
+		// ast
+		$$ = AST_BinaryExpression("=", $1, result);
+
+		
+		char type[50];
+
+		strcpy(type,getVariableType($1,scope));
+
+		if (strcmp(type,"INT") == 0){
+			// ir code
+			createIntAssignment($1, result, scope);
+
+			// mips code
+			createMIPSIntAssignment($1, result, scope);
+		}
+
+		else if(strcmp(type,"FLT") == 0){
+			// ir code
+			createFloatAssignment($1, result, scope);
+
+			// mips code
+			createMIPSFloatAssignment($1, result, scope);
+		}
+
+		
+		// code optimization
+		// mark the id as used
+		isUsed($1, scope);
+
+	} else {
+
+		if (op == '+') {
+			createMIPSParameterAddition($1, scope);
+		} else if (op == '-') {
+			createMIPSSubtraction($1, num1, num2, scope);
+		}
+		
+
 	}
-
-	// ast
-	$$ = AST_BinaryExpression("=", $1, result);
-
-	
-	char type[50];
-
-	strcpy(type,getVariableType($1,scope));
-
-	if (strcmp(type,"INT") == 0){
-		// ir code
-		createIntAssignment($1, result, scope);
-
-		// mips code
-		createMIPSIntAssignment($1, result, scope);
-	}
-
-	else if(strcmp(type,"FLT") == 0){
-		// ir code
-		createFloatAssignment($1, result, scope);
-
-		// mips code
-		createMIPSFloatAssignment($1, result, scope);
-	}
-
-	
-	// code optimization
-	// mark the id as used
-	isUsed($1, scope);
 
 }
 
@@ -1418,16 +1503,18 @@ MathStmt: Math MathStmt {
 
 Math: LPAREN {addToInputCalc($1);}
 		| RPAREN {addToInputCalc($1);}
-		| ID {addToInputCalc($1);} 
-		| NUMBER {addToInputCalc($1);}
+		| ID {addToInputCalc($1); strcpy(num1, $1);} 
+		| NUMBER {addToInputCalc($1); strcpy(num2, $1);}
 		| FLOAT_NUM {addToInputCalc($1);}
 		| EXPONENT {addToInputCalc("**");}
 		| Operator {addToInputCalc($1);}
 
 
 
-Operator: PLUS_OP {}	
-		| SUB_OP {}
+Operator: PLUS_OP {op = '+';
+}	
+		| SUB_OP {op = '-';
+		}
 		| MULT_OP {}
 		| DIV_OP {}
 
