@@ -210,8 +210,6 @@ void updateValue2(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH], c
 
 }
 
-
-
 void updateParameter(int indx, char scope[MAX_NAME_LENGTH], char value[MAX_NAME_LENGTH], int count) {
 	int index = getSymbolTableIndex(scope);
 	int size = getSymbolTableSize(index);

@@ -26,7 +26,7 @@ void initAssemblyFile(){
     tempMIPS = fopen("tempMIPS.asm", "w");
     fprintf(tempMIPS, "\n.text\n");
     fprintf(tempMIPS, "main:\n");
-    fprintf(tempMIPS, "# -----------------------\n");
+    fprintf(tempMIPS, "# -----------------------\n\n");
     fclose(tempMIPS);
 
     MIPScode = fopen("MIPScode.asm", "w");
@@ -106,7 +106,7 @@ void createIntParameter(char val[50], int index, char scope[50]) {
 
     tempMIPS = fopen("tempMIPS.asm", "a");
 
-    fprintf(tempMIPS, "\n\tli  $a%d, %s\n", index, val);
+    fprintf(tempMIPS, "\n\tli $a%d, %s\n", index, val);
 
     fclose(tempMIPS);
 
@@ -246,6 +246,55 @@ void createMIPSIDtoIDAssignment(char id1[50], char id2[50], char scope[50]){
 
 }
 
+void createMIPSReturnStatementNumber(char id[50], char var[50], char num[50], char scope[50]) {
+        // e.g. return x;
+
+        MIPScode = fopen("MIPScode.asm", "a");
+        fprintf(MIPScode, "\t%s: .word 0\n", id);
+        fclose(MIPScode);
+
+        char str[50];
+        strcpy(str, scope);
+        strcat(str, var);
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        fprintf(MIPSfuncs, "\n\tlw $t0, %s   # load the value of the first variable into $t0\n", str);
+        fprintf(MIPSfuncs, "\tsw $t0, %sReturn   # store the value of the first variable into the second\n", scope);
+        fclose(MIPSfuncs);
+
+        printf(CYAN "MIPS Created.\n\n\n" RESET); 
+
+
+}
+
+void setVariableToReturn(char var[50], char func[50], char scope[50]) {
+
+        tempMIPS = fopen("tempMIPS.asm", "a");
+        fprintf(tempMIPS, "\n\tlw $t0, %sReturn     # load the value of the first variable into $t0\n", func);
+        fprintf(tempMIPS, "\tsw $t0, G%s   # store the value of the first variable into the second\n", var);
+        fclose(tempMIPS);
+
+}
+
+void createMIPSParameterAddition(char var[50], char scope[50]) {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        fprintf(MIPSfuncs, "\n\tadd $t0, $a1, $a2         # add the two values into $t0\n");
+        fprintf(MIPSfuncs, "\tsw $t0, %s%s      # store the sum into target variable\n", scope, var);
+        fclose(MIPSfuncs);
+
+}
+
+void createMIPSSubtraction(char var1[50], char var2[50], char var3[50], char scope[50]) {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        fprintf(MIPSfuncs, "\n\tlw $t0, G%s          # load target variable into $t0\n", var1);
+        fprintf(MIPSfuncs, "\tsub $t0, $t0, %s    # subtract the two values into $t0\n", var3);
+        fprintf(MIPSfuncs, "\tsw $t0, G%s          # store the sum into target variable\n", var1);
+        fclose(MIPSfuncs);
+
+}
+
 void createMIPSIntDecl(char id[50], char scope[50]){
         // e.g. x = 5;
 
@@ -253,11 +302,8 @@ void createMIPSIntDecl(char id[50], char scope[50]){
         fprintf(MIPScode, "\t%s%s: .word 0\n", scope, id);
         fclose(MIPScode);
         printf(CYAN "MIPS Created.\n\n\n" RESET); 
+
 }
-
-
-
-
 
 void createMIPSIntAssignment (char id[50], char num[50], char scope[50]){
     // e.g. x = 5;
@@ -312,8 +358,8 @@ void createMIPSWriteString(char str1[50], char scope[50]) {
         tempMIPS = fopen("tempMIPS.asm", "a");
         int itemID;
 
-        fprintf(tempMIPS, "\n\tli   $v0, 4       # call code to print an string\n");
-        fprintf(tempMIPS, "\tla   $a0, TEMP%d  # print stored string from above\n", counter-1);
+        fprintf(tempMIPS, "\n\tli $v0, 4       # call code to print an string\n");
+        fprintf(tempMIPS, "\tla $a0, TEMP%d  # print stored string from above\n", counter-1);
         fprintf(tempMIPS, "\tsyscall\n");
 
         fclose(tempMIPS);
@@ -476,7 +522,7 @@ void makeMIPSNewLine(char scope[50]) {
 
         fprintf(MIPSfuncs, "\n\taddi $a0, $0 0xA  # new line\n");
         fprintf(MIPSfuncs, "\taddi $v0, $0 0xB  # new line\n");
-        fprintf(MIPSfuncs, "\tsyscall           # syscall to print new line\n");
+        fprintf(MIPSfuncs, "\tsyscall           # syscall to print new line\n\n");
 
         fclose(MIPSfuncs);
         printf(CYAN "MIPS Created.\n\n\n" RESET);
