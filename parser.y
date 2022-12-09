@@ -882,6 +882,37 @@ Expr:	SEMICOLON {
 			*/
 		}
 
+	} |	WRITE STRINGLITERAL SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Etc. String)\n" RESET);
+
+		if (ifElseCurrentBlock == runIfElseBlock) {
+			// semantic checks
+				// N/A
+
+			// symbol table
+				// N/A
+
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, $2);
+
+			// ir code
+			// N/A
+
+			// mips code
+			char str[50];
+			strcpy(str, removeApostrophes($2));
+			defineMIPSTempString(str);
+			createMIPSWriteString($2, scope);
+
+			// code optimization
+				// mark the id as used
+				isUsed($2, scope);
+
+			/*
+						Expr
+				WRITE     getValue(ID)
+			*/
+		}
+
 	} |	WRITE ID LBRACE NUMBER RBRACE SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Array Element)\n" RESET); 
 
 		if (ifElseCurrentBlock == runIfElseBlock) {
@@ -1543,7 +1574,7 @@ IfStmt: IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GR
 
 							if (runIfElseBlock == RUN_IF_BLOCK) {
 								
-								printf(BORANGE "DONE WITH IF STATEMENT\n" RESET);
+								printf(BORANGE "Done with If Statement.\n\n" RESET);
 
 							}
 
@@ -1553,7 +1584,7 @@ IfStmt: IF {inElseOrWhile = UPDATE_IF_ELSE;} LPAREN Condition RPAREN { printf(GR
 
 							if (runIfElseBlock == RUN_ELSE_BLOCK) {
 								
-								printf(BORANGE "DONE WITH ELSE STATEMENT\n" RESET);
+								printf(BORANGE "Done With Else Statement.\n\n" RESET);
 
 							}
 							runIfElseBlock = 0; // reset the pass variable
@@ -1579,6 +1610,7 @@ Condition: NUMBER CompOperator NUMBER {
 					endMIPSWhile($1,$2,$3);
 					runWhileBlock = 1;
 				}
+
 
 		} | ID CompOperator ID {
 
@@ -1677,7 +1709,32 @@ Condition: NUMBER CompOperator NUMBER {
 				}
 
 
-		
+		} | ID CompOperator NUMBER {
+
+				// is the variable intitalized as a value?
+				int check;
+				check = strcmp(getValue($1, scope), "NULL");
+
+				if (!check) { // if first ID is NULL
+					printf(RED "\nERROR: ID '%s' is not assigned to a value.\n" RESET, $1);
+					showSymTable();
+					exit(0);
+				}
+
+				int temp1, temp2;
+				temp1 = atoi(getValue($1, scope));
+				temp2 = atoi($3);
+
+				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+					runIfElseBlock = 1;
+				}
+				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+					if(strcmp($2,"==") == 0){
+						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
+					}
+					runWhileBlock = 1;
+				}
+
 
 		} | FLOAT_NUM CompOperator FLOAT_NUM {
 

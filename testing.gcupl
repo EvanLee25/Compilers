@@ -5,16 +5,14 @@ char pass2;
 x = 1;
 y = 2;
 
-if (x != y) {
-    pass1 = 'y';
-    write x;
+if (x > 0) {
+    pass2 = 'y';
 } else {
-    pass1 = 'n';
-    write y;
+    pass2 = 'n';
 }
 
-if (x != y) {
-    pass2 = 'y';
+int func(int num, int num2) {
+    write num;
 }
 
 while(x != y){

@@ -19,6 +19,8 @@ void changeMIPSFile(int specifier){
     }
 }
 
+int counter = 0;
+
 void initAssemblyFile(){
          
     tempMIPS = fopen("tempMIPS.asm", "w");
@@ -286,6 +288,50 @@ void createMIPSCharAssignment (char id[50], char chr[50], char scope[50]) {
         fprintf(MIPScode, "\t%s%s: .asciiz \"%s\"\n", scope, id, chr);
         fclose(MIPScode);
         printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+}
+
+void defineMIPSTempString(char str[50]) {
+    // e.g. write "hello";
+
+        MIPScode = fopen("MIPScode.asm", "a");
+        fprintf(MIPScode, "\tTEMP%d: .asciiz \"%s\"\n", counter, str);
+        fclose(MIPScode);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+        counter++;
+
+}
+
+void createMIPSWriteString(char str1[50], char scope[50]) {
+
+    int str;
+    str = strcmp(scope, "G");
+
+    if (str == 0) {
+    
+        tempMIPS = fopen("tempMIPS.asm", "a");
+        int itemID;
+
+        fprintf(tempMIPS, "\n\tli   $v0, 4       # call code to print an string\n");
+        fprintf(tempMIPS, "\tla   $a0, TEMP%d  # print stored string from above\n", counter-1);
+        fprintf(tempMIPS, "\tsyscall\n");
+
+        fclose(tempMIPS);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    } else {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        int index;
+
+        fprintf(MIPSfuncs, "\n\tli   $v0, 4       # call code to print an string\n");
+        fprintf(MIPSfuncs, "\tla   $a0, TEMP%d  # print stored string from above\n", counter-1);
+        fprintf(MIPSfuncs, "\tsyscall\n");
+
+        fclose(MIPSfuncs);
+        printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+    }
 
 }
 
