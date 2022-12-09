@@ -1635,6 +1635,7 @@ WhileStmt:	WHILE { inElseOrWhile = UPDATE_WHILE;
 					
 					sprintf(whileName, "whileLoop%d",numOfWhileLoops);
 					createMIPSFunction(whileName);  //create while loop function in MIPS
+					callMIPSFunction(whileName);
 					numOfWhileLoops ++;
 					changeMIPSFile(MIPS_FUNC); //add block code to while loop function 
 
