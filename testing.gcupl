@@ -1,21 +1,18 @@
 int x;
-int y;
-char pass1;
-char pass2;
-x = 1;
-y = 5;
+char y;
+x = 20;
 
-if (x > 0) {
-    pass2 = 'y';
-} else {
-    pass2 = 'n';
+int addValue(int num1, int num2){
+     int result;
+     result = num1 + num2;
+     return result;
 }
 
-int func(int num, int num2) {
-    write num;
-}
-
-while(x != y){
+int result;
+while (x < 30){
+    result = addValue(x, -5);
+    write "result:";
+    write result;
+    write ~nl;
     x = x + 1;
-    write x;
 }

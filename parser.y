@@ -51,6 +51,7 @@ char scope[50] = "G";
 //while loop variables
 int numOfWhileLoops = 0;
 char whileName[50];
+int registerCounter = 0;
 #define TEMP_MIPS 0  //(default) Middle section, main:
 #define MIPS_CODE 1  //Top section, var decls
 #define MIPS_FUNC 2  //Bottom section for functions/while loops
@@ -1426,7 +1427,7 @@ IDEQExpr: ID EQ MathStmt {
 	// ast
 	// TODO: EVAN
 	showSymTable();
-	if (scope == "G" || inElseOrWhile == UPDATE_WHILE) { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
+	if (scope == "G" && inElseOrWhile != UPDATE_WHILE) { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
 
 		system("python3 calculate.py");
 		
@@ -1490,12 +1491,23 @@ IDEQExpr: ID EQ MathStmt {
 
 	} else {
 
-		if (op == '+') {
-			createMIPSParameterAddition($1, scope);
-		} else if (op == '-') {
-			createMIPSSubtraction($1, num1, num2, scope);
-		}
+		if (scope != "G" && inElseOrWhile != UPDATE_WHILE) { // in a function
+
+			if (op == '+') {
+				createMIPSParameterAddition($1, scope);
+			} else if (op == '-') {
+				createMIPSSubtraction($1, num1, num2, scope);
+			}
 		
+		} else { // in a while loop
+
+			if (op == '+') {
+				createMIPSLoopAddition(scope);
+			} else if (op == '-') {
+				createMIPSSubtraction($1, num1, num2, scope);
+			}
+
+		}
 
 	}
 
@@ -1512,8 +1524,35 @@ MathStmt: Math MathStmt {
 
 Math: LPAREN {addToInputCalc($1);}
 		| RPAREN {addToInputCalc($1);}
-		| ID {addToInputCalc(getValue($1,scope)); strcpy(num1, $1);} 
-		| NUMBER {addToInputCalc($1); strcpy(num2, $1);}
+		| ID {
+			addToInputCalc(getValue($1,scope)); 
+			strcpy(num1, $1);
+
+			//printf(BORANGE "inElseOrWhile: %s\nUPDATE_WHILE: %d\n", inElseOrWhile, UPDATE_WHILE);
+			
+			if (inElseOrWhile == UPDATE_WHILE) {
+
+				printf(BORANGE "\n\nHEREHEREHEREHERE\n\n" RESET);
+				createMIPSAddIDToRegister($1, registerCounter, scope);
+				registerCounter++;
+				
+			}
+
+
+		} 
+
+		| NUMBER {
+			addToInputCalc($1); 
+			strcpy(num2, $1); 
+
+			if (inElseOrWhile == UPDATE_WHILE) {
+
+				createMIPSAddNumberToRegister($1, registerCounter);
+				registerCounter++;
+
+			}
+		
+		}
 		| FLOAT_NUM {addToInputCalc($1);}
 		| EXPONENT {addToInputCalc("**");}
 		| Operator {addToInputCalc($1);}
@@ -1633,13 +1672,13 @@ WhileStmt:	WHILE { inElseOrWhile = UPDATE_WHILE;
 					
 					sprintf(whileName, "whileLoop%d",numOfWhileLoops);
 					createMIPSFunction(whileName);  //create while loop function in MIPS
-					callMIPSFunction(whileName);
+					callMIPSLoop(whileName);
 					numOfWhileLoops ++;
 					changeMIPSFile(MIPS_FUNC); //add block code to while loop function 
 
 						} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
 						 
-							inElseOrWhile = 0; //reset before block since Condition has been run already
+							//inElseOrWhile = 0; //reset before block since Condition has been run already
 
 
 						 } Block { 
@@ -1693,7 +1732,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
-					endMIPSWhile($1,$2,$3,scope);
+					endMIPSWhile($1,$2,$3,scope,1,1);
 					runWhileBlock = 1;
 				}
 
@@ -1755,7 +1794,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
-						endMIPSWhile($1,$2,$3,scope);
+						endMIPSWhile($1,$2,$3,scope,0,0);
 						runWhileBlock = 1;
 					}
 				}
@@ -1772,7 +1811,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
-						endMIPSWhile($1,$2,$3,scope);
+						endMIPSWhile($1,$2,$3,scope,0,0);
 						runWhileBlock = 1;
 					}
 				}
@@ -1789,7 +1828,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
-						endMIPSWhile($1,$2,$3,scope);
+						endMIPSWhile($1,$2,$3,scope,0,0);
 						runWhileBlock = 1;
 					}
 				}
@@ -1818,6 +1857,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
+					endMIPSWhile($1,$2,$3,scope,0,1);
 					runWhileBlock = 1;
 				}
 
@@ -1836,7 +1876,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
-					endMIPSWhile($1,$2,$3,scope);
+					endMIPSWhile($1,$2,$3,scope,1,1);
 					runWhileBlock = 1;
 				}
 
@@ -1854,7 +1894,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
-					endMIPSWhile($1,$2,$3,scope);
+					endMIPSWhile($1,$2,$3,scope,1,1);
 					runWhileBlock = 1;
 				}
 

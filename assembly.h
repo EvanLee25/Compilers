@@ -92,7 +92,7 @@ void callMIPSFunction(char funcID[50]) {
 
     //int id = itemID + 1;
 
-    tempMIPS = fopen("tempMIPS.asm", "a");
+    tempMIPS = fopen(MIPSspecifier, "a");
 
     fprintf(tempMIPS, "\n\tjal %s       # goto function: %s\n", funcID, funcID);
 
@@ -102,9 +102,24 @@ void callMIPSFunction(char funcID[50]) {
 
 }
 
+void callMIPSLoop(char funcID[50]) {
+
+    //int id = itemID + 1;
+
+    tempMIPS = fopen(MIPSspecifier, "a");
+
+    fprintf(tempMIPS, "\n\tjal %s       # goto loop: %s\n", funcID, funcID);
+    fprintf(tempMIPS, "\n\tnext:       # return from loop here\n", funcID, funcID);
+
+    fclose(tempMIPS);
+
+    printf(CYAN "MIPS Created.\n\n\n" RESET);
+
+}
+
 void createIntParameter(char val[50], int index, char scope[50]) {
 
-    tempMIPS = fopen("tempMIPS.asm", "a");
+    tempMIPS = fopen(MIPSspecifier, "a");
 
     fprintf(tempMIPS, "\n\tli $a%d, %s\n", index, val);
 
@@ -130,21 +145,33 @@ void addEndLoop(){
     MIPSfuncs = fopen("MIPSfuncs.asm", "a");
 
     fprintf(MIPSfuncs, "endloop:\n"); // function header (e.g. 'func:')
-    fprintf(MIPSfuncs, "\n\tjr $ra       # return to main\n\n");
+    fprintf(MIPSfuncs, "\n\tjal next       # return to main\n\n");
     fclose(MIPSfuncs);
 
     printf(CYAN "MIPS Created.\n\n\n" RESET);
 }
 
-void endMIPSWhile(char val1[50], char condition[5], char val2[50], char scope[50]){
+void endMIPSWhile(char val1[50], char condition[5], char val2[50], char scope[50], int first, int second){
 
     MIPSfuncs = fopen("MIPSfuncs.asm", "a");
-    printf("\n\n\n\n\n\n\n\n\n\n\n\n");
-    printf(condition);
 
     // load temp registers
-    fprintf(MIPSfuncs, "\n\tlw $t0, %s%s", scope, val1);
+    if (first == 0 && second == 0) { // both id's
+        fprintf(MIPSfuncs, "\n\tlw $t0, %s%s", scope, val1);
         fprintf(MIPSfuncs, "\n\tlw $t1, %s%s", scope, val2);
+    }
+    else if (first == 0 && second == 1) {
+        fprintf(MIPSfuncs, "\n\tlw $t0, %s%s", scope, val1);
+        fprintf(MIPSfuncs, "\n\tli $t1, %s", val2);
+    }
+    else if (first == 1 && second == 0) {
+        fprintf(MIPSfuncs, "\n\tli $t0, %s", val1);
+        fprintf(MIPSfuncs, "\n\tlw $t1, %s%s", scope, val2);
+    }
+    else if (first == 1 && second == 1) {
+        fprintf(MIPSfuncs, "\n\tli $t1, %s", val1);
+        fprintf(MIPSfuncs, "\n\tli $t1, %s", val2);
+    }
 
     if(strcmp(condition,"==") == 0){ //while ( _ == _ ){} is true
         //beq $t0, 10, endloop # if $t0 == 10, branch to endloop
@@ -156,19 +183,19 @@ void endMIPSWhile(char val1[50], char condition[5], char val2[50], char scope[50
     }
 
     else if(strcmp(condition,"<") == 0){ //while ( _ < _ ){} is true
-        fprintf(MIPSfuncs, "\n\tbgt %s, %s, endloop       # break loop if true \n\n",val1,val2);
+        fprintf(MIPSfuncs, "\n\tbgt $t0, $t1, endloop       # break loop if true \n\n",val1,val2);
     }
 
     else if(strcmp(condition,"<=") == 0){ //while ( _ > _ ){} is true
-        fprintf(MIPSfuncs, "\n\tbge %s, %s, endloop       # break loop if true \n\n",val1,val2);
+        fprintf(MIPSfuncs, "\n\tbge $t0, $t1, endloop       # break loop if true \n\n",val1,val2);
     }
 
     else if(strcmp(condition,">") == 0){ //while ( _ > _ ){} is true
-        fprintf(MIPSfuncs, "\n\tblt %s, %s, endloop       # break loop if true \n\n",val1,val2);
+        fprintf(MIPSfuncs, "\n\tblt $t0, $t1, endloop       # break loop if true \n\n",val1,val2);
     }
 
     else if(strcmp(condition,">=") == 0){ //while ( _ > _ ){} is true
-        fprintf(MIPSfuncs, "\n\tble %s, %s, endloop       # break loop if true \n\n",val1,val2);
+        fprintf(MIPSfuncs, "\n\tble $t0, $t1, endloop       # break loop if true \n\n",val1,val2);
     }
 
     
@@ -273,7 +300,7 @@ void createMIPSReturnStatementNumber(char id[50], char var[50], char num[50], ch
 
 void setVariableToReturn(char var[50], char func[50], char scope[50]) {
 
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         fprintf(tempMIPS, "\n\tlw $t0, %sReturn     # load the value of the first variable into $t0\n", func);
         fprintf(tempMIPS, "\tsw $t0, G%s   # store the value of the first variable into the second\n", var);
         fclose(tempMIPS);
@@ -289,10 +316,38 @@ void createMIPSParameterAddition(char var[50], char scope[50]) {
 
 }
 
+void createMIPSLoopAddition(char scope[50]) {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        fprintf(MIPSfuncs, "\n\tadd $t0, $s0, $s1         # add the two values into $t0\n");
+        fprintf(MIPSfuncs, "\tsw $t0, Gx      # store the sum into target variable\n", scope);
+        fclose(MIPSfuncs);
+
+}
+
+void createMIPSAddNumberToRegister(char val[50], int counter) {
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        fprintf(MIPSfuncs, "\n\tli $s%d, %s\n", counter, val);
+        fclose(MIPSfuncs);
+
+}
+
+void createMIPSAddIDToRegister(char id[50], int counter, char scope[50]) {
+
+        char str[50];
+        strcpy(str, scope);
+        strcat(str, id);
+
+        MIPSfuncs = fopen("MIPSfuncs.asm", "a");
+        fprintf(MIPSfuncs, "\n\tlw $s%d, %s\n", counter, str);
+        fclose(MIPSfuncs);
+
+}
+
 void createMIPSSubtraction(char var1[50], char var2[50], char var3[50], char scope[50]) {
 
         MIPSfuncs = fopen("MIPSfuncs.asm", "a");
-        fprintf(MIPSfuncs, "\n\tlw $t0, G%s          # load target variable into $t0\n", var1);
         fprintf(MIPSfuncs, "\tsub $t0, $t0, %s    # subtract the two values into $t0\n", var3);
         fprintf(MIPSfuncs, "\tsw $t0, G%s          # store the sum into target variable\n", var1);
         fclose(MIPSfuncs);
@@ -359,7 +414,7 @@ void createMIPSWriteString(char str1[50], char scope[50]) {
 
     if (str == 0) {
     
-        tempMIPS = fopen("tempMIPS.asm", "a");
+        tempMIPS = fopen(MIPSspecifier, "a");
         int itemID;
 
         fprintf(tempMIPS, "\n\tli $v0, 4       # call code to print an string\n");
