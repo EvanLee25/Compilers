@@ -21,6 +21,8 @@ void yyerror(const char* s);
 char currentScope[50]; /* global or the name of the function */
 char operator;
 char op;
+char IDArg[50];
+int argIsID = 0;
 char num1[50];
 char num2[50];
 int argCounter = 0;
@@ -390,6 +392,8 @@ ArgDecl:	| NUMBER {
 			} | ID {
 
 				argptr[argCounter] = getValue($1, "G");
+				strcpy(IDArg, $1);
+				argIsID = 1; // set flag so it knows the parameter is an ID, not a number
 				argCounter++;
 				
 				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, getValue($1, "G"));
@@ -876,8 +880,13 @@ Expr:	SEMICOLON {
 				isChar = strcmp(type, "CHR");
 
 				if (isInt == 0) {
-					createIntParameter(args[i], i+1, scope);
-					//createMIPSIntAssignment(result, args[i], scope);
+					if (argIsID == 1) { // if parameter is an ID
+						createIntIDParameter(IDArg, i+1, "G");
+						argIsID = 0;
+					} 
+					else { // if parameter is an integer number
+						createIntParameter(args[i], i+1, scope);
+					}
 				} else if (isFloat == 0) {
 					createFloatParameter(args[i], i+1, scope);
 					//createMIPSFloatAssignment(result, args[i], scope);
@@ -911,7 +920,7 @@ Expr:	SEMICOLON {
 				if (scope == "G") {
 					initialized($2, scope);
 				} else {
-					printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
+					//printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
 				}
 
 			// symbol table
@@ -1291,8 +1300,14 @@ Expr:	SEMICOLON {
 				isChar = strcmp(type, "CHR");
 
 				if (isInt == 0) {
-					createIntParameter(args[i], i+1, scope);
-					//createMIPSIntAssignment(result, args[i], scope);
+					printf(BORANGE "\nargIsID = %s\n", argIsID);
+					if (argIsID == 1) { // if parameter is an ID
+						createIntIDParameter(IDArg, i+1, scope);
+						argIsID = 0;
+					} 
+					else { // if parameter is an integer number
+						createIntParameter(args[i], i+1, scope);
+					}
 				} else if (isFloat == 0) {
 					createFloatParameter(args[i], i+1, scope);
 					//createMIPSFloatAssignment(result, args[i], scope);
@@ -1426,7 +1441,6 @@ IDEQExpr: ID EQ MathStmt {
 
 	// ast
 	// TODO: EVAN
-	showSymTable();
 	if (scope == "G" && inElseOrWhile != UPDATE_WHILE) { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
 
 		system("python3 calculate.py");
@@ -1504,7 +1518,7 @@ IDEQExpr: ID EQ MathStmt {
 			if (op == '+') {
 				createMIPSLoopAddition(scope);
 			} else if (op == '-') {
-				createMIPSSubtraction($1, num1, num2, scope);
+				createMIPSLoopSubtraction(scope);
 			}
 
 		}
@@ -1532,7 +1546,6 @@ Math: LPAREN {addToInputCalc($1);}
 			
 			if (inElseOrWhile == UPDATE_WHILE) {
 
-				printf(BORANGE "\n\nHEREHEREHEREHERE\n\n" RESET);
 				createMIPSAddIDToRegister($1, registerCounter, scope);
 				registerCounter++;
 				
