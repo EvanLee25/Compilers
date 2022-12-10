@@ -58,6 +58,9 @@ int registerCounter = 0;
 #define MIPS_CODE 1  //Top section, var decls
 #define MIPS_FUNC 2  //Bottom section for functions/while loops
 
+#define IR_CODE 0 // main
+#define IR_FUNC 1 // functions/loops
+
 %}
 
 %union {
@@ -136,6 +139,9 @@ Program: DeclList { //printf("\nProgram -> DeclList \n");
 		printf(PINK " AST ENDED " RESET);
 		printf("########################## \n\n" RESET);
 
+		// end IR code
+		appendFiles("IRFuncs.ir", "IRcode.ir");
+
 		// end mips code
 		addEndLoop();
 		createEndOfAssemblyCode();
@@ -188,9 +194,8 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope)
 
 								// ir code
-								printf(BLUE "IR Code" RESET);
-								printf(RED " NOT " RESET);
-								printf(BLUE "Created.\n" RESET);
+								createFunctionHeader($2);
+								changeIRFile(IR_FUNC);
 
 								// mips
 								createMIPSFunction($2);
@@ -204,7 +209,7 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								$$ = AST_assignment("FNC",$1,$2);
 
 								// ir code
-								printf(BLUE "IR Code Not Needed.\n" RESET);
+								changeIRFile(IR_CODE);
 
 								// mips
 								endMIPSFunction();
@@ -216,9 +221,8 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope);
 
 								// ir code
-								printf(BLUE "IR Code" RESET);
-								printf(RED " NOT " RESET);
-								printf(BLUE "Created.\n" RESET);
+								createFunctionHeader($2);
+								changeIRFile(IR_FUNC);
 
 								// mips
 								createMIPSFunction($2);
@@ -232,7 +236,7 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								$$ = AST_assignment("FNC",$1,$2);
 
 								// ir code
-								printf(BLUE "IR Code Not Needed.\n" RESET);
+								changeIRFile(IR_CODE);
 
 								// mips code
 								endMIPSFunction();
@@ -245,9 +249,7 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope); 
 
 								// ir code
-								printf(BLUE "IR Code" RESET);
-								printf(RED " NOT " RESET);
-								printf(BLUE "Created.\n" RESET);
+								createFunctionHeader($2);
 
 								// mips
 								createMIPSFunction($2);
@@ -260,7 +262,7 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								$$ = AST_assignment("FNC",$1,$2);
 
 								// ir code
-								printf(BLUE "IR Code Not Needed.\n" RESET);
+								
 
 								// mips
 								endMIPSFunction();
@@ -273,9 +275,7 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope); 
 
 								// ir code
-								printf(BLUE "IR Code" RESET);
-								printf(RED " NOT " RESET);
-								printf(BLUE "Created.\n" RESET);
+								createFunctionHeader($2);
 
 								// mips
 								createMIPSFunction($2);
@@ -290,7 +290,7 @@ FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initial
 								$$ = AST_assignment("FNC",$1,$2);	
 
 								// ir code
-								printf(BLUE "IR Code Not Needed.\n" RESET);
+								
 
 								// mips
 								endMIPSFunction();
@@ -973,11 +973,11 @@ Expr:	SEMICOLON {
 			$$ = AST_BinaryExpression("Expr", $1, $2);
 
 			// ir code
-			// N/A
-
-			// mips code
 			char str[50];
 			strcpy(str, removeApostrophes($2));
+			createWriteString(str);
+
+			// mips code
 			defineMIPSTempString(str);
 			createMIPSWriteString($2, scope);
 
@@ -1059,7 +1059,8 @@ Expr:	SEMICOLON {
 			printf(BGREEN "Symbol Table Not Needed.\n" RESET);
 
 			// ir code
-			printf(BLUE "IR Code Not Needed.\n" RESET);
+			createNewLine();
+
 			// mips
 			makeMIPSNewLine(scope);
 		}
@@ -1360,10 +1361,27 @@ Expr:	SEMICOLON {
 			strcat(str2, "Return");
 			
 			if (strcmp(str, "INT") == 0) {
+
+				// ir code
+				createReturnIDStatement($2);
+
+				// mips
 				createMIPSReturnStatementNumber(str2, $2, getValue($2, scope), scope);
+
 			} else if (strcmp(str, "FLT") == 0) {
+
+				// ir code
+				createReturnIDStatement($2);
+
+				// mips
 				createMIPSFloatAssignment("", getValue($2, scope), str1);
+
 			} else if (strcmp(str, "CHR") == 0) {
+
+				// ir code
+				createReturnIDStatement($2);
+
+				// mips
 				createMIPSCharAssignment("", getValue($2, scope), str1);
 			}
 		}
@@ -1508,16 +1526,37 @@ IDEQExpr: ID EQ MathStmt {
 		if (scope != "G" && inElseOrWhile != UPDATE_WHILE) { // in a function
 
 			if (op == '+') {
+
+				// ir code
+				createFunctionAddition($1);
+
+				// mips
 				createMIPSParameterAddition($1, scope);
+
 			} else if (op == '-') {
+
+				// ir code
+				createFunctionSubtraction($1);
+
+				// mips
 				createMIPSSubtraction($1, num1, num2, scope);
 			}
 		
 		} else { // in a while loop
 
 			if (op == '+') {
+
+				// ir code
+				createFunctionAddition($1);
+
+				// mips
 				createMIPSLoopAddition(scope);
 			} else if (op == '-') {
+
+				// ir code
+				createFunctionSubtraction($1);
+
+				// mips
 				createMIPSLoopSubtraction(scope);
 			}
 
@@ -1686,18 +1725,22 @@ WhileStmt:	WHILE { inElseOrWhile = UPDATE_WHILE;
 					sprintf(whileName, "whileLoop%d",numOfWhileLoops);
 					createMIPSFunction(whileName);  //create while loop function in MIPS
 					callMIPSLoop(whileName);
-					numOfWhileLoops ++;
+					numOfWhileLoops++;
+					changeIRFile(IR_FUNC);
 					changeMIPSFile(MIPS_FUNC); //add block code to while loop function 
+
+					// ir code
+					createWhileStatement(numOfWhileLoops-1);
 
 						} LPAREN Condition RPAREN { printf(GRAY "RECOGNIZED RULE: While Statement Initialization \n\n" RESET);							 
 						 
 							//inElseOrWhile = 0; //reset before block since Condition has been run already
 
-
 						 } Block { 
 							
 							printf(GRAY "\nRECOGNIZED RULE: While Statement Block\n\n" RESET);
 							MIPSWhileJump(whileName);
+							changeIRFile(IR_CODE);
 							changeMIPSFile(TEMP_MIPS); //change MIPS file location back to default (main:)
 							//current = 0;
 
@@ -1745,6 +1788,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
+					createWhileCondition($1, $2, $3);
 					endMIPSWhile($1,$2,$3,scope,1,1);
 					runWhileBlock = 1;
 				}
@@ -1807,6 +1851,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
+						createWhileCondition($1, $2, $3);
 						endMIPSWhile($1,$2,$3,scope,0,0);
 						runWhileBlock = 1;
 					}
@@ -1824,6 +1869,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
+						createWhileCondition($1, $2, $3);
 						endMIPSWhile($1,$2,$3,scope,0,0);
 						runWhileBlock = 1;
 					}
@@ -1841,6 +1887,7 @@ Condition: NUMBER CompOperator NUMBER {
 						if(strcmp($2,"==") == 0){
 							printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 						}
+						createWhileCondition($1, $2, $3);
 						endMIPSWhile($1,$2,$3,scope,0,0);
 						runWhileBlock = 1;
 					}
@@ -1870,6 +1917,7 @@ Condition: NUMBER CompOperator NUMBER {
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
+					createWhileCondition($1, $2, $3);
 					endMIPSWhile($1,$2,$3,scope,0,1);
 					runWhileBlock = 1;
 				}
@@ -1939,6 +1987,7 @@ int main(int argc, char**argv)
 	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
 	clearCalcInput();
 	initializeSymbolTable();
+	changeIRFile(IR_CODE);
 	changeMIPSFile(TEMP_MIPS);
 
 	// initialize ir code file

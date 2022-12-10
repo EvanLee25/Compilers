@@ -4,6 +4,22 @@
 #include <string.h>
 #include <unistd.h>
 
+#define GREEN   "\x1b[32m"
+#define BGREEN  "\x1b[1;32m"
+#define RED     "\x1b[1;31m"
+#define ORANGE 	"\x1b[33m"
+#define BORANGE "\x1b[1;33m"
+#define PINK	"\x1b[95m"
+#define BPINK	"\x1b[1;95m"
+#define BLUE    "\x1b[34m"
+#define BBLUE   "\x1b[1;94m"
+#define CYAN	"\x1b[96m"
+#define BCYAN	"\x1b[1;96m"
+#define BYELLOW "\x1b[1;103m"
+#define GRAY	"\x1b[90m"
+#define BOLD	"\e[1;37m"
+#define RESET   "\x1b[0m"
+
 FILE * MIPScode;
 FILE * tempMIPS;
 FILE * MIPSfuncs;
