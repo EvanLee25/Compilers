@@ -148,27 +148,27 @@ void endMIPSWhile(char val1[50], char condition[5], char val2[50], char scope[50
 
     if(strcmp(condition,"==") == 0){ //while ( _ == _ ){} is true
         //beq $t0, 10, endloop # if $t0 == 10, branch to endloop
-        fprintf(MIPSfuncs, "\n\tbeq $t0, $t1, endloop       # break loop if true \n\n", val1, val2);
-    }
-
-    else if(strcmp(condition,"!=") == 0){ //while ( _ < _ ){} is true
         fprintf(MIPSfuncs, "\n\tbne $t0, $t1, endloop       # break loop if true \n\n", val1, val2);
     }
 
+    else if(strcmp(condition,"!=") == 0){ //while ( _ < _ ){} is true
+        fprintf(MIPSfuncs, "\n\tbeq $t0, $t1, endloop       # break loop if true \n\n", val1, val2);
+    }
+
     else if(strcmp(condition,"<") == 0){ //while ( _ < _ ){} is true
-        fprintf(MIPSfuncs, "\n\tblt %s, %s, endloop       # break loop if true \n\n",val1,val2);
-    }
-
-    else if(strcmp(condition,"<=") == 0){ //while ( _ > _ ){} is true
-        fprintf(MIPSfuncs, "\n\tble %s, %s, endloop       # break loop if true \n\n",val1,val2);
-    }
-
-    else if(strcmp(condition,">") == 0){ //while ( _ > _ ){} is true
         fprintf(MIPSfuncs, "\n\tbgt %s, %s, endloop       # break loop if true \n\n",val1,val2);
     }
 
-    else if(strcmp(condition,">=") == 0){ //while ( _ > _ ){} is true
+    else if(strcmp(condition,"<=") == 0){ //while ( _ > _ ){} is true
         fprintf(MIPSfuncs, "\n\tbge %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,">") == 0){ //while ( _ > _ ){} is true
+        fprintf(MIPSfuncs, "\n\tblt %s, %s, endloop       # break loop if true \n\n",val1,val2);
+    }
+
+    else if(strcmp(condition,">=") == 0){ //while ( _ > _ ){} is true
+        fprintf(MIPSfuncs, "\n\tble %s, %s, endloop       # break loop if true \n\n",val1,val2);
     }
 
     

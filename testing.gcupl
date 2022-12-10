@@ -3,7 +3,7 @@ int y;
 char pass1;
 char pass2;
 x = 1;
-y = 2;
+y = 5;
 
 if (x > 0) {
     pass2 = 'y';
@@ -16,5 +16,6 @@ int func(int num, int num2) {
 }
 
 while(x != y){
-    x = 2;
+    x = x + 1;
+    write x;
 }

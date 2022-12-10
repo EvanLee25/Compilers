@@ -1426,7 +1426,7 @@ IDEQExpr: ID EQ MathStmt {
 	// ast
 	// TODO: EVAN
 	showSymTable();
-	if (scope == "G") { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
+	if (scope == "G" || inElseOrWhile == UPDATE_WHILE) { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
 
 		system("python3 calculate.py");
 		
