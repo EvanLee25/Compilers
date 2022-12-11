@@ -10,9 +10,9 @@ int addValue(int num1, int num2){
 
 int result;
 while (x > 0){
-    result = addValue(x, -5);
-    write "result:";
-    write result;
+    result = addValue(x,-5);
+    x = x - 1;
+    write x;
     write ~nl;
-    x = x - 5;
 }
+

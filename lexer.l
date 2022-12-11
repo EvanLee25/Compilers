@@ -118,15 +118,6 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
      
 }
 
-
-"print"  {
-	words++; chars += strlen(yytext);
-	printf("%s : PRINT STATEMENT\n", yytext);
-    yylval.string = strdup(yytext);
-    return PRINT;
-     
-}
-
 "=="  {
 	chars += 2;
 	printf("%s : OPERATOR\n", yytext);
@@ -156,38 +147,6 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
     return GT_EQ;
-     
-}
-
-"+="  {
-	chars += 2;
-	printf("%s : OPERATOR\n", yytext);
-    yylval.string = strdup(yytext);
-    return PLUS_EQ;
-     
-}
-
-"-="  {
-	chars += 2;
-	printf("%s : OPERATOR\n", yytext);
-    yylval.string = strdup(yytext);
-    return SUB_EQ;
-     
-}
-
-"*="  {
-	chars += 2;
-	printf("%s : OPERATOR\n", yytext);
-    yylval.string = strdup(yytext);
-    return MULT_EQ;
-     
-}
-
-"/="  {
-	chars += 2;
-	printf("%s : OPERATOR\n", yytext);
-    yylval.string = strdup(yytext);
-    return DIV_EQ;
      
 }
 
@@ -254,14 +213,6 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
     return EXPONENT;
 }  
 
-"%"  {
-	chars++;
-	printf("%s : OPERATOR\n", yytext);
-    yylval.string = strdup(yytext);
-    return MODULUS;
-     
-}
-
 "("  {
 	chars++;
 	printf("%s : OPERATOR\n", yytext);
@@ -315,14 +266,6 @@ CHARLITERAL \'([^\\\'']|\\.)*\'
 	printf("%s : OPERATOR\n", yytext);
     yylval.string = strdup(yytext);
     return COMMA;
-     
-}
-
-"'"  {
-	chars++;
-	printf("%s : APOSTROPHE\n", yytext);
-    yylval.string = strdup(yytext);
-    return APOSTROPHE;
      
 }
 

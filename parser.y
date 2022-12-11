@@ -1,11 +1,13 @@
 %{
 
+// import libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <string.h>
 
+// import all accessory files
 #include "symbolTable.h"
 #include "AST.h"
 #include "IRcode.h"
@@ -13,56 +15,63 @@
 #include "calculator.h"
 #include "ctype.h"
 
+// flex
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
-
 void yyerror(const char* s);
+
+// static value definitions for easier readability when determining what is running loop and if statement-wise
+#define IN_ELSE_BLOCK 0 // inside else statement
+#define IN_IF_BLOCK 1 // inside if statement
+
+#define RUN_ELSE_BLOCK 0 // will run else block
+#define RUN_IF_BLOCK 1 // will run if block
+
+#define UPDATE_IF_ELSE 0 // will update the if-else
+#define UPDATE_WHILE 1 // will update the while loop
+
+// static value definitions for ir code and mips file choices to print to
+#define IR_CODE 0 // (default) main
+#define IR_FUNC 1 // functions/loops
+#define TEMP_MIPS 0  // (default) middle section, main:
+#define MIPS_CODE 1  // top section, var decls
+#define MIPS_FUNC 2  // bottom section for functions/while loops
+
+// various variables for tracking
 char currentScope[50]; /* global or the name of the function */
-char operator;
-char op;
-char IDArg[50];
-int argIsID = 0;
-char num1[50];
-char num2[50];
-int argCounter = 0;
-char *args[50];
-char **argptr = args;
+char IDArg[50]; // if an argument is an ID, it's name is temporarily stored here
+int argIsID = 0; // boolean to determine if an argument is an ID
+int argCounter = 0; // how many arguments there are
+char *args[50]; // argument array, names stored here
+char **argptr = args; // argument array pointer
 
-#define IN_ELSE_BLOCK 0
-#define IN_IF_BLOCK 1
+// two different operator chars to hold a current operator
+char operator; // holds current operator in math statements
+char op; // holds current operator in conditions
 
-#define RUN_ELSE_BLOCK 0
-#define RUN_IF_BLOCK 1
+// temporary variables to hold two numbers in a binary math statement
+char num1[50]; // first number
+char num2[50]; // second number
 
-#define UPDATE_IF_ELSE 0
-#define UPDATE_WHILE 1
-
-
+// boolean values for if-else and while loop logic in parser
 int runIfElseBlock = 0; // 1 - run if block;  0 - run else block;
 int ifElseCurrentBlock = 0; // 1 - in if statment; 0 - in else statement;
-
 int runWhileBlock = 0; // 1 - run while block;  0 - exit while loop
-
-int inElseOrWhile = 0; //boolean flag to determin if runIfElseBlock or runWhileBlock should be updated
+int inElseOrWhile = 0; //boolean flag to determine if runIfElseBlock or runWhileBlock should be updated
 					   // 0 - if/else        1 - while
 
-//initialize scope and symbol table
-char scope[50] = "G";
+// while loop variables
+int numOfWhileLoops = 0; // counter for amount of while loops, used for making name of while loop in mips
+char whileName[50]; // name of the while loop, used for naming it in mips
+int registerCounter = 0; // counts the registers for parameters in mips
 
-//while loop variables
-int numOfWhileLoops = 0;
-char whileName[50];
-int registerCounter = 0;
-#define TEMP_MIPS 0  //(default) Middle section, main:
-#define MIPS_CODE 1  //Top section, var decls
-#define MIPS_FUNC 2  //Bottom section for functions/while loops
-
-#define IR_CODE 0 // main
-#define IR_FUNC 1 // functions/loops
+// initialize scope as global and symbol table
+char scope[50] = "G"; // set scope to global
 
 %}
 
+// different types of tokens
 %union {
 	int number;
 	char character;
@@ -70,409 +79,424 @@ int registerCounter = 0;
 	struct AST* ast;
 }
 
-%token <string> CHAR
-%token <string> INT
-%token <string> FLOAT
-%token <string> FLOAT_NUM
-%token <string> VOID
+// token declarations: words
+%token <string> CHAR // word: char
+%token <string> INT // word: int
+%token <string> FLOAT // word: float
+%token <string> VOID // word: void
+%token <string> IF // word: if
+%token <string> ELSE // word: else
+%token <string> WHILE // word: while
+%token <string> WRITE // word: write
+%token <string> RETURN // word: return
 
-%token <string> IF
-%token <string> ELSE
-%token <string> WHILE
-%token <string> PRINT
-%token <string> DOUBLE_EQ
-%token <string> NOT_EQ
-%token <string> LT_EQ
-%token <string> GT_EQ
-%token <string> LT
-%token <string> GT
-%token <string> EQ
-%token <string> PLUS_EQ
-%token <string> MULT_EQ
-%token <string> SUB_EQ
-%token <string> DIV_EQ
-%token <string> PLUS_OP
-%token <string> MULT_OP
-%token <string> SUB_OP
-%token <string> DIV_OP
-%token <string> EXPONENT
-%token <string> MODULUS
-%token <string> LPAREN
-%token <string> RPAREN
-%token <string> LBRACKET
-%token <string> RBRACKET
-%token <string> LBRACE
-%token <string> RBRACE
-%token <string> COMMA
-%token <string> SEMICOLON
-%token <string> NEWLINECHAR
-%token <string> APOSTROPHE
-%token <string> LETTER
-%token <string> RETURN
+// token declarations: etc. words
+%token <string> COMMA // word: ,
+%token <string> SEMICOLON // word: ;
+%token <string> NEWLINECHAR // word: ~nl
 
-%token <string> STRINGLITERAL
-%token <string> CHARLITERAL
-%token <string> WRITE
+// token declarations: operators
+%token <string> DOUBLE_EQ // operator: ==
+%token <string> NOT_EQ // operator: !=
+%token <string> LT_EQ // operator: <=
+%token <string> GT_EQ // operator: >=
+%token <string> LT // operator: <
+%token <string> GT // operator: >
+%token <string> EQ // operator: =
+%token <string> PLUS_OP // operator: +
+%token <string> MULT_OP // operator: *
+%token <string> SUB_OP // operator: -
+%token <string> DIV_OP // operator: /
+%token <string> EXPONENT // operator: *
+%token <string> LPAREN // operator: (
+%token <string> RPAREN // operator: )
+%token <string> LBRACKET // operator: [
+%token <string> RBRACKET // operator: ]
+%token <string> LBRACE // operator: {
+%token <string> RBRACE // operator: }
 
-%token <string> ID
-%token <string> NUMBER
+// token declarations: regex's
+%token <string> NUMBER // number regex: 1
+%token <string> FLOAT_NUM // float regex: 1.0
+%token <string> STRINGLITERAL // string regex: "string"
+%token <string> CHARLITERAL // char regex: 'c'
+%token <string> ID // id regex: var
 
+// printer function
 %printer { fprintf(yyoutput, "%s", $$); } ID;
-//not needed if NUMBER is a string
-//%printer { fprintf(yyoutput, "%d", $$); } NUMBER;
 
+// token declarations: nonterminals
 %type <ast> Program DeclList Decl VarDecl FuncDecl ParamDeclList WhileStmt IfStmt ElseStmt Condition ParamDecl ArgDeclList ArgDecl Block BlockDeclList BlockDecl StmtList Expr IDEQExpr MathStmt Math Operator CompOperator ArrDecl
 
+// start the parser
 %start Program
 
 %%
 
-Program: DeclList { //printf("\nProgram -> DeclList \n");
+// program consists of a list of declarations
+Program: DeclList {
 		// ast
 		$$ = $1;
 
+		// output the start of the ast
 		printf("\n\n ########################" RESET);
 		printf(BPINK " AST STARTED " RESET);
 		printf("######################### \n\n" RESET);
+
+		// print the ast
 		//printAST($$,0);
+
+		// output the end of the ast
 		printf("\n\n #########################" RESET);
 		printf(PINK " AST ENDED " RESET);
 		printf("########################## \n\n" RESET);
 
-		// end IR code
+		// append the two ir code files to each other
 		appendFiles("IRFuncs.ir", "IRcode.ir");
 
 		// end mips code
-		addEndLoop();
-		createEndOfAssemblyCode();
+		addEndLoop(); // add the endloop function to the bottom of mips for any loops to jump to to get to main
+		createEndOfAssemblyCode(); // add the end line of mips to kill the program
+
+		// append the three mips files to each other
 		appendFiles("tempMIPS.asm", "MIPScode.asm");
 		printf("\n");
 		appendFiles("MIPSfuncs.asm", "MIPScode.asm");
+
+		// output that mips was generated
 		printf("\n\n #######################" RESET);
 		printf(BPINK " MIPS GENERATED " RESET);
 		printf("####################### \n\n" RESET);
 
 };
 
-DeclList:   Decl DeclList {
-		// ast
-		$1->left = $2;
-		$$ = $1;
+// declList consists of a recursive list of declarations
+DeclList:      Decl DeclList {
 
-}
-			| Decl {
+				// ast
+				$1->left = $2;
+				$$ = $1;
+
+			} | Decl {
+
+				// ast
+				$$ = $1;
+
+};
+
+// declaration types, any of these can show at any time in the source code
+Decl:	   FuncDecl { // function declaration
+
 			// ast
 			$$ = $1;
 
+		} | VarDecl { // variable declaration
+
+			// ast
+			$$ = $1;
+
+		} | StmtList { // statement declaration list
+
+			// ast
+			$$ = $1;
+
+		} | WhileStmt { // while statement declaration
+			
+			// ast
+			$$ = $1;
+	
+		} |	IfStmt { // if statement declaration
+
+			// ast
+			$$ = $1;
+	
 };
 
-Decl:	FuncDecl {
-		// ast
-		$$ = $1;
-
-	} | VarDecl {
-		// ast
-		$$ = $1;
-
-	} | StmtList {
-		// ast
-		$$ = $1;
-
-	} | WhileStmt {
-		//ast
-		$$ = $1;
-	
-	} |	IfStmt {
-		$$ = $1;
-	
-};
-
-
-FuncDecl: VOID ID LPAREN { 		printf(GRAY "RECOGNIZED RULE: Void Function Initialization \n\n" RESET); 
-								symTabAccess(); addSymbolTable($2,"VOID"); 
-								strcpy(scope,$2); 
-								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope)
+// function declaration types: void, int, float, char
+FuncDecl:				 VOID ID LPAREN { printf(GRAY "RECOGNIZED RULE: Void Function Initialization \n\n" RESET); // void function declaration
+								
+								// symbol table
+								symTabAccess(); // access symbol table
+								addSymbolTable($2,"VOID"); // add void function to symbol table
+								strcpy(scope,$2); // set scope to function name
 
 								// ir code
-								createFunctionHeader($2);
-								changeIRFile(IR_FUNC);
+								createFunctionHeader($2); // create function
+								changeIRFile(IR_FUNC); // change file to print block to the function IR code file
 
 								// mips
-								createMIPSFunction($2);
-
-								} 
+								createMIPSFunction($2); // create function
 	
-							ParamDeclList RPAREN Block { printf(BGREEN "\nVoid Function End.\n" RESET);
-								//showSymTable();
-								//addItem("testing","FUNC","VOID",$2,0);
+							// second part of the function, including parameter list, right parentheses, and block
+							} ParamDeclList RPAREN Block { printf(BGREEN "\nVoid Function End.\n" RESET); // void function end
+
 								// ast
-								$$ = AST_assignment("FNC",$1,$2);
+								$$ = AST_assignment("FNC",$1,$2); // add the function to the ast
 
 								// ir code
-								changeIRFile(IR_CODE);
+								changeIRFile(IR_CODE); // change file back to main file
 
 								// mips
-								endMIPSFunction();
+								endMIPSFunction(); // end function in mips
 						
-						} | INT ID LPAREN {printf(GRAY "RECOGNIZED RULE: Integer Function Initialization \n\n" RESET);
-								symTabAccess();
-								addSymbolTable($2,"INT");
-								strcpy(scope,$2); 
-								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope);
+
+						} | INT ID LPAREN {printf(GRAY "RECOGNIZED RULE: Integer Function Initialization \n\n" RESET); // int function declaration
+
+								// symbol table
+								symTabAccess(); // access symbol table
+								addSymbolTable($2,"INT"); // add int function to symbol table
+								strcpy(scope,$2); // set scope to function name
 
 								// ir code
-								createFunctionHeader($2);
-								changeIRFile(IR_FUNC);
+								createFunctionHeader($2); // create function
+								changeIRFile(IR_FUNC); // change file to print block to the function IR code file
 
 								// mips
-								createMIPSFunction($2);
-
-								} 
+								createMIPSFunction($2); // create function
 						 
-						 ParamDeclList RPAREN Block { printf(BGREEN "\nInt Function End.\n" RESET);
-								//showSymTable();
+						 	// second part of the function, including parameter list, right parentheses, and block
+						 	} ParamDeclList RPAREN Block { printf(BGREEN "\nInt Function End.\n" RESET); // void function end
 
 								// ast
-								$$ = AST_assignment("FNC",$1,$2);
+								$$ = AST_assignment("FNC",$1,$2); // add the function to the ast
 
 								// ir code
-								changeIRFile(IR_CODE);
+								changeIRFile(IR_CODE); // change file back to main file
 
 								// mips code
-								endMIPSFunction();
+								endMIPSFunction(); // end function in mips
 
 						
-						} | CHAR ID LPAREN {printf(GRAY "RECOGNIZED RULE: Char Function Initialization \n\n" RESET);
-								symTabAccess();
-								addSymbolTable($2,"CHR");
-								strcpy(scope,$2); 
-								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope); 
+						} | CHAR ID LPAREN {printf(GRAY "RECOGNIZED RULE: Char Function Initialization \n\n" RESET); // char function declaration
+
+								// symbol table
+								symTabAccess(); // access symbol table
+								addSymbolTable($2,"CHR"); // add char function to symbol table
+								strcpy(scope,$2); // set scope to function name
 
 								// ir code
-								createFunctionHeader($2);
+								createFunctionHeader($2); // create function
+								changeIRFile(IR_FUNC); // change file to print block to the function IR code file
 
 								// mips
-								createMIPSFunction($2);
-
-								} 
+								createMIPSFunction($2); // create function
 						 
-						 ParamDeclList RPAREN Block { printf(BGREEN "\nChar Function End.\n" RESET);
-								//showSymTable();
-								// ast
-								$$ = AST_assignment("FNC",$1,$2);
-
-								// ir code
-								
-
-								// mips
-								endMIPSFunction();
-
-						
-						} | FLOAT ID LPAREN {printf(GRAY "RECOGNIZED RULE: Float Function Initialization \n\n" RESET);
-								symTabAccess();
-								addSymbolTable($2,"FLT");
-								strcpy(scope,$2); 
-								//printf(ORANGE "\nCurrent Scope: '%s'\n" RESET, scope); 
-
-								// ir code
-								createFunctionHeader($2);
-
-								// mips
-								createMIPSFunction($2);
-						
-
-								} 
-								
-						 ParamDeclList RPAREN Block { printf(BGREEN "\nFloat Function End.\n" RESET);
-								//showSymTable();
+						 	// second part of the function, including parameter list, right parentheses, and block
+							} ParamDeclList RPAREN Block { printf(BGREEN "\nChar Function End.\n" RESET); // char function end
 
 								// ast
-								$$ = AST_assignment("FNC",$1,$2);	
+								$$ = AST_assignment("FNC",$1,$2); // add the function to the ast
 
 								// ir code
-								
+								changeIRFile(IR_CODE); // change file back to main file
 
 								// mips
-								endMIPSFunction();
+								endMIPSFunction(); // end function in mips
 
+						
+						} | FLOAT ID LPAREN {printf(GRAY "RECOGNIZED RULE: Float Function Initialization \n\n" RESET); // float function declaration
+
+								// symbol table
+								symTabAccess(); // access symbol table
+								addSymbolTable($2,"FLT"); // add float function to symbol table
+								strcpy(scope,$2); // set scope to function name
+
+								// ir code
+								createFunctionHeader($2); // create function
+								changeIRFile(IR_FUNC); // change file to print block to the function IR code file
+
+								// mips
+								createMIPSFunction($2); // create function
+								
+							// second part of the function, including parameter list, right parentheses, and block
+						 	} ParamDeclList RPAREN Block { printf(BGREEN "\nFloat Function End.\n" RESET); // float function end
+
+								// ast
+								$$ = AST_assignment("FNC",$1,$2); // add the function to the ast
+
+								// ir code
+								changeIRFile(IR_CODE); // change file back to main file
+
+								// mips
+								endMIPSFunction(); // end function in mips
+ 
 }
 
-ParamDeclList: ParamDecl COMMA ParamDeclList {
+// parameter declaration list consists of parameters separated by commas or a single parameter
+ParamDeclList: ParamDecl COMMA ParamDeclList { // list of parameters separated by commas
 
+					// ast
 					$1->left = $2;
 					$$ = $1;
 
-				} | ParamDecl {
+				} | ParamDecl { // or single parameter
 
+					// ast
 					$$ = $1;
 
 				}
 
-ParamDecl:		| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET);
+// types of parameter declarations, integer, float, char
+ParamDecl:		| INT ID { printf(GRAY "RECOGNIZED RULE: Integer Parameter Initialization \n\n" RESET); // integer parameter declaration
 
-					addItem($2,"PAR","INT",scope,0);
-
-					// ir code
-					printf(BLUE "IR Code" RESET);
-					printf(RED " NOT " RESET);
-					printf(BLUE "Created.\n" RESET);
-
-					// mips
-					printf(CYAN "   MIPS" RESET);
-					printf(RED " NOT " RESET);
-					printf(CYAN "Created.\n\n\n" RESET);
-
-
-				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Float Parameter Initialization \n\n" RESET);
-
-					addItem($2,"PAR","FLT",scope,0);
+					// symbol table
+					addItem($2,"PAR","INT",scope,0); // add integer parameter to symbol table
 
 					// ir code
 					printf(BLUE "IR Code" RESET);
 					printf(RED " NOT " RESET);
 					printf(BLUE "Created.\n" RESET);
 
-					// mips
-					printf(CYAN "   MIPS" RESET);
-					printf(RED " NOT " RESET);
-					printf(CYAN "Created.\n\n\n" RESET);
 
+				} | FLOAT ID { printf(GRAY "RECOGNIZED RULE: Float Parameter Initialization \n\n" RESET); // float parameter declaration
 
-				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Char Parameter Initialization \n\n" RESET);
-
-					addItem($2,"PAR","CHR",scope,0);
+					// symbol table
+					addItem($2,"PAR","FLT",scope,0); // add float parameter to symbol table
 
 					// ir code
 					printf(BLUE "IR Code" RESET);
 					printf(RED " NOT " RESET);
 					printf(BLUE "Created.\n" RESET);
 
-					// mips
-					printf(CYAN "   MIPS" RESET);
+
+				} | CHAR ID { printf(GRAY "RECOGNIZED RULE: Char Parameter Initialization \n\n" RESET); // char parameter declaration
+
+					// symbol table
+					addItem($2,"PAR","CHR",scope,0); // add char parameter to symbol table
+
+					// ir code
+					printf(BLUE "IR Code" RESET);
 					printf(RED " NOT " RESET);
-					printf(CYAN "Created.\n\n\n" RESET);
+					printf(BLUE "Created.\n" RESET);
 					
 
-				}
+}
 
-ArgDeclList: ArgDecl COMMA ArgDeclList {
+// argument declaration list for calling a function, e.g. addValue(1,2): 1 & 2 are arguments, either a recursive list of arguments separated by a comma or a single argument
+ArgDeclList: ArgDecl COMMA ArgDeclList { // recursive list of arguments
 
+					// ast
 					$1->left = $2;
 					$$ = $1;
 
-				} | ArgDecl {
+				} | ArgDecl { // or single argument
 
+					// ast
 					$$ = $1;
 
 				}
 
-ArgDecl:	| NUMBER {
+// argdecl holds types of arguments: number, float number, charliteral, id
+ArgDecl:	| NUMBER { printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1); // number argument
 
-				argptr[argCounter] = $1;
-				argCounter++;
+				argptr[argCounter] = $1; // add number to argument array
+				argCounter++; // increment argument counter
+
+
+			} | FLOAT_NUM { printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1); // float argument
+
+				argptr[argCounter] = $1; // add float number to argument array
+				argCounter++; // increment argument counter
+
+
+			} | CHARLITERAL { printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1); // char argument
+
+				argptr[argCounter] = $1; // add char to argument array
+				argCounter++; // increment argument counter
 				
-				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1);
 
+			} | ID { printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, getValue($1, "G")); // id argument
 
-			} | FLOAT_NUM {
-
-				argptr[argCounter] = $1;
-				argCounter++;
-				
-				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1);
-
-
-			} | CHARLITERAL {
-
-				argptr[argCounter] = $1;
-				argCounter++;
-				
-				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, $1);
-
-			} | ID {
-
-				argptr[argCounter] = getValue($1, "G");
-				strcpy(IDArg, $1);
+				argptr[argCounter] = getValue($1, "G"); // add id value to argument array
+				strcpy(IDArg, $1); // copy the name of the id into temporary IDArg variable
 				argIsID = 1; // set flag so it knows the parameter is an ID, not a number
-				argCounter++;
-				
-				printf(GRAY "RECOGNIZED RULE: Parameter = %s\n\n" RESET, getValue($1, "G"));
-			 
+				argCounter++; // increment argument counter
 
 }
 
+// block is used for the block in functions, if statements, and while loops
+Block: LBRACKET BlockDeclList RBRACKET { // blockDeclList is the recursive list of statements inside the block
 
-Block: LBRACKET BlockDeclList RBRACKET {
-	// ast
-	//$$ = $1;
-
-	// reset scope back to global after function is over
-	strcpy(scope,"G");
-}
-
-
-BlockDeclList: BlockDecl BlockDeclList {
-		// ast
-		$1->left = $2;
-		$$ = $1;
+	strcpy(scope,"G"); // reset scope back to global after statements are parsed
 
 }
-			| BlockDecl {
-			// ast
-			$$ = $1;
-			}
 
-BlockDecl: VarDecl {
+// blockDeclList is a recursive list of statements or single statement, which is similar to DeclList
+BlockDeclList: BlockDecl BlockDeclList { // recursive list of statements
+
+				// ast
+				$1->left = $2;
+				$$ = $1;
+
+		} | BlockDecl { // or single statement
+
+				// ast
+				$$ = $1;
+
+}
+
+// blockDecl types: variable declaration, stmtList, while loop, if statement
+BlockDecl: VarDecl { // variable declaration
+
 		   // ast
 		   $$ = $1;
 
-		} | StmtList {
-		  // ast
-		  $$ = $1;
+		} | StmtList { // statement list
 
-		} | WhileStmt {
+			// ast
+			$$ = $1;
+
+		} | WhileStmt { // while loop
+
 			//ast
 			$$ = $1;
 		
-		} | IfStmt {
+		} | IfStmt { // if statement
 			// ast
 			$$ = $1;
 
 };
 
-
-StmtList:	| Expr StmtList {$1->left = $2; $$ = $1;}
-			| Expr {$$ = $1;}
-;
+// statement list is a recursive list of expressions or a single expression or nothing
+StmtList:	| Expr StmtList { // nothing or recursive list of statements
+				
+				// ast
+				$1->left = $2; 
+				$$ = $1;
+			
+			} | Expr { // or single expression
+				
+				// ast
+				$$ = $1;
+		
+};
 
 /*----start vardecl-----------------------------------------------------------------------------------------------------*/
 
+// variable declaration types
+VarDecl:	INT ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Variable Declaration\n\n" RESET);	// e.g. int x;
 
-VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Declaration\n\n" RESET);		
+						if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 
-						if (ifElseCurrentBlock == runIfElseBlock) {
 							// semantic checks
 								// is the variable already declared?
-								symTabAccess();
-								if (found($2,scope) == 1) {
-									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2);
-									exit(0); // variable already declared
+								symTabAccess(); // access symbol table
+								if (found($2,scope) == 1) { // if we find the variable in the symbol table
+									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2); // error message
+									exit(0); // exit program
 								}
 
 							// symbol table
-							addItem($2, "VAR", "INT", scope, 0);
-
-							
+							addItem($2, "VAR", "INT", scope, 0); // add variable to the correct symbol table based on scope
 
 							// ast
-							$$ = AST_assignment("TYPE",$1,$2);
+							$$ = AST_assignment("TYPE",$1,$2); // add variable to ast
 
 							// ir code
-							createIntDefinition($2, scope);
+							createIntDefinition($2, scope); // create ir code: T0 = x
 
-							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
-							createMIPSIntDecl($2,scope);
-							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
+							// mips code 
+							createMIPSIntDecl($2,scope); // create mips: Gx: .word 0
 							
 							// code optimization
 								// N/A
@@ -483,32 +507,33 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							*/
 						}
 				
-			} |	ID EQ NUMBER SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
+			} |	ID EQ NUMBER SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET); // e.g. x = 1;
 
-						if (ifElseCurrentBlock == runIfElseBlock) {
+						if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 							// semantic checks
 								// is the variable already declared
-								symTabAccess();
-								if (scope == "G") {
-									if (found($1,scope) == 0) { //if variable not declared yet
-										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1);
-										exit(0); // variable already declared
+								symTabAccess(); // access symbol table
+								if (scope == "G") { // if the scope is global
+									if (found($1,scope) == 0) { // if we don't find the variable in the global symbol table
+										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1); // error message
+										exit(0); // exit program
 									}
-								} else {
-									if (found($1,scope) == 0) { //if variable not declared yet
-										if (found($1, "G") == 0) {
-											showSymTable();
-											printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the function or global scope.\n\n" RESET,$1);
-											exit(0); // variable already declared
+								} 
+								else { // else the scope is function
+									if (found($1,scope) == 0) { // if we don't find the variable in the function symbol table
+										if (found($1, "G") == 0) { // if the variable is not found in the global scope
+											showSymTable(); // show the symbol tables
+											printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the function or global scope.\n\n" RESET,$1); // error message
+											exit(0); // exit program
 										}
 									}
 								}
 
 								// is the statement redundant
 								if (redundantValue($1, scope, $3) == 0) { // if statement is redundant
-								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
-									printf(RED "::::> CHECK FAILED: Variable %s has already been declared as: %s.\n\n" RESET,$1,$3);
-									exit(0);
+									printf(RED "::::> CHECK FAILED: Variable %s has already been declared as: %s.\n\n" RESET,$1,$3); // error message
+									exit(0); // exit program
 								}
 
 							// symbol table
@@ -529,14 +554,13 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							}
 
 							// ast
-							$$ = AST_BinaryExpression("=",$1,$3);
+							$$ = AST_BinaryExpression("=",$1,$3); // add binary expression to the ast
 
 							// ir code
-							createIntAssignment($1, $3, scope);
+							createIntAssignment($1, $3, scope); // create ir code: T0 = 1
 
 							// mips code
-							createMIPSIntAssignment($1, $3, scope);
-			
+							createMIPSIntAssignment($1, $3, scope); // create mips code for int assignment
 
 							// code optimization
 								// N/A
@@ -545,29 +569,30 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID    NUMBER
 							*/
+
 						}
 
-			} |	CHAR ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Char Variable Declaration \n\n" RESET);
+			} |	CHAR ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Char Variable Declaration \n\n" RESET); // e.g. char c;
 
-						if (ifElseCurrentBlock == runIfElseBlock) {
+						if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 							// semantic checks
 								// is the variable already declared?
-								symTabAccess();
-								if (found($2,scope) == 1) {
+								symTabAccess(); // access symbol table
+								if (found($2,scope) == 1) { // if we find the variable in the symbol table
 									exit(0); // variable already declared
 								}
 
 							// symbol table	
-							addItem($2, "VAR", "CHR", scope, 0);
+							addItem($2, "VAR", "CHR", scope, 0); // add char variable to the symbol table
 
 							// ast
-							$$ = AST_assignment("TYPE",$1,$2);
+							$$ = AST_assignment("TYPE",$1,$2); // add char variable to the ast
 
 							// ir code
-							createCharDefinition($2, scope);
+							createCharDefinition($2, scope); // create ir code: T1 = c
 
 							// mips
-							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
+							printf(CYAN "MIPS Not Needed.\n\n\n" RESET); // mips currently not needed
 							
 							// code optimization
 								// N/A
@@ -576,37 +601,39 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									VarDecl
 								CHAR	   ID
 							*/	
+
 						}				
 			
-			} |	ID EQ CHARLITERAL SEMICOLON	  { printf(GRAY "RECOGNIZED RULE: Char Variable Initialization \n\n" RESET);		
+			} |	ID EQ CHARLITERAL SEMICOLON	  { printf(GRAY "RECOGNIZED RULE: Char Variable Initialization \n\n" RESET); // e.g. c = 'a';	
 
-						if (ifElseCurrentBlock == runIfElseBlock) {
+						if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 							// remove apostrophes from charliteral
-							char* str = removeApostrophes($3);
+							char* str = removeApostrophes($3); // symbol table function to return char without apostrophes
 
 							// semantic checks
 								// is the variable already declared?
-								symTabAccess();
-								if (scope == "G") {
-									if (found($1,scope) == 0) { //if variable not declared yet
-										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1);
-										exit(0); // variable already declared
+								symTabAccess(); // access symbol table
+								if (scope == "G") { // if the scope is global
+									if (found($1,scope) == 0) { // if the variable is not found in the global scope
+										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1); // error message
+										exit(0); // exit program
 									}
-								} else {
-									if (found($1,scope) == 0) { //if variable not declared yet
-										if (found($1, "G") == 0) {
-											showSymTable();
-											printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the function or global scope.\n\n" RESET,$1);
-											exit(0); // variable already declared
+								}
+								else { // else we are in function scope
+									if (found($1,scope) == 0) { // if the variable is not found in the function scope
+										if (found($1, "G") == 0) { // if the variable is not found in the global scope
+											showSymTable(); // access symbol table
+											printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the function or global scope.\n\n" RESET,$1); // error message
+											exit(0); // exit program
 										}
 									}
 								}
 
 								// is the statement redundant
 								if (redundantValue($1, scope, str) == 0) { // if statement is redundant
-								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
-									printf(RED "::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
-									exit(0);
+									printf(RED "::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3); // error message
+									exit(0); // exit the program
 								}
 
 							// symbol table
@@ -627,13 +654,13 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							}
 							
 							// ast
-							$$ = AST_BinaryExpression("=",$1,str);
+							$$ = AST_BinaryExpression("=",$1,str); // add binary expression to ast
 
 							// ir code
-							createCharAssignment($1, str, scope);
+							createCharAssignment($1, str, scope); // create it code: T1 = 'a'
 
 							// mips code
-							createMIPSCharAssignment($1, str, scope);
+							createMIPSCharAssignment($1, str, scope); // create mips
 
 							// code optimization
 								// N/A
@@ -642,30 +669,32 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID	   CHARLITERAL
 							*/
+
 						}
 
-			} | FLOAT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Float Variable Declaration\n\n" RESET);		
+			} | FLOAT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Float Variable Declaration\n\n" RESET);	// e.g. float f;
 
-						if (ifElseCurrentBlock == runIfElseBlock) {
+						if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 							// semantic checks
 								// is the variable already declared?
-								symTabAccess();
-								if (found($2,scope) == 1) {
-									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2);
-									exit(0); // variable already declared
+								symTabAccess(); // access symbol table
+								if (found($2,scope) == 1) { // if the variable is found in the symbol table
+									printf(RED "\nERROR: Variable '%s' already declared.\n" RESET,$2); // error message
+									exit(0); // exit program
 								}
 
 							// symbol table
-							addItem($2, "VAR", "FLT", scope, 0);
+							addItem($2, "VAR", "FLT", scope, 0); // add the float variable to the symbol table
 
 							// ast
-							$$ = AST_assignment("TYPE",$1,$2);
+							$$ = AST_assignment("TYPE",$1,$2); // add the float variable to the ast
 
 							// ir code
-							createFloatDefinition($2, scope);
+							createFloatDefinition($2, scope); // create ir code: T2 = f
 
-							// mips code (JUST FOR CODE TRACKING, DON'T THINK THIS IS NECESSARY IN MIPS)
-							printf(CYAN "MIPS Not Needed.\n\n\n" RESET);
+							// mips code
+							printf(CYAN "MIPS Not Needed.\n\n\n" RESET); // mips currently not necessary
 							
 							// code optimization
 								// N/A
@@ -674,35 +703,36 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 										VarDecl
 									INT        ID
 							*/
+
 						}
 
-				} |	ID EQ FLOAT_NUM SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Initialization \n\n" RESET);
+				} |	ID EQ FLOAT_NUM SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Float Variable Initialization \n\n" RESET); // e.g. f = 1.0;
 							
-						if (ifElseCurrentBlock == runIfElseBlock) {
+						if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 							// semantic checks
 								// is the variable already declared
-								symTabAccess();
-								if (scope == "G") {
-									if (found($1,scope) == 0) { //if variable not declared yet
-										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1);
-										exit(0); // variable already declared
+								symTabAccess(); // access symbol table
+								if (scope == "G") { // if the scope is global
+									if (found($1,scope) == 0) { // if the variable is not found in the global scope
+										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1); // error message
+										exit(0); // exit program
 									}
-								} else {
-									if (found($1,scope) == 0) { //if variable not declared yet
-										if (found($1, "G") == 0) {
-											showSymTable();
-											printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the function or global scope.\n\n" RESET,$1);
-											exit(0); // variable already declared
+								} 
+								else { // else the scope is function
+									if (found($1,scope) == 0) { // if the variable is not found in the function scope
+										if (found($1, "G") == 0) { // if the variable is not found in the global scope
+											showSymTable(); // show the symbol table
+											printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the function or global scope.\n\n" RESET,$1); // error message
+											exit(0); // exit program
 										}
 									}
 								}
 
-
 								// is the statement redundant
 								if (redundantValue($1, scope, $3) == 0) { // if statement is redundant
-								// NEED TO MAKE THIS NOT PRINT AS IR CODE FOR CODE OPTIMIZATION
-									printf(RED "\n::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3);
-									exit(0);
+									printf(RED "\n::::> CHECK FAILED: Variable '%s' has already been declared as: %s.\n\n" RESET,$1,$3); // error message
+									exit(0); // exit program
 								}
 
 							// symbol table
@@ -723,13 +753,13 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							}
 
 							// ast
-							$$ = AST_BinaryExpression("=",$1,$3);
+							$$ = AST_BinaryExpression("=",$1,$3); // add float variable to ast
 
 							// ir code
-							createFloatAssignment($1,$3, scope);
+							createFloatAssignment($1,$3, scope); // create ir code: T3 = 1.0
 
 							// mips code
-							createMIPSFloatAssignment($1, $3, scope);
+							createMIPSFloatAssignment($1, $3, scope); // create mips
 
 							// code optimization
 								// N/A
@@ -738,18 +768,20 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 									=
 								ID    NUMBER
 							*/
+
 						}
 
-				} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
+				} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); // e.g. x = y;
 
-					if (ifElseCurrentBlock == runIfElseBlock) {
+					if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 						// semantic checks
 							// are both variables already declared?
-							symTabAccess();
-							printf("\n");
-							if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
-								printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3);
-								exit(0); // variable already declared
+							symTabAccess(); // access symbol table
+							printf("\n"); // print newline
+							if (found($1,scope) == 0 || found($3,scope) == 0) { // if both variables are not found in the scope
+								printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3); // error message
+								exit(0); // exit program
 							}
 
 							// does the second id have a value?
@@ -762,56 +794,62 @@ VarDecl:	INT ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							compareTypes($1, $3, scope);
 
 						// symbol table
-						updateValue($1, scope, getValue($3, scope));
+						updateValue($1, scope, getValue($3, scope)); // update the value of the first id in the symbol table
 
 						// ast
-						$$ = AST_BinaryExpression("=",$1,$3);
+						$$ = AST_BinaryExpression("=",$1,$3); // add expression to the ast
 
 						// ir code
-						createIDtoIDAssignment($1, $3, scope);
+						createIDtoIDAssignment($1, $3, scope); // create ir code: T0 = T1
 
 						// mips code
-						createMIPSIDtoIDAssignment($1, $3, scope);
+						createMIPSIDtoIDAssignment($1, $3, scope); // create mips
 
 						// code optimization
 							// mark the two id's as used
 							isUsed($1, scope);
 							isUsed($3, scope);
+
 					}
 
 
-				} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); 
+				} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Addition Statement\n\n" RESET); // id = math statement, e.g. x = 10 - 8;
 
-					if (ifElseCurrentBlock == runIfElseBlock) {
+					if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 						// ast
 						$$ = $1;
 
-						/*
-									=
-								ID	  NUMBER
-						*/
 					}
 
-				} | ArrDecl {};
-;
+				} | ArrDecl { // array declaration
+
+};
 
 
 /*----end vardecl-------------------------------------------------------------------------------------------------------*/
-  
 
 
-Expr:	SEMICOLON {
 
-	} |	ID EQ ID SEMICOLON	{ printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); 
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+
+/*----start expr--------------------------------------------------------------------------------------------------------*/
+
+
+// expr is any possible expression in our language: e.g. write x; or return y;
+Expr:	SEMICOLON {  // just a semicolon
+
+	} |	ID EQ ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Assignment Statement\n\n" RESET); // e.g. x = y like above, but can also be present in a stmtList
+
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 			// semantic checks
 				// are both variables already declared?
-				symTabAccess();
-				printf("\n");
-				if (found($1,scope) == 0 || found($3,scope) == 0) { // if variable not declared yet
-					printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3);
-					exit(0); // variable already declared
+				symTabAccess(); // access symbole table
+				printf("\n"); // print newline
+				if (found($1,scope) == 0 || found($3,scope) == 0) { // if both variables are not found in the scope
+					printf(RED "\nERROR: Variable %s or %s not declared.\n\n" RESET,$1,$3); // error message
+					exit(0); // exit progrma
 				}
 
 				// does the second id have a value?
@@ -824,271 +862,273 @@ Expr:	SEMICOLON {
 				compareTypes($1, $3, scope);
 
 			// symbol table
-			updateValue($1, scope, getValue($3, scope));
+			updateValue($1, scope, getValue($3, scope)); // update value of first id in symbol table
 
 			// ast
-			$$ = AST_BinaryExpression("=",$1,$3);
+			$$ = AST_BinaryExpression("=",$1,$3); // add expression to the ast
 
 			// ir code
-			createIDtoIDAssignment($1, $3, scope);
+			createIDtoIDAssignment($1, $3, scope); // create ir code: T0 = T1
 
 			// mips code
-			createMIPSIDtoIDAssignment($1, $3, scope);
+			createMIPSIDtoIDAssignment($1, $3, scope); // create mips
 
 			// code optimization
 				// mark the two id's as used
 				isUsed($1, scope);
 				isUsed($3, scope);
+
 		}
 
-	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = Function\n" RESET); 
+	} | ID EQ ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: ID = Function\n" RESET); // e.g. x = addValue(1,2);
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
-
-			// symbol table
-			updateValue($1, scope, getValue($3, scope));
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 
 			// set scope to function
 			strcpy(scope, $3);
 
-			// mips
-			for (int i = 0; i < argCounter; i++) {
-				
-				updateParameter(i, scope, args[i], argCounter);
+			// loop through arguments and do parser functions
+			for (int i = 0; i < argCounter; i++) { // from 0 to however many arguments there are
 
-				printf(BGREEN "Parameter Accepted.\n" RESET);
+				printf(BGREEN "Parameter Accepted.\n" RESET); // output to console
 
+				// ir code
 				printf(BLUE "IR Code" RESET);
 				printf(RED " NOT " RESET);
-				printf(BLUE "Created.\n" RESET);
+				printf(BLUE "Created.\n" RESET); // ir code not yet created
 
-				char itemName[50];
-				char itemID[50];
-				char result[50];
-				sprintf(itemID, "%d", i);
-				sprintf(itemName, "%s", getNameByID(itemID, scope));
-				strcpy(result, "");
-				strcat(result, itemName);
+				// variables for getting parameter name based on index
+				char itemName[50]; // stores name of parameter
+				char itemID[50]; // stores id of the parameter
+				char result[50]; // stores the result of below function
 
+				// get parameter name based on index of for loop
+				sprintf(itemID, "%d", i); // convert i into a string
+				sprintf(itemName, "%s", getNameByID(itemID, scope)); // add the name of the parameter into itemName
+				strcpy(result, ""); // redundant
+				strcat(result, itemName); // store itemName in result
+
+				// variables to hold the type of the parameter
 				char type[50];
-				sprintf(type, "%s", getVariableType(itemName, scope));
-
 				int isInt, isFloat, isChar;
-				
-				isInt = strcmp(type, "INT");
-				isFloat = strcmp(type, "FLT");
-				isChar = strcmp(type, "CHR");
 
-				if (isInt == 0) {
+				// get the type of the parameter
+				sprintf(type, "%s", getVariableType(itemName, scope));
+				
+				// determine whether the type is INT, FLT, or CHR
+				isInt = strcmp(type, "INT"); // compare type to "INT"
+				isFloat = strcmp(type, "FLT"); // compare type to "FLT"
+				isChar = strcmp(type, "CHR"); // compare type to "CHR"
+
+				if (isInt == 0) { // if the parameter is an integer
 					if (argIsID == 1) { // if parameter is an ID
-						createIntIDParameter(IDArg, i+1, "G");
-						argIsID = 0;
+
+						// mips
+						createIntIDParameter(IDArg, i+1, "G"); // create mips for an id parameter
+						argIsID = 0; // revert argIsID to 0 (it gets set to 1 when it sees an ID parameter in ArgDeclList)
+
 					} 
-					else { // if parameter is an integer number
-						createIntParameter(args[i], i+1, scope);
+					else { // if parameter is an integer
+
+						// mips
+						createIntParameter(args[i], i+1, scope); // create mips for an integer parameter
+
 					}
-				} else if (isFloat == 0) {
-					createFloatParameter(args[i], i+1, scope);
-					//createMIPSFloatAssignment(result, args[i], scope);
-				} else if (isChar == 0) {
-					createMIPSCharAssignment(result, args[i], scope);
+				} else if (isFloat == 0) { // if parameter is a float
+
+					// mips
+					createFloatParameter(args[i], i+1, scope); // create mips for a float parameter
+	
+				} else if (isChar == 0) { // if parameter is a char
+
+					// mips
+					createMIPSCharAssignment(result, args[i], scope); // create mips for a char parameter
+
 				}
 				
 			}
-			argCounter = 0;
+			argCounter = 0; // revert argCounter to 0 (it gets incremented when counting arguments in ArgDeclList)
 
 			// set scope back to global
 			strcpy(scope, "G");
 
 			// symbol table
-			printf(BGREEN "Function Call & Parameters Accepted.\n" RESET);
+			printf(BGREEN "Function Call & Parameters Accepted.\n" RESET); // output to console
 
 			// mips again
-			callMIPSFunction($3);
-
-			// update value to function return
-			setVariableToReturn($1, $3, scope);
+			callMIPSFunction($3); // create mips for the calling of a function
+			setVariableToReturn($1, $3, scope); // update the variable for the return type of this function
 
 		}
 
+	} |	WRITE ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET); // e.g. write x;
 
-	} |	WRITE ID SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Variable)\n" RESET); 
-
-		if (ifElseCurrentBlock == runIfElseBlock) {
-			// semantic checks
-				// is the id initialized as a value?
-				if (scope == "G") {
-					initialized($2, scope);
-				} else {
-					//printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
-				}
-
-			// symbol table
-				// N/A
-
-			// ast
-			$$ = AST_BinaryExpression("Expr", $1, getValue($2, scope));
-
-			// ir code
-			createWriteId($2, scope);
-
-			// mips code
-				// get the type of the variable
-				char* type = getVariableType($2, scope);
-
-				// determine if its int or char
-				int isInt = strcmp(type, "INT");
-				int isChar = strcmp(type, "CHR");
-				int isFloat = strcmp(type, "FLT");
-
-				// run correct mips function according to type
-				if (isInt == 0) { // if the variable is an integer
-					createMIPSWriteInt($2, scope);
-				} else if (isChar == 0) { // if the variable is a char
-					createMIPSWriteChar($2, scope);
-				} else if (isFloat == 0) {
-					createMIPSWriteFloat($2, scope);
-				}
-
-			// code optimization
-				// mark the id as used
-				isUsed($2, scope);
-
-			/*
-						Expr
-				WRITE     getValue(ID)
-			*/
-		}
-
-	} |	WRITE STRINGLITERAL SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Etc. String)\n" RESET);
-
-		if (ifElseCurrentBlock == runIfElseBlock) {
-			// semantic checks
-				// N/A
-
-			// symbol table
-				// N/A
-
-			// ast
-			$$ = AST_BinaryExpression("Expr", $1, $2);
-
-			// ir code
-			char str[50];
-			strcpy(str, removeApostrophes($2));
-			createWriteString(str);
-
-			// mips code
-			defineMIPSTempString(str);
-			createMIPSWriteString($2, scope);
-
-			// code optimization
-				// mark the id as used
-				isUsed($2, scope);
-
-			/*
-						Expr
-				WRITE     getValue(ID)
-			*/
-		}
-
-	} |	WRITE ID LBRACE NUMBER RBRACE SEMICOLON 	{ printf(GRAY "RECOGNIZED RULE: Write Statement (Array Element)\n" RESET); 
-
-		if (ifElseCurrentBlock == runIfElseBlock) {
-			// concatenate the array in this format: "$2[$4]"
-			char elementID[50];
-			strcpy(elementID, $2);
-			strcat(elementID, "[");
-			strcat(elementID, $4);
-			strcat(elementID, "]");
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 
 			// semantic checks
 				// is the id initialized as a value?
-				if (scope == "G") {
-					initialized(elementID, scope);
-				} else {
-					printf(BORANGE "Need Semantic Check to see if ID is a parameter.\n");
-				}
-
+				initialized($2, scope); // symbol table function: exits if not initialized
+			
 			// symbol table
 				// N/A
 
 			// ast
-			$$ = AST_BinaryExpression("Expr", $1, getValue(elementID, scope));
+			$$ = AST_BinaryExpression("Expr", $1, getValue($2, scope)); // add the write statement to the ast
 
 			// ir code
-			createWriteId(elementID, scope);
-
-			// mips code
-				// get the type of the variable
-				char* type = getVariableType(elementID, scope);
-
-				// determine if its int or char
-				int isInt = strcmp(type, "INT");
-				int isChar = strcmp(type, "CHR");
-				int isFloat = strcmp(type, "FLT");
-
-				// run correct mips function according to type
-				if (isInt == 0) { // if the variable is an integer
-					removeBraces(elementID);
-					createMIPSWriteInt(elementID, scope);
-				} else if (isChar == 0) { // if the variable is a char
-					removeBraces(elementID);
-					createMIPSWriteChar(elementID, scope);
-				} else if (isFloat == 0) {
-					removeBraces(elementID);
-					createMIPSWriteFloat(elementID, scope);
-				}
-
-			// code optimization
-				// mark the id as used
-				isUsed($2, scope);
-
-			/*
-						Expr
-				WRITE     getValue(ID)
-			*/
-		}
-
-	} | WRITE NEWLINECHAR SEMICOLON { printf(GRAY "RECOGNIZED RULE: Print New Line\n\n" RESET); 
-
-		if (ifElseCurrentBlock == runIfElseBlock) {
-			// ast
-			$$ = AST_BinaryExpression("Expr", $1, "NEWLINE");
-
-			// symbol table
-			printf(BGREEN "Symbol Table Not Needed.\n" RESET);
-
-			// ir code
-			createNewLine();
+			createWriteId($2, scope); // create ir code: output T0
 
 			// mips
-			makeMIPSNewLine(scope);
+			// get the type of the variable
+			char* type = getVariableType($2, scope);
+
+			// determine if its int or char
+			int isInt = strcmp(type, "INT"); // compare type to "INT"
+			int isChar = strcmp(type, "CHR"); // compare type to "CHR"
+			int isFloat = strcmp(type, "FLT"); // compare type to "FLT"
+
+			// run correct mips function according to type
+			if (isInt == 0) { // if the variable is an integer
+				createMIPSWriteInt($2, scope); // create mips
+			} 
+			else if (isChar == 0) { // if the variable is a char
+				createMIPSWriteChar($2, scope); // create mips
+			} 
+			else if (isFloat == 0) { // if the variable is a float
+				createMIPSWriteFloat($2, scope); // create mips
+			}
+
+			// code optimization
+				// mark the id as used
+				isUsed($2, scope);
+
+			/*
+						Expr
+				WRITE     getValue(ID)
+			*/
 		}
 
-	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Math Statement\n\n" RESET); 
+	} |	WRITE STRINGLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Write Statement (Etc. String)\n" RESET); // e.g. write "Hello World!";
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
+			// semantic checks
+				// N/A
+
+			// symbol table
+				// N/A
+
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, $2); // add expression to the ast
+
+			// ir code
+			char str[50]; // variable to hold string without apostrophes
+			strcpy(str, removeApostrophes($2)); // remove apostrophes and copy string into str
+			createWriteString(str); // create ir code: output "Hello World!""
+
+			// mips code
+			defineMIPSTempString(str); // create mips temp definition at the top of the file to hold the string
+			createMIPSWriteString($2, scope); // create mips code to display the string in scope
+
+			// code optimization
+				// mark the id as used
+				isUsed($2, scope);
+
+		}
+
+	} |	WRITE ID LBRACE NUMBER RBRACE SEMICOLON { printf(GRAY "RECOGNIZED RULE: Write Statement (Array Element)\n" RESET); // e.g. write arr[0];
+
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
+			// concatenate the array in this format: "$2[$4]"
+			char elementID[50]; // holds the id of the element in the array
+			strcpy(elementID, $2); // elementID: arr
+			strcat(elementID, "["); // elementID: arr[
+			strcat(elementID, $4); // elementID: arr[0
+			strcat(elementID, "]"); // elementID: arr[0]
+
+			// semantic checks
+				// is the id initialized as a value?
+				initialized(elementID, scope); // symbol table function: exits if not initialized
+				
+			// symbol table
+				// N/A
+
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, getValue(elementID, scope)); // add expression to ast
+
+			// ir code
+			createWriteId(elementID, scope); // create ir code: T0 = arr[0]
+
+			// mips code
+				// get the type of the element
+				char* type = getVariableType(elementID, scope); // symbol table function that returns type
+
+				// determine if its int or char
+				int isInt = strcmp(type, "INT"); // compare type to "INT"
+				int isChar = strcmp(type, "CHR"); // compare type to "CHR"
+				int isFloat = strcmp(type, "FLT"); // compare type to "FLT"
+
+				// run correct mips function according to type
+				if (isInt == 0) { // if the elemnt is an integer
+					removeBraces(elementID); // remove the braces to make its name in mips
+					createMIPSWriteInt(elementID, scope); // create mips to write the element
+				} 
+				else if (isChar == 0) { // if the element is a char
+					removeBraces(elementID); // remove the braces to make its name in mips
+					createMIPSWriteChar(elementID, scope); // create mips to write the element
+				} 
+				else if (isFloat == 0) { // if the element is a float
+					removeBraces(elementID); // remove the braces to make its name in mips
+					createMIPSWriteFloat(elementID, scope); // create mips to write the element
+				}
+
+			// code optimization
+				// mark the id as used
+				isUsed($2, scope);
+
+		}
+
+	} | WRITE NEWLINECHAR SEMICOLON { printf(GRAY "RECOGNIZED RULE: Print New Line\n\n" RESET); // e.g. write ~nl;
+
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
+			// ast
+			$$ = AST_BinaryExpression("Expr", $1, "NEWLINE"); // add newline expression to ast
+
+			// symbol table
+			printf(BGREEN "Symbol Table Not Needed.\n" RESET); // output to console
+
+			// ir code
+			createNewLine(); // create ir code: output *newline*
+
+			// mips
+			makeMIPSNewLine(scope); // create newline in mips
+
+		}
+
+	} | IDEQExpr SEMICOLON { printf(GRAY "RECOGNIZED RULE: Math Statement\n\n" RESET); // e.g. x = 3 - 1; same as above, just can also be in a stmtList
+
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 			// ast
 			$$ = $1;
 
-			/*
-						=
-					ID	  NUMBER
-			*/\
 		}
 
-	} | ID LBRACE NUMBER RBRACE EQ NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Integer Array Index\n\n" RESET);
+	} | ID LBRACE NUMBER RBRACE EQ NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Integer Array Index\n\n" RESET); // e.g. arr[0] = 1;
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 			// add backets to id
-			char temp[50];	
-			sprintf(temp,"%s[%s]",$1,$3);
+			char temp[50]; // temp variable to hold id with brackets
+			sprintf(temp,"%s[%s]",$1,$3); // fills temp with: arr[0] for example
 
 			// convert index to integer
-			int index = atoi($3);
+			int index = atoi($3); // stores converted integer in index variable
 
 			// symbol table
-			updateArrayValue($1, index, scope, "INT", $6);
+			updateArrayValue($1, index, scope, "INT", $6); // update value of the array element in the symbol table
 
 			// symbol table
 			if (strcmp(scope, "G") != 0) { // if scope is in function
@@ -1104,7 +1144,7 @@ Expr:	SEMICOLON {
 				} else { // variable not found
 
 					showSymTable(); // show symbol table
-					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error message
 					exit(0); // exit program
 
 				}
@@ -1114,94 +1154,89 @@ Expr:	SEMICOLON {
 			}
 
 			// ast
-			$$ = AST_assignment($1,$3,$6);
+			$$ = AST_assignment($1,$3,$6); // add expression to the ast
 
 			// ir code
-			createIntAssignment(temp, $6, scope);
+			createIntAssignment(temp, $6, scope); // create ir code
 
 			// mips code
-			// remove braces for mips
-			if (strcmp(scope, "G") != 0) { // if scope is in function
+			if (strcmp(scope, "G") != 0) { // if scope is function
 
 				if (found(temp, scope) == 1) { // if the variable is found in the function's sym table
 
-					removeBraces(temp);
-					createMIPSIntAssignment(temp, $6, scope);
+					removeBraces(temp); // remove the braces to make its name in mips
+					createMIPSIntAssignment(temp, $6, scope); // create mips to update the array element
 
 				} else if (found(temp, "G") == 1) { // if the variable is found in the global scope
 
-					removeBraces(temp);
-					createMIPSIntAssignment(temp, $6, "G");
+					removeBraces(temp); // remove the braces to make its name in mips
+					createMIPSIntAssignment(temp, $6, "G"); // create mips to update the array element
 
 				} else { // variable not found
 
 					showSymTable(); // show symbol table
-					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error message
 					exit(0); // exit program
 
 				}
 
-			} else { // if scope is global
-				removeBraces(temp);
-				createMIPSIntAssignment(temp, $6, scope);
+			} 
+			else { // if scope is global
+				removeBraces(temp); // remove the braces to make its name in mips
+				createMIPSIntAssignment(temp, $6, scope); // create mips to update the array element
 			}
+
 		}
 
+	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Integer Array Index (Math)\n\n" RESET); // e.g. arr[0] = 1 + 2;
 
-	} | ID LBRACE NUMBER RBRACE EQ Math SEMICOLON {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
-			system("python3 calculate.py");
+			system("python3 calculate.py"); // perform calculation
 	
-			char result[100];
-			readEvalOutput(&result);
-			clearCalcInput();
-			printf(RED"\nResult from evaluation ==> %s \n"RESET,result);
+			char result[100]; // store result of calculation
+			readEvalOutput(&result); // read the output and store in result
+			clearCalcInput(); // clear the input to the calculator
+			printf(RED"\nResult from evaluation ==> %s \n"RESET,result); // output result to console
 	
 			// convert index to integer
-			int index = atoi($3);
+			int index = atoi($3); // convert index to integer and store in index variable
 
-			// array table
-			updateArrayValue($1, index, scope, "INT", result); //TODO DOES NOT RESOLVE FLOATS
+			// symbol table
+			updateArrayValue($1, index, scope, "INT", result); // update array element in symbol table
 
 			// ast
-			$$ = AST_assignment($1,$3,result);
+			$$ = AST_assignment($1,$3,result); // add expression to symbol table
 
 			// ir code
-			char temp[50];	
-			sprintf(temp,"%s[%s]",$1,$3);
-			createIntAssignment(temp, result, scope);
+			char temp[50]; // temp variable to hold id with brackets
+			sprintf(temp,"%s[%s]",$1,$3); // fills temp with: arr[0] for example
+			createIntAssignment(temp, result, scope); // create ir code
 
 			// mips code
 			if (strcmp(scope, "G") != 0) { // if scope is in function
-
-				if (found(temp, scope) == 1) { // if the variable is found in the function's sym table
-
-					removeBraces(temp);
-					createMIPSIntAssignment(temp, result, scope);
-
-				} else if (found(temp, "G") == 1) { // if the variable is found in the global scope
-
-					removeBraces(temp);
-					createMIPSIntAssignment(temp, result, "G");
-
-				} else { // variable not found
-
+				if (found(temp, scope) == 1) { // if the variable is found in the function scope
+					removeBraces(temp); // remove the braces to make its name in mips
+					createMIPSIntAssignment(temp, result, scope); // create mips to update the array element
+				} 
+				else if (found(temp, "G") == 1) { // if the variable is found in the global scope
+					removeBraces(temp); // remove the braces to make its name in mips
+					createMIPSIntAssignment(temp, result, "G"); // create mips to update the array element
+				} 
+				else { // variable not found
 					showSymTable(); // show symbol table
-					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error message
 					exit(0); // exit program
-
 				}
-
 			} else { // if scope is global
-				removeBraces(temp);
-				createMIPSIntAssignment(temp, result, scope);
+				removeBraces(temp); // remove the braces to make its name in mips
+				createMIPSIntAssignment(temp, result, scope); // create mips to update the array element
 			}
 		}
 	
-	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Char Array Index\n\n" RESET);
+	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Char Array Index\n\n" RESET); // e.g. arr[0] = 'c';
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 			// add brackets to id for sym table searches
 			char temp[50];	
 			sprintf(temp,"%s[%s]",$1,$3);
@@ -1270,7 +1305,7 @@ Expr:	SEMICOLON {
 
 	} | ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: Call Function\n\n" RESET);
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 			// set scope to function
 			strcpy(scope, $1);
 
@@ -1338,7 +1373,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (ID)\n\n" RESET);
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 			// symbol table
 			updateValue(scope, "G", getValue($2, scope));
 			printf(BGREEN "Updated ID Return Value of Function.\n" RESET);
@@ -1388,7 +1423,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (Int Number)\n\n" RESET);
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 			// symbol table
 			updateValue(scope, "G", $2);
 			printf(BGREEN "Updated Integer Return Value of Function.\n" RESET);
@@ -1410,7 +1445,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN FLOAT_NUM SEMICOLON {
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 			// symbol table
 			updateValue(scope, "G", $2);
 			printf(BGREEN "Updated Float Return Value of Function.\n" RESET);
@@ -1432,7 +1467,7 @@ Expr:	SEMICOLON {
 
 	} | RETURN CHARLITERAL SEMICOLON {
 
-		if (ifElseCurrentBlock == runIfElseBlock) {
+		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
 			// symbol table
 			updateValue(scope, "G", $2);
 			printf(BGREEN "Updated Char Return Value of Function.\n" RESET);
@@ -1451,7 +1486,7 @@ Expr:	SEMICOLON {
 
 }
 
-
+/*----end expr----------------------------------------------------------------------------------------------------------*/
 
 
 
