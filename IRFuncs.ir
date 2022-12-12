@@ -1,15 +1,3 @@
-# IR Code
-#---------------
-
-main:
-
-T0 = x
-T1 = y
-T0 = 20
-
-goto addValue
-
-T3 = result
 
 # Functions
 #---------------

@@ -1237,15 +1237,16 @@ Expr:	SEMICOLON {  // just a semicolon
 	} | ID LBRACE NUMBER RBRACE EQ CHARLITERAL SEMICOLON { printf(GRAY "RECOGNIZED RULE: Modify Char Array Index\n\n" RESET); // e.g. arr[0] = 'c';
 
 		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 			// add brackets to id for sym table searches
-			char temp[50];	
-			sprintf(temp,"%s[%s]",$1,$3);
+			char temp[50]; // temp variable to hold id with brackets
+			sprintf(temp,"%s[%s]",$1,$3); // fills temp with: arr[0] for example
 
 			// convert index to integer
-			int index = atoi($3);
+			int index = atoi($3); // store converted array index in index variable
 
 			// remove apostrophes from charliteral
-			char* str = removeApostrophes($6);
+			char* str = removeApostrophes($6); // remove apostrophes function from symbol table
 
 			// symbol table
 			if (strcmp(scope, "G") != 0) { // if scope is in function
@@ -1261,7 +1262,7 @@ Expr:	SEMICOLON {  // just a semicolon
 				} else { // variable not found
 
 					showSymTable(); // show symbol table
-					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error message
 					exit(0); // exit program
 
 				}
@@ -1271,154 +1272,169 @@ Expr:	SEMICOLON {  // just a semicolon
 			}
 
 			// ast
-			$$ = AST_assignment($1,$3,str);
+			$$ = AST_assignment($1,$3,str); // add expression to the ast
 
 			// ir code
-			createIntAssignment(temp, str, scope);
+			createIntAssignment(temp, str, scope); // create ir code
 
 			// mips code
 			if (strcmp(scope, "G") != 0) { // if scope is in function
 
 				if (found(temp, scope) == 1) { // if the variable is found in the function's sym table
 
-					removeBraces(temp);
-					createMIPSCharAssignment(temp, str, scope);
+					removeBraces(temp); // remove the braces to make its name in mips
+					createMIPSCharAssignment(temp, str, scope); // create mips to update the array element
 
 				} else if (found(temp, "G") == 1) { // if the variable is found in the global scope
 
-					removeBraces(temp);
-					createMIPSCharAssignment(temp, str, "G");
+					removeBraces(temp); // remove the braces to make its name in mips
+					createMIPSCharAssignment(temp, str, "G"); // create mips to update the array element
 
 				} else { // variable not found
 
 					showSymTable(); // show symbol table
-					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error msg
+					printf(RED "\nERROR: Variable '%s' does not exist.\n\n" RESET, temp); // error message
 					exit(0); // exit program
 
 				}
 
 			} else { // if scope is global
-				removeBraces(temp);
-				createMIPSCharAssignment(temp, str, scope);
+				removeBraces(temp); // remove the braces to make its name in mips
+				createMIPSCharAssignment(temp, str, scope); // create mips to update the array element
 			}
 		}
 
-	} | ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: Call Function\n\n" RESET);
+	} | ID LPAREN ArgDeclList RPAREN SEMICOLON { printf(GRAY "RECOGNIZED RULE: Call Function\n\n" RESET); // e.g. addValue(1,2);
 
 		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 			// set scope to function
 			strcpy(scope, $1);
 
+			// loop through arguments
 			for (int i = 0; i < argCounter; i++) {
-				updateParameter(i, scope, args[i], argCounter);
 
-				printf(BGREEN "Parameter Accepted.\n" RESET);
+				printf(BGREEN "Parameter Accepted.\n" RESET); // output to console
 
+				// ir code
 				printf(BLUE "IR Code" RESET);
 				printf(RED " NOT " RESET);
-				printf(BLUE "Created.\n" RESET);
+				printf(BLUE "Created.\n" RESET); // ir code not yet created
 
-				char itemName[50];
-				char itemID[50];
-				char result[50];
-				sprintf(itemID, "%d", i);
-				sprintf(itemName, "%s", getNameByID(itemID, scope));
-				strcpy(result, "");
-				strcat(result, itemName);
+				// variables for getting parameter name based on index
+				char itemName[50]; // stores name of parameter
+				char itemID[50]; // stores id of the parameter
+				char result[50]; // stores the result of below function
 
+				// get parameter name based on index of for loop
+				sprintf(itemID, "%d", i); // convert i into a string
+				sprintf(itemName, "%s", getNameByID(itemID, scope)); // add the name of the parameter into itemName
+				strcpy(result, ""); // redundant
+				strcat(result, itemName); // store itemName in result
+
+				// variables to hold the type of the parameter
 				char type[50];
-				sprintf(type, "%s", getVariableType(itemName, scope));
-
 				int isInt, isFloat, isChar;
-				
-				isInt = strcmp(type, "INT");
-				isFloat = strcmp(type, "FLT");
-				isChar = strcmp(type, "CHR");
 
-				if (isInt == 0) {
-					printf(BORANGE "\nargIsID = %s\n", argIsID);
+				// get the type of the parameter
+				sprintf(type, "%s", getVariableType(itemName, scope));
+				
+				// get type of parameter
+				isInt = strcmp(type, "INT"); // compare type to "INT"
+				isFloat = strcmp(type, "FLT"); // compare type to "FLT"
+				isChar = strcmp(type, "CHR"); // compare type to "CHR"
+
+				// run mips based on type
+				if (isInt == 0) { // if parameter is an integer
 					if (argIsID == 1) { // if parameter is an ID
-						createIntIDParameter(IDArg, i+1, scope);
-						argIsID = 0;
+						createIntIDParameter(IDArg, i+1, scope); // create integer ID parameter in mips
+						argIsID = 0; // reset argIsID to 0 (gets changed to 1 in argDeclList)
 					} 
 					else { // if parameter is an integer number
-						createIntParameter(args[i], i+1, scope);
+						createIntParameter(args[i], i+1, scope); // create integer parameter in mips
 					}
-				} else if (isFloat == 0) {
-					createFloatParameter(args[i], i+1, scope);
-					//createMIPSFloatAssignment(result, args[i], scope);
-				} else if (isChar == 0) {
-					createMIPSCharAssignment(result, args[i], scope);
+				} 
+				else if (isFloat == 0) { // if parameter is a float
+					createFloatParameter(args[i], i+1, scope); // create float parameter in mips
+				} 
+				else if (isChar == 0) { // if parameter is a char
+					createMIPSCharAssignment(result, args[i], scope); // create char parameter in mips
 				}
 			}
-			argCounter = 0;
+			argCounter = 0; // reset argCounter to 0 (gets set to 1 when counting arguments in argDeclList)
 
 			// set scope back to global
 			strcpy(scope, "G");
 
 			// symbol table
-			printf(BGREEN "Function Call & Parameters Accepted.\n" RESET);
+			printf(BGREEN "Function Call & Parameters Accepted.\n" RESET); // output to console
 
 			// ast
-			$$ = AST_assignment($1,$2,$4);
+			$$ = AST_assignment($1,$2,$4); // add expression to the ast
 
 			// ir code
 			printf(BLUE "IR Code" RESET);
 			printf(RED " NOT " RESET);
-			printf(BLUE "Created.\n" RESET);
+			printf(BLUE "Created.\n" RESET); // ir code currently not needed
 
 			// mips
-			callMIPSFunction($1);
+			callMIPSFunction($1); // create function call in mips
+
 		}
 
-	} | RETURN ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (ID)\n\n" RESET);
+	} | RETURN ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (ID)\n\n" RESET); // e.g. return x; (inside a function)
 
 		if (ifElseCurrentBlock == runIfElseBlock) { // if we are in an if block, both are 1, if we are in an else block, both are 0
+
 			// symbol table
-			updateValue(scope, "G", getValue($2, scope));
-			printf(BGREEN "Updated ID Return Value of Function.\n" RESET);
+			updateValue(scope, "G", getValue($2, scope)); // update the value of the function in the global table
+			printf(BGREEN "Updated ID Return Value of Function.\n" RESET); // output to console
 
 			// ir code
 			printf(BLUE "IR Code" RESET);
 			printf(RED " NOT " RESET);
-			printf(BLUE "Created.\n" RESET);
+			printf(BLUE "Created.\n" RESET); // ir code not currently needed
 
-			// mips
-			char str[50];
-			strcpy(str, getVariableType($2, scope));
+			// temp variables
+			char str[50]; // temp string to hold variable type
+			strcpy(str, getVariableType($2, scope)); // store variable type in 'str'
 
-			char str1[50];
-			strcpy(str1, "G");
-			strcat(str1, scope);
+			char str1[50]; // temp string to hold "G{scope}"
+			strcpy(str1, "G"); // store "G" in 'str1'
+			strcat(str1, scope); // concatenate the scope to 'str1'
 
-			char str2[50];
-			strcpy(str2, scope);
-			strcat(str2, "Return");
+			char str2[50]; // temp string to hold "{scope}Return" for function return variable in mips
+			strcpy(str2, scope); // store scope in 'str2'
+			strcat(str2, "Return"); // concatenate "Return" to 'str2'
 			
-			if (strcmp(str, "INT") == 0) {
+			// mips based on type
+			if (strcmp(str, "INT") == 0) { // if the id is an integer
 
 				// ir code
-				createReturnIDStatement($2);
+				createReturnIDStatement($2); // create ir code: return T2
 
 				// mips
-				createMIPSReturnStatementNumber(str2, $2, getValue($2, scope), scope);
+				createMIPSReturnStatementNumber(str2, $2, getValue($2, scope), scope); // create mips return variable
 
-			} else if (strcmp(str, "FLT") == 0) {
+			} 
+			else if (strcmp(str, "FLT") == 0) { // if the id is a float
 
 				// ir code
-				createReturnIDStatement($2);
+				createReturnIDStatement($2); // create ir code: return T2
 
 				// mips
-				createMIPSFloatAssignment("", getValue($2, scope), str1);
+				createMIPSFloatAssignment("", getValue($2, scope), str1); // create mips return variable
 
-			} else if (strcmp(str, "CHR") == 0) {
+			} 
+			else if (strcmp(str, "CHR") == 0) { // if the id is char
 
 				// ir code
-				createReturnIDStatement($2);
+				createReturnIDStatement($2); // create ir code: return T2
 
 				// mips
-				createMIPSCharAssignment("", getValue($2, scope), str1);
+				createMIPSCharAssignment("", getValue($2, scope), str1); // create mips return variable
 			}
+			
 		}
 
 	} | RETURN NUMBER SEMICOLON { printf(GRAY "RECOGNIZED RULE: Return Statement (Int Number)\n\n" RESET);
