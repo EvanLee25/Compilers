@@ -4,31 +4,33 @@
 #include <stdio.h>
 #include <ctype.h>
 
-//@Hunter TODO: Can you add comments for what each color should be used for?
-#define GREEN   "\x1b[32m"
-#define BGREEN  "\x1b[1;32m"
-#define RED     "\x1b[1;31m"
-#define ORANGE 	"\x1b[33m"
-#define BORANGE "\x1b[1;33m"
-#define PINK	"\x1b[95m"
-#define BPINK	"\x1b[1;95m"
-#define BLUE    "\x1b[34m"
-#define BBLUE   "\x1b[1;94m"
-#define CYAN	"\x1b[96m"
-#define BCYAN	"\x1b[1;96m"
-#define BYELLOW "\x1b[1;103m"
-#define GRAY	"\x1b[90m"
-#define BOLD	"\e[1;37m"
-#define RESET   "\x1b[0m"
+// color definitions for console output
+#define GREEN   "\x1b[32m" // green
+#define BGREEN  "\x1b[1;32m" // bold green
+#define RED     "\x1b[1;31m" // red
+#define ORANGE 	"\x1b[33m" // orange
+#define BORANGE "\x1b[1;33m" // bold orange
+#define PINK	"\x1b[95m" // pink
+#define BPINK	"\x1b[1;95m" // bold pink
+#define BLUE    "\x1b[34m" // blue
+#define BBLUE   "\x1b[1;94m" // bold blue
+#define CYAN	"\x1b[96m" // cyan
+#define BCYAN	"\x1b[1;96m" // bold cyan
+#define BYELLOW "\x1b[1;103m" // bold yellow
+#define GRAY	"\x1b[90m" // gray
+#define BOLD	"\e[1;37m" // bold white
+#define RESET   "\x1b[0m" // reset color
 
-#define MAX_SYMBOL_TABLES 50
-#define MAX_SYMBOL_ENTRIES 150
-#define MAX_AMOUNT_SCOPES 50
-#define MAX_NAME_LENGTH 50
+// definitions of amounts and lengths
+#define MAX_SYMBOL_TABLES 50 // maximum numbers of symbol tables
+#define MAX_SYMBOL_ENTRIES 150 // maximum symbol table entries
+#define MAX_AMOUNT_SCOPES 50 // maximum amount of scopess
+#define MAX_NAME_LENGTH 50 // maximum length of a name
 
+// struct for an entry to the symbol table
 struct Entry
 {
-	int itemID;
+	int itemID; // id of the entry
 	char itemName[MAX_NAME_LENGTH];  // the name of the identifier
 	char itemKind[8];  // is it a function or a variable?
 	char itemType[8];  // Is it int, char, etc.?
@@ -40,104 +42,127 @@ struct Entry
 struct Entry symTabItems[MAX_SYMBOL_TABLES][MAX_SYMBOL_ENTRIES]; //symTabItems[50 symbol tables max][100 items in each symbol table]
 char symbolTableScopes[MAX_AMOUNT_SCOPES][MAX_NAME_LENGTH]; //array of strings-> symbolTableScopes[50 different scopes][scope names can be 30 char long]
 int symbolTableSizes[MAX_SYMBOL_TABLES] = {0}; //set all sizes to 0
-int numOfSymbolTables = 0;
+int numOfSymbolTables = 0; // initialize number of symbol tables as 0
 
+// function to access the symbol table
 void symTabAccess(void) {
-	printf(BGREEN "Symbol Table accessed.\n" RESET);
+
+	printf(BGREEN "Symbol Table accessed.\n" RESET); // output to console
+
 }
 
+// function to get the index of the symbol table for the scope that is passed in
 int getSymbolTableIndex(char scope[MAX_NAME_LENGTH]){
-	for(int i = 0; i < numOfSymbolTables; i++){
-		//printf("\nSYMBOL SCOPE: %s\n",symbolTableScopes[i]);
-		//printf("\nSCOPE: %s\n",scope);
 
-		if (!strcmp(symbolTableScopes[i], scope)) {
-			return i;
+	// loop from 0 to the number of symbol tables total
+	for(int i = 0; i < numOfSymbolTables; i++){
+		if (!strcmp(symbolTableScopes[i], scope)) { // if the name of the symbol table is equal to the scope
+			return i; // return the index
 		}
 	}
-
-	printf(RED "\nINDEX DOES NOT EXIST. ERROR IN SYMBOL TABLE: getSymbolTableIndex\n" RESET);
+	printf(RED "\nINDEX DOES NOT EXIST. ERROR IN SYMBOL TABLE: getSymbolTableIndex\n" RESET); // error message
 	return -1;
 	
 }
 
+// function to get the size of the symbol table passed in
 int getSymbolTableSize(int symbolTableIndex){
-	return symbolTableSizes[symbolTableIndex];
+
+	return symbolTableSizes[symbolTableIndex]; // return the size of the symbol table by accessing the array of symbol table sizes
+
 }
 
+// function to initialize the global symbol table
 void initializeSymbolTable(){
-	strcpy(symbolTableScopes[numOfSymbolTables], "G");
-	numOfSymbolTables++; //Now 1 symbol table
 
+	strcpy(symbolTableScopes[numOfSymbolTables], "G"); // copy "G" into the next entry in the symbol table array
+	numOfSymbolTables++; // increment number of symbol tables
+
+	// loop from 1 to the maximum symbol table entries
 	for (int i = 1; i < MAX_SYMBOL_ENTRIES; i++){
+		// loop from 0 to the maximum symbol tables
 		for (int j = 0; j < MAX_SYMBOL_TABLES; j++){
-			strcpy(symTabItems[j][i].value,"NULL");
+			strcpy(symTabItems[j][i].value,"NULL"); // copy NULL into all values in the table
 		}
 	}
 
 }
 
+// function to remove a character from a string
 void removeChar(char * str, char charToRemove){
-    int i, j;
-    int len = strlen(str);
-    for(i=0; i<len; i++)
-    {
-        if(str[i] == charToRemove)
-        {
-            for(j=i; j<len; j++)
-            {
-                str[j] = str[j+1];
+
+    int i, j; // initialize two coounter variables
+    int len = strlen(str); // compute the length of the string
+
+	// loop from 0 to the length of the string
+    for(i = 0; i < len; i++) {
+        if(str[i] == charToRemove) { // if the character is the character to remove
+			// loop from i to the length
+            for(j = i; j < len; j++) {
+                str[j] = str[j+1]; // set the current character t the next entry for every char after the char to remove
             }
-            len--;
-            i--;
+            len--; // decrement the length
+            i--; // decrement i
         }
     }
     
 }
 
+// function to remove braces from a string
 void removeBraces(char str[MAX_NAME_LENGTH]) {
-	char ch = '[';
-	char ch2 = ']';
-	removeChar(str, ch);
-	removeChar(str, ch2);
+
+	char ch = '['; // initialize the left brace char
+	char ch2 = ']'; // initialize the right brace char
+	removeChar(str, ch); // remove the left brace from the string
+	removeChar(str, ch2); // remove the right brace from the string
+
 }
 
-void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8], char scope[MAX_NAME_LENGTH], int isUsed){
-		for (int i = 0; i<numOfSymbolTables;i++){ //iterate through all scopes
-			int str1 = strcmp(symbolTableScopes[i], scope);
-			if (str1 == 0){
-				int new = getSymbolTableSize(i);
-				symTabItems[i][new].itemID = new;
-				strcpy(symTabItems[i][new].itemName, itemName);
-				strcpy(symTabItems[i][new].itemKind, itemKind);
-				strcpy(symTabItems[i][new].itemType, itemType);
-				strcpy(symTabItems[i][new].scope, scope);
-				symTabItems[i][new].isUsed = isUsed;
-				strcpy(symTabItems[i][new].value, "NULL");
-				printf(BGREEN "Item added to the Symbol Table.\n" RESET);
-				symbolTableSizes[i]++;
+// function to add an item to a symbol table
+void addItem(char itemName[MAX_NAME_LENGTH], char itemKind[8], char itemType[8], char scope[MAX_NAME_LENGTH], int isUsed) {
+
+		// loop from 0 to the number of symbol tables
+		for (int i = 0; i < numOfSymbolTables; i++){ // iterate through all scopes
+			int str1 = strcmp(symbolTableScopes[i], scope); // compare scope to the name of the symbol table
+			if (str1 == 0){ // if the scope is equal to the name of the symbol table
+				int new = getSymbolTableSize(i); // get the index of the symbol table
+				symTabItems[i][new].itemID = new; // set the itemID equal to the index
+				strcpy(symTabItems[i][new].itemName, itemName); // set the name according to parameter
+				strcpy(symTabItems[i][new].itemKind, itemKind); // set the kind according to parameter
+				strcpy(symTabItems[i][new].itemType, itemType); // set the type according to parameter
+				strcpy(symTabItems[i][new].scope, scope); // set scope according to current scope
+				symTabItems[i][new].isUsed = isUsed; // set isUsed according to parameter
+				strcpy(symTabItems[i][new].value, "NULL"); // set value to NULL
+				printf(BGREEN "Item added to the Symbol Table.\n" RESET); // console output
+				symbolTableSizes[i]++; // increment symbol table sizes
 			}
 		}
 	
 }
 
+// function to add a symbol table (when there's a function in the source code)
 void addSymbolTable(char scope[MAX_NAME_LENGTH],char itemType[MAX_NAME_LENGTH]){
-	strcpy(symbolTableScopes[numOfSymbolTables], scope); //scope name added
-	addItem(scope,"FNC",itemType,"G",0);
-	numOfSymbolTables++; // Add a symbol table
+
+	strcpy(symbolTableScopes[numOfSymbolTables], scope); // set the symbol table name to the scope
+	addItem(scope,"FNC",itemType,"G",0); // add the function to the global scope
+	numOfSymbolTables++; // increment number of symbol tables
+
 }
 
+// function to add an array to a symbol table
 void addArray(char name[MAX_NAME_LENGTH], char itemKind[MAX_NAME_LENGTH], char itemType[MAX_NAME_LENGTH], char arrayRange[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
-	//find right symb table to add to]
-	int index = getSymbolTableIndex(scope);
-	int size = getSymbolTableSize(index);
-	printf(RED "\n %i \n" RESET, size);
-	int tempRange = atoi(arrayRange);
 	
+	// determine the correct symbol table to add the array to
+	int index = getSymbolTableIndex(scope); // get index
+	int size = getSymbolTableSize(index); // get size
+	printf(RED "\n %i \n" RESET, size); // console output
+	int tempRange = atoi(arrayRange); // set range to arrayRange
+	
+	// loop from size to size + range
 	for (int i = size; i < size + tempRange; i++){
-		char arrIndex[MAX_NAME_LENGTH]; //foo[0]
-		sprintf(arrIndex, "%s[%d]", name, i - size);
-		addItem(arrIndex, itemKind, itemType, scope, 0);
+		char arrIndex[MAX_NAME_LENGTH]; // array to hold index
+		sprintf(arrIndex, "%s[%d]", name, i - size); // turn i - size into a string
+		addItem(arrIndex, itemKind, itemType, scope, 0); // add item to symbol table
 	}
 }
 
