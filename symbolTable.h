@@ -370,8 +370,8 @@ int initialized(char itemName[MAX_NAME_LENGTH], char scope[MAX_NAME_LENGTH]){
 			}
 		}
 	}
-	printf(RED "CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" RESET, itemName);
-	exit(0);
+	//printf(RED "CHECK FAILED: Syntax Error: Variable '%s' has not yet been assigned to a value.\n\n" RESET, itemName);
+	//exit(0);
 	return 0;
 }
 
