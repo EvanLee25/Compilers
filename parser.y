@@ -514,7 +514,7 @@ VarDecl:	INT ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared
 								symTabAccess(); // access symbol table
-								if (scope == "G") { // if the scope is global
+								if (strcmp(scope, "G") == 0) { // if the scope is global
 									if (found($1,scope) == 0) { // if we don't find the variable in the global symbol table
 										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1); // error message
 										exit(0); // exit program
@@ -614,7 +614,7 @@ VarDecl:	INT ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared?
 								symTabAccess(); // access symbol table
-								if (scope == "G") { // if the scope is global
+								if (strcmp(scope,"G") == 0) { // if the scope is global
 									if (found($1,scope) == 0) { // if the variable is not found in the global scope
 										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1); // error message
 										exit(0); // exit program
@@ -713,7 +713,7 @@ VarDecl:	INT ID SEMICOLON { printf(GRAY "RECOGNIZED RULE: Integer Variable Decla
 							// semantic checks
 								// is the variable already declared
 								symTabAccess(); // access symbol table
-								if (scope == "G") { // if the scope is global
+								if (strcmp(scope, "G") == 0) { // if the scope is global
 									if (found($1,scope) == 0) { // if the variable is not found in the global scope
 										printf(RED "\n::::> CHECK FAILED: Variable '%s' not initialized in the global scope.\n\n" RESET,$1); // error message
 										exit(0); // exit program
@@ -1509,8 +1509,8 @@ Expr:	SEMICOLON {  // just a semicolon
 IDEQExpr: ID EQ MathStmt {
 
 	// ast
-	// TODO: EVAN
-	if (scope == "G" && inElseOrWhile != UPDATE_WHILE) { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
+	printf("\n\ninElseOrWhile = %d\n\n",inElseOrWhile);
+	if (strcmp(scope,"G") == 0 && inElseOrWhile != UPDATE_WHILE) { // ADD CHECK HERE FOR IF NOT IN WHILE LOOP, IF IN WHILE LOOP, NEED TO DO ELSE
 
 		system("python3 calculate.py");
 		
@@ -1572,9 +1572,9 @@ IDEQExpr: ID EQ MathStmt {
 		// mark the id as used
 		isUsed($1, scope);
 
-	} else {
+	} else { //simplified calculations for 
 
-		if (scope != "G" && inElseOrWhile != UPDATE_WHILE) { // in a function
+		if (strcmp(scope, "G") == 1 && inElseOrWhile != UPDATE_WHILE) { // in a function
 
 			if (op == '+') {
 
@@ -1617,7 +1617,7 @@ IDEQExpr: ID EQ MathStmt {
 
 }
 
-MathStmt: Math MathStmt {
+MathStmt: Math MathStmt { printf(BGREEN"\n\nJUST ENDED MATH STMT!!! \n\n" RESET); //a math statment can have as many math sections to it as necessary
 
 }
 
@@ -1626,54 +1626,85 @@ MathStmt: Math MathStmt {
 }
 
 
-Math: LPAREN {addToInputCalc($1);}
-		| RPAREN {addToInputCalc($1);}
+Math: LPAREN {
+	
+	if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE) { // in a function
+		printf("\n\nGOT HERE\n\n");
+		addToInputCalc($1);} // Math will include any symbol that can be included in a math statement
+	}
+		| RPAREN {
+			if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE) { // in a function
+		addToInputCalc($1);} // Math will include any symbol that can be included in a math statement
+	}
+			
 		| ID {
-			addToInputCalc(getValue($1,scope)); 
-			strcpy(num1, $1);
+			
+			
 
 			//printf(BORANGE "inElseOrWhile: %s\nUPDATE_WHILE: %d\n", inElseOrWhile, UPDATE_WHILE);
 			
-			if (inElseOrWhile == UPDATE_WHILE) {
-
+			if (inElseOrWhile == UPDATE_WHILE || (strcmp(scope, "G") == 1 && inElseOrWhile != UPDATE_WHILE)) { //if while loop, use different math
+				
+				//mips
 				createMIPSAddIDToRegister($1, registerCounter, scope);
 				registerCounter++;
 				
+				
+			}
+			else if (strcmp(scope, "G") == 0) {
+				addToInputCalc(getValue($1,scope)); 
+				strcpy(num1, $1);
 			}
 
 
 		} 
 
 		| NUMBER {
-			addToInputCalc($1); 
-			strcpy(num2, $1); 
+			if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE) { // in a function
+				addToInputCalc($1); 
+				strcpy(num2, $1); 
+			}
 
-			if (inElseOrWhile == UPDATE_WHILE) {
-
-				createMIPSAddNumberToRegister($1, registerCounter);
-				registerCounter++;
-
+			if (inElseOrWhile == UPDATE_WHILE) {  //if in function or while loop, use different math
+				if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE){
+					//mips
+					createMIPSAddNumberToRegister($1, registerCounter);
+					registerCounter++;
+				}
 			}
 		
 		}
-		| FLOAT_NUM {addToInputCalc($1);}
-		| EXPONENT {addToInputCalc("**");}
-		| Operator {addToInputCalc($1);}
+		| FLOAT_NUM {
+			if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE) { // in a function
+			addToInputCalc($1);
+			}
+		}
+		| EXPONENT {
+			if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE) { // in a function
+				addToInputCalc("**");
+			}
+		}
+		| Operator {
+			if (strcmp(scope, "G") == 0 && inElseOrWhile != UPDATE_WHILE) { // in a function
+				addToInputCalc($1);
+			}
+		}
 
 
-
+//operators can use +,-,x,/, and ^
 Operator: PLUS_OP {op = '+';}	
 		| SUB_OP {op = '-';}
 		| MULT_OP {op = '*';}
 		| DIV_OP {op = '/';}
 
 
-CompOperator: DOUBLE_EQ {}
-			| LT {}
-			| GT {}
-			| LT_EQ {}
-			| GT_EQ {}
-			| NOT_EQ {}
+CompOperator: DOUBLE_EQ {} // ==
+			| LT {}        // <
+			| GT {}        // >
+			| LT_EQ {}     // <=
+			| GT_EQ {}     // ?=
+			| NOT_EQ {}    // !=
+
 
 // ARRAY DECLARATIONS ----------------------------------------------------------------------
 ArrDecl:	
@@ -1832,10 +1863,10 @@ Condition: NUMBER CompOperator NUMBER {
 				temp1 = atoi($1);
 				temp2 = atoi($3);
 
-				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) {
+				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_IF_ELSE) { //when running a condition, check if it is a if/else condition
 					runIfElseBlock = 1;
 				}
-				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) {
+				if (compareIntOp($2, temp1, temp2) && inElseOrWhile == UPDATE_WHILE) { //when running a condition, check if it is a while condition
 					if(strcmp($2,"==") == 0){
 						printf(BORANGE "\nWARNING: Possible infinite loop detected.\n" RESET);
 					}
@@ -1845,7 +1876,7 @@ Condition: NUMBER CompOperator NUMBER {
 				}
 
 
-		} | ID CompOperator ID {
+		} | ID CompOperator ID { // (x < y)
 
 				char type1[50];
 				char type2[50];
@@ -2014,7 +2045,7 @@ Condition: NUMBER CompOperator NUMBER {
 
 
 
-ConditionVar:	NUMBER {
+ConditionVar:	NUMBER { // we allow numbers, ids, floats, and chars in our condition statments
 
 			} | ID {
 				
@@ -2036,10 +2067,10 @@ int main(int argc, char**argv)
 	*/
 
 	printf(BOLD "\n\n ###################### COMPILER STARTED ###################### \n\n" RESET);
-	clearCalcInput();
-	initializeSymbolTable();
-	changeIRFile(IR_CODE);
-	changeMIPSFile(TEMP_MIPS);
+	clearCalcInput(); //clears files for python calculations
+	initializeSymbolTable(); //creates global table
+	changeIRFile(IR_CODE); //IR code file selection
+	changeMIPSFile(TEMP_MIPS); //MIPS file selection
 
 	// initialize ir code file
 	initIRcodeFile();
@@ -2047,7 +2078,7 @@ int main(int argc, char**argv)
 	// initialize mips code file
 	initAssemblyFile();
 	
-	if (argc > 1){
+	if (argc > 1){ //parses through the file given in arguments which is our testing.gcupl
 	  if(!(yyin = fopen(argv[1], "r")))
           {
 		perror(argv[1]);

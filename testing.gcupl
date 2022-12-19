@@ -1,6 +1,7 @@
 int x;
 char y;
-x = 20;
+x = 20*7-(50+50);
+x = x - 20;
 
 int addValue(int num1, int num2){
      int result;
@@ -11,8 +12,11 @@ int addValue(int num1, int num2){
 int result;
 while (x > 0){
     result = addValue(x,-5);
-    x = x - 1;
+    x = (x - 1);
     write x;
     write ~nl;
+    x = x - 5;
 }
+
+
 
